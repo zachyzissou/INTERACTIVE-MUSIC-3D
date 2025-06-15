@@ -1,0 +1,10 @@
+.sliderWrapper {
+  position: absolute;
+  top: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  background: rgba(20, 20, 30, 0.7);
+  padding: 0.5rem;
+  border-radius: 4px;
+}
