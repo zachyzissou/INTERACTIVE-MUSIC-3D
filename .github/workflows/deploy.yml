@@ -13,18 +13,10 @@ jobs:
       - interactive-music-3d
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18
-
-      - name: Install dependencies & build
+      - name: Pull latest from GitHub
         run: |
-          npm install
-          npm run build
+          cd /deploy-target
+          git pull origin main
 
       - name: Restart web container
         run: |
