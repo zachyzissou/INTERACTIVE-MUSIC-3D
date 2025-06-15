@@ -2,22 +2,10 @@
 import React, { useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { Float } from '@react-three/drei'
-import * as Tone from 'tone'
 import type { Mesh } from 'three'
 import { usePortalRing } from './usePortalRing'
+import { playNote } from '../lib/audio'
 
-// Shared Synth instance, lazy-initialized after first user interaction
-let synth: Tone.Synth | null = null
-async function getSynth() {
-  if (synth) return synth
-  await Tone.start()
-  synth = new Tone.Synth().toDestination()
-  // configure oscillator & envelope per global rules
-  synth.oscillator.type = 'sine'
-  synth.envelope.attack = 0.05
-  synth.envelope.release = 1
-  return synth
-}
 
 // Portal definitions: assign a musical note and color to each
 const portalConfigs: { note: string; color: string }[] = [
@@ -72,16 +60,13 @@ const Portal: React.FC<{
 const PortalRing: React.FC = () => {
   const { groupRef, getPosition } = usePortalRing(portalConfigs.length)
 
-  const total = portalConfigs.length
-
   // debounce click interval
   let lastClick = 0
   const handlePortalClick = async (note: string) => {
     const now = performance.now()
     if (now - lastClick < 50) return
     lastClick = now
-    const s = await getSynth()
-    s.triggerAttackRelease(note, '1n', Tone.now())
+    await playNote(note)
   }
 
   return (

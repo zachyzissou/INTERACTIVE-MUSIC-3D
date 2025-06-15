@@ -1,6 +1,5 @@
 // src/components/SoundPortals.tsx
 import React, { useState, useRef } from 'react'
-import { useFrame } from '@react-three/fiber'
 import { Float, useCursor } from '@react-three/drei'
 import { useObjects, ObjectType } from '../store/useObjects'
 import type { Mesh } from 'three'
@@ -21,9 +20,6 @@ const Portal: React.FC<{ cfg: typeof portalConfigs[0]; position: [number, number
   const meshRef = useRef<Mesh>(null!)
   const [hovered, setHovered] = useState(false)
   useCursor(hovered)
-  useFrame((_, delta) => {
-    meshRef.current.rotation.y += delta * 0.5
-  })
   return (
     <Float position={position} floatIntensity={1} speed={1.5} rotationIntensity={0.5}>
       <mesh
@@ -51,8 +47,6 @@ const Portal: React.FC<{ cfg: typeof portalConfigs[0]; position: [number, number
 // SoundPortals arranged in a ring
 const SoundPortals: React.FC = () => {
   const { groupRef, getPosition } = usePortalRing(portalConfigs.length)
-
-  const total = portalConfigs.length
   return (
     <group ref={groupRef}>
       {portalConfigs.map((cfg, idx) => {

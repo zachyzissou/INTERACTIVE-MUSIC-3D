@@ -1,11 +1,14 @@
 "use client";
 import { Canvas, useThree } from '@react-three/fiber';
+import * as THREE from 'three';
 import { Physics } from '@react-three/cannon';
 import FloatingSphere from '@/components/FloatingSphere';
 import AudioVisualizer from '@/components/AudioVisualizer';
 import Floor from '@/components/Floor';
 import MusicalObject from '@/components/MusicalObject';
 import SoundPortals from '@/components/SoundPortals';
+import SpawnMenu from '@/components/SpawnMenu';
+import EffectWorm from '@/components/EffectWorm';
 import { useEffect, useState } from 'react';
 import { startNote, stopNote } from '@/lib/audio';
 import { useObjects } from '@/store/useObjects';
@@ -18,8 +21,9 @@ const Home = () => {
   function CameraController({ fov }: { fov: number }) {
     const { camera } = useThree();
     useEffect(() => {
-      camera.fov = fov;
-      camera.updateProjectionMatrix();
+      const perspCam = camera as THREE.PerspectiveCamera;
+      perspCam.fov = fov;
+      perspCam.updateProjectionMatrix();
     }, [fov, camera]);
     return null;
   }
@@ -61,6 +65,8 @@ const Home = () => {
               position={obj.position}
             />
           ))}
+          {/* experimental effect worm */}
+          <EffectWorm id="worm" position={[0, 1, 0]} />
         </Physics>
         {/* floating demo sphere */}
         <FloatingSphere />
@@ -91,6 +97,9 @@ const Home = () => {
           onChange={(e) => setFov(parseFloat(e.target.value))}
         />
       </div>
+
+      {/* Spawn menu overlay */}
+      <SpawnMenu />
     </div>
   );
 };
