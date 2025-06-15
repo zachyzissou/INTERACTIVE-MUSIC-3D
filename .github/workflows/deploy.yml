@@ -1,0 +1,31 @@
+name: CI Build & Deploy
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: 
+      - self-hosted
+      - unraid
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install dependencies & build
+        run: |
+          npm ci
+          npm run build
+
+      - name: Restart web container
+        run: |
+          docker restart interactive-music-web
