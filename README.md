@@ -6,20 +6,17 @@ This project is an experimental interactive music website built using Next.js, R
 
 ```
 interactive-music-3d
+├── app
+│   ├── layout.tsx          # Global layout for the App Router
+│   └── page.tsx            # Main 3D scene
 ├── src
-│   ├── pages
-│   │   ├── _app.tsx        # Custom App component for Next.js
-│   │   └── index.tsx       # Landing page with 3D scene
-│   ├── components
-│   │   └── FloatingSphere.tsx # Component for the floating sphere
-│   ├── lib
-│   │   └── tone.ts         # Tone.js setup and note generation
-│   └── styles
-│       └── globals.css     # Global CSS styles
-├── package.json             # npm configuration and dependencies
-├── tsconfig.json            # TypeScript configuration
-├── next.config.js           # Next.js configuration
-└── README.md                # Project documentation
+│   ├── components          # Reusable React Three Fiber components
+│   ├── lib                 # Shared utilities (audio helpers, stores)
+│   └── styles              # CSS modules
+├── package.json            # npm configuration and dependencies
+├── tsconfig.json           # TypeScript configuration
+├── next.config.js          # Next.js configuration
+└── README.md               # Project documentation
 ```
 
 ## Prerequisites
