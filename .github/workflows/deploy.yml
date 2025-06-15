@@ -40,13 +40,12 @@ jobs:
 
       - name: Rebuild & restart web container
         run: |
+          echo "Building Docker image from workspace"
+          docker build -t interactive-music-web .
+          echo "Stopping and removing old container if exists"
           docker rm -f interactive-music-web || true
-          docker run -d \
-            --name interactive-music-web \
+          echo "Starting new container from built image"
+          docker run -d --name interactive-music-web \
             --restart unless-stopped \
-            -v /mnt/user/appdata/interactive-music:/usr/src/app \
-            -v /mnt/user/appdata/interactive-music/node_modules:/usr/src/app/node_modules \
-            -w /usr/src/app \
             -p 31415:3000 \
-            node:18-alpine \
-            sh -c "npm ci && npm run build && npm run start"
+            interactive-music-web
