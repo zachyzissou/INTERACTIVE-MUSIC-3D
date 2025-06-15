@@ -1,4 +1,4 @@
-name: CI Build & Deploy
+name: CI/CD - interactive-music-3d-unraid
 
 on:
   push:
@@ -13,11 +13,21 @@ jobs:
       - interactive-music-3d
 
     steps:
-      - name: Pull latest from GitHub
-        run: |
-          cd /deploy-target
-          git pull origin main
+      - name: 🧾 Checkout repository
+        uses: actions/checkout@v3
 
-      - name: Restart web container
+      - name: 🔧 Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: 📦 Install dependencies
+        run: npm ci
+
+      - name: 🏗️ Build Next.js site
+        run: npm run build
+
+      - name: 🚀 Deploy to Unraid volume
         run: |
-          docker restart interactive-music-web
+          echo "Deploying to /deploy-target/"
+          rsync -av --delete .next/ /deploy-target/
