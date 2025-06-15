@@ -74,17 +74,6 @@ To get started with the project, follow these steps:
 
 This project is licensed under the MIT License.
 
-## Performance
-
-Benchmarks on a mid-range laptop:
-
-| Objects | Avg FPS |
-|---------|--------|
-| 1       | ~120   |
-| 25      | ~90    |
-| 100     | ~65    |
-
-The FFT texture consumes ~1KB of GPU memory.
 
 ## Plugins
 
