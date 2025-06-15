@@ -11,15 +11,16 @@ import { startNote, stopNote } from '@/lib/audio';
 import { useObjects } from '@/store/useObjects';
 
 const Home = () => {
-  // dynamic camera distance state
-  const [camZ, setCamZ] = useState(10);
+  // dynamic camera field-of-view state
+  const [fov, setFov] = useState(50);
 
-  // camera controller to update Z position imperatively
-  function CameraController({ camZ }: { camZ: number }) {
+  // camera controller to update FOV imperatively
+  function CameraController({ fov }: { fov: number }) {
     const { camera } = useThree();
     useEffect(() => {
-      camera.position.z = camZ;
-    }, [camZ, camera]);
+      camera.fov = fov;
+      camera.updateProjectionMatrix();
+    }, [fov, camera]);
     return null;
   }
 
@@ -35,32 +36,9 @@ const Home = () => {
   const objects = useObjects((state) => state.objects);
   return (
     <div style={{ height: '100vh', width: '100vw', position: 'relative' }}>
-      {/* Zoom slider UI overlay */}
-      <div
-        style={{
-          position: 'absolute',
-          top: '1rem',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          zIndex: 10,
-          background: 'rgba(20,20,30,0.7)',
-          padding: '0.5rem',
-          borderRadius: '4px',
-        }}
-      >
-        <label style={{ color: '#fff', marginRight: '0.5rem' }}>Zoom:</label>
-        <input
-          type="range"
-          min={5}
-          max={20}
-          step={0.1}
-          value={camZ}
-          onChange={(e) => setCamZ(parseFloat(e.target.value))}
-        />
-      </div>
-      <Canvas shadows camera={{ position: [0, 5, camZ], fov: 50 }}>
+      <Canvas shadows camera={{ position: [0, 5, 10], fov }}>
         {/* camera controller updates */}
-        <CameraController camZ={camZ} />
+        <CameraController fov={fov} />
         {/* lighting */}
         <ambientLight intensity={0.3} />
         <directionalLight
@@ -89,6 +67,30 @@ const Home = () => {
         {/* 3D portal ring for spawning sound objects */}
         <SoundPortals />
       </Canvas>
+
+      {/* Zoom slider UI overlay */}
+      <div
+        style={{
+          position: 'absolute',
+          top: '1rem',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          zIndex: 10,
+          background: 'rgba(20,20,30,0.7)',
+          padding: '0.5rem',
+          borderRadius: '4px',
+        }}
+      >
+        <label style={{ color: '#fff', marginRight: '0.5rem' }}>FOV:</label>
+        <input
+          type="range"
+          min={30}
+          max={100}
+          step={1}
+          value={fov}
+          onChange={(e) => setFov(parseFloat(e.target.value))}
+        />
+      </div>
     </div>
   );
 };
