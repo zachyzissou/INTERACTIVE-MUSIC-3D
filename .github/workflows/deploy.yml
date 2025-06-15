@@ -23,7 +23,7 @@ jobs:
 
       - name: Install dependencies & build
         run: |
-          npm ci
+          npm install
           npm run build
 
       - name: Restart web container
