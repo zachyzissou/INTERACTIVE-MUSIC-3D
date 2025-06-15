@@ -2,7 +2,7 @@
 import React from 'react'
 import styles from '../styles/spawnMenu.module.css'
 import { useObjects } from '../store/useObjects'
-import { objectConfigs, objectTypes } from '../lib/objectConfigs'
+import { objectConfigs, objectTypes } from '../config/objectTypes'
 
 // Minimal flush UI menu to spawn new musical spheres
 type SpawnMenuProps = {}

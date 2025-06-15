@@ -4,7 +4,7 @@ import { Float, useCursor } from '@react-three/drei'
 import { useObjects, ObjectType } from '../store/useObjects'
 import type { Mesh } from 'three'
 import { usePortalRing } from './usePortalRing'
-import { objectConfigs, objectTypes } from '../lib/objectConfigs'
+import { objectConfigs, objectTypes } from '../config/objectTypes'
 
 // Derive portal configs from shared object settings
 const portalConfigs: { type: ObjectType; color: string }[] = objectTypes.map(

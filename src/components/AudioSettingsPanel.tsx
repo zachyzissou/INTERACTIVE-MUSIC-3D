@@ -1,3 +1,4 @@
+"use client"
 import React, { useEffect } from 'react'
 import { useAudioSettings, ScaleType } from '../store/useAudioSettings'
 import styles from '../styles/audioSettingsPanel.module.css'

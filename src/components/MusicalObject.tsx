@@ -6,7 +6,11 @@ import { useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
 import { playNote, playChord, playBeat } from '../lib/audio'
 import { ObjectType } from '../store/useObjects'
-import { objectConfigs } from '../lib/objectConfigs'
+import { objectConfigs } from '../config/objectTypes'
+import ShapeFactory from './ShapeFactory'
+import { Html } from '@react-three/drei'
+import { useEffectSettings } from '../store/useEffectSettings'
+import EffectPanel from './EffectPanel'
 
 // Props interface for MusicalObject component
 interface MusicalObjectProps {
@@ -26,14 +30,17 @@ export const MusicalObject: React.FC<MusicalObjectProps> = ({ id, type, position
     userData: { id, type },
     onCollide: () => {
       // play sound when colliding
-      if (type === 'note') playNote()
-      if (type === 'chord') playChord()
-      if (type === 'beat') playBeat()
+      if (type === 'note') playNote(id)
+      if (type === 'chord') playChord(id)
+      if (type === 'beat' || type === 'loop') playBeat(id)
     }
   }))
 
   // dragging state
   const [dragging, setDragging] = useState(false)
+  const [moved, setMoved] = useState(false)
+  const select = useEffectSettings((s) => s.select)
+  const selected = useEffectSettings((s) => s.selected)
   const { raycaster, mouse, camera } = useThree()
   const plane = useMemo(() => new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), [])
   const intersectPoint = useMemo(() => new THREE.Vector3(), [])
@@ -44,6 +51,7 @@ export const MusicalObject: React.FC<MusicalObjectProps> = ({ id, type, position
     raycaster.ray.intersectPlane(plane, intersectPoint)
     api.position.set(intersectPoint.x, intersectPoint.y, intersectPoint.z)
     api.velocity.set(0, 0, 0)
+    setMoved(true)
   })
 
   return (
@@ -51,16 +59,22 @@ export const MusicalObject: React.FC<MusicalObjectProps> = ({ id, type, position
       ref={ref as React.MutableRefObject<Mesh>}
       castShadow
       receiveShadow
-      onPointerDown={(e) => { e.stopPropagation(); setDragging(true) }}
+      onPointerDown={(e) => { e.stopPropagation(); setDragging(true); setMoved(false) }}
       onPointerUp={(e) => { e.stopPropagation(); setDragging(false) }}
+      onClick={(e) => { e.stopPropagation(); if (!moved) select(id) }}
       onPointerMissed={() => setDragging(false)}
     >
-      <sphereGeometry args={[0.5, 32, 32]} />
+      <ShapeFactory type={type} />
       <meshStandardMaterial
         color={objectConfigs[type].color}
         metalness={0.4}
         roughness={0.7}
       />
+      {selected === id && (
+        <Html position={[0, 1, 0]} transform>
+          <EffectPanel objectId={id} />
+        </Html>
+      )}
     </mesh>
   )
 }

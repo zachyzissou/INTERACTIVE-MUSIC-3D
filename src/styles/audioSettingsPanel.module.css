@@ -1,14 +1,19 @@
-.panel {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  background: rgba(20, 20, 30, 0.7);
-  padding: 0.5rem;
-  border-radius: 4px;
+
+.topBar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
   display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+  justify-content: flex-end;
+  padding: 0.5rem;
+  background: rgba(20, 20, 30, 0.7);
   z-index: 10;
+}
+
+.panel {
+  display: flex;
+  gap: 0.5rem;
 }
 
 .row {
