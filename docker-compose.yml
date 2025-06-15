@@ -1,0 +1,16 @@
+version: '3.8'
+services:
+  interactive-music-3d:
+    build: .
+    image: your-dockerhub-username/interactive-music-3d:latest
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+    networks:
+      - nginx-proxy
+
+networks:
+  nginx-proxy:
+    external: true
