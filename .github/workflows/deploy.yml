@@ -38,9 +38,15 @@ jobs:
       - name: 🏗️ Build Next.js site
         run: npm run build
 
-      - name: 🚀 Deploy to Unraid volume
+      - name: Rebuild & restart web container
         run: |
-          echo "Copying build into the running container"
-          docker cp .next/. interactive-music-web:/usr/share/nginx/html
-          echo "Restarting container"
-          docker restart interactive-music-web
+          docker rm -f interactive-music-web || true
+          docker run -d \
+            --name interactive-music-web \
+            --restart unless-stopped \
+            -v /mnt/user/appdata/interactive-music:/usr/src/app \
+            -v /mnt/user/appdata/interactive-music/node_modules:/usr/src/app/node_modules \
+            -w /usr/src/app \
+            -p 31415:3000 \
+            node:18-alpine \
+            sh -c "npm ci && npm run build && npm run start"
