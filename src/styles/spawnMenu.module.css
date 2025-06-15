@@ -1,4 +1,3 @@
-/* src/styles/spawnMenu.module.css */
 .spawnMenu {
   position: absolute;
   top: 50%;
@@ -6,23 +5,23 @@
   transform: translateY(-50%);
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  background: rgba(20, 20, 30, 0.7);
+  gap: 0.75rem;
   padding: 0.5rem;
-  border-radius: 4px;
-  z-index: 10;
+  z-index: 20;
 }
 
 .spawnButton {
-  background: transparent;
-  border: 1px solid #555;
-  color: #fff;
-  padding: 0.25rem 0.5rem;
+  background: rgba(20, 20, 30, 0.6);
+  border: 2px solid var(--accent2);
+  color: var(--fg);
+  padding: 0.5rem 0.75rem;
+  text-transform: uppercase;
+  font-weight: bold;
+  border-radius: 0.5rem;
   cursor: pointer;
-  font-size: 0.9rem;
-  border-radius: 2px;
+  transition: box-shadow 0.2s, background 0.2s;
 }
 
 .spawnButton:hover {
-  background: rgba(100, 100, 150, 0.3);
+  box-shadow: 0 0 8px var(--accent2);
 }

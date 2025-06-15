@@ -1,0 +1,25 @@
+.root {
+  --bg: #111;
+  --fg: #eee;
+  --accent: #4f6;
+  --accent2: #6af;
+  background-color: var(--bg);
+  color: var(--fg);
+  min-height: 100vh;
+}
+
+.glass {
+  background: rgba(20, 20, 30, 0.5);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+  border-radius: 1rem;
+}
+
+.neonText {
+  color: var(--accent);
+  text-shadow: 0 0 4px var(--accent);
+}
+
+.neonGlow {
+  box-shadow: 0 0 8px var(--accent2);
+}

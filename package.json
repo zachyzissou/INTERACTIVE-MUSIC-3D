@@ -12,6 +12,7 @@
     "@react-three/drei": "^10.2.0",
     "@react-three/fiber": "latest",
     "cannon-es": "^0.20.0",
+    "framer-motion": "^12.18.1",
     "meyda": "latest",
     "next": "latest",
     "react": "latest",

@@ -1,8 +1,8 @@
 // app/layout.tsx
 import '../src/styles/globals.css'
+import ui from '../src/styles/ui.module.css'
 import React from 'react'
 import AudioSettingsPanel from '@/components/AudioSettingsPanel'
-import styles from '@/styles/audioSettingsPanel.module.css'
 
 export const metadata = {
   title: 'Interactive Music 3D',
@@ -12,10 +12,8 @@ export const metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body>
-        <div className={styles.topBar}>
-          <AudioSettingsPanel />
-        </div>
+      <body className={ui.root}>
+        <AudioSettingsPanel />
         {children}
       </body>
     </html>
