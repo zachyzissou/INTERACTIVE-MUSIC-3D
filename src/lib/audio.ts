@@ -57,3 +57,20 @@ export async function playBeat() {
   await initAudioEngine()
   beatSynth.triggerAttackRelease('C2', '8n', Tone.now() + 0.01)
 }
+
+/**
+ * Start a sustained note used for intro cues.
+ */
+export async function startNote(note: string = 'C4') {
+  await initAudioEngine()
+  noteSynth.triggerAttackRelease(note, '1n', Tone.now())
+}
+
+/**
+ * Stop the sustained note.
+ */
+export function stopNote() {
+  if (noteSynth) {
+    noteSynth.triggerRelease(Tone.now() + 0.01)
+  }
+}

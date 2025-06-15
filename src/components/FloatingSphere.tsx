@@ -1,7 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Sphere } from '@react-three/drei';
-import { startNote, stopNote } from '../lib/tone';
+import { startNote, stopNote } from '../lib/audio';
 import { Mesh } from 'three';
 
 const FloatingSphere = () => {
