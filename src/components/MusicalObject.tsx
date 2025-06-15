@@ -1,82 +1,96 @@
 // src/components/MusicalObject.tsx
-import React, { useRef, useState, useMemo } from 'react'
-import { Mesh } from 'three'
-import { useSphere } from '@react-three/cannon'
-import { useFrame, useThree } from '@react-three/fiber'
-import * as THREE from 'three'
-import { playNote, playChord, playBeat } from '../lib/audio'
-import { ObjectType } from '../store/useObjects'
-import { objectConfigs } from '../config/objectTypes'
+import React, { useMemo } from 'react'
+import { Instances, Instance, Html } from '@react-three/drei'
+import { objectConfigs, objectTypes, ObjectType } from '../config/objectTypes'
+import { useObjects, MusicalObject as Obj } from '../store/useObjects'
 import ShapeFactory from './ShapeFactory'
-import { Html } from '@react-three/drei'
+import EffectPanel from "./EffectPanel"
 import { useEffectSettings } from '../store/useEffectSettings'
-import EffectPanel from './EffectPanel'
+import { usePhysicsStore } from '../lib/physics'
+import * as THREE from 'three'
+import SingleMusicalObject from './SingleMusicalObject'
+import { usePerformance } from '../store/usePerformance'
 
-// Props interface for MusicalObject component
-interface MusicalObjectProps {
-  id: string
-  type: ObjectType
-  position: [number, number, number]
+// Group objects by type for instanced rendering
+function groupByType(objects: Obj[]) {
+  const map: Record<ObjectType, Obj[]> = {
+    note: [],
+    chord: [],
+    beat: [],
+    effect: [],
+    scaleCloud: [],
+    loop: [],
+  }
+  objects.forEach((o) => map[o.type].push(o))
+  return map
 }
 
-
-export const MusicalObject: React.FC<MusicalObjectProps> = ({ id, type, position }) => {
-  // physics body
-  const [ref, api] = useSphere(() => ({
-    mass: 1,
-    position,
-    args: [0.5],
-    linearDamping: 0.9,
-    userData: { id, type },
-    onCollide: () => {
-      // play sound when colliding
-      if (type === 'note') playNote(id)
-      if (type === 'chord') playChord(id)
-      if (type === 'beat' || type === 'loop') playBeat(id)
-    }
-  }))
-
-  // dragging state
-  const [dragging, setDragging] = useState(false)
-  const [moved, setMoved] = useState(false)
+const MusicalObjectInstances: React.FC = () => {
+  const objects = useObjects((s) => s.objects)
+  const grouped = useMemo(() => groupByType(objects), [objects])
+  const transforms = usePhysicsStore((s) => s.transforms)
   const select = useEffectSettings((s) => s.select)
   const selected = useEffectSettings((s) => s.selected)
-  const { raycaster, mouse, camera } = useThree()
-  const plane = useMemo(() => new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), [])
-  const intersectPoint = useMemo(() => new THREE.Vector3(), [])
-
-  useFrame(() => {
-    if (!dragging) return
-    raycaster.setFromCamera(mouse, camera)
-    raycaster.ray.intersectPlane(plane, intersectPoint)
-    api.position.set(intersectPoint.x, intersectPoint.y, intersectPoint.z)
-    api.velocity.set(0, 0, 0)
-    setMoved(true)
-  })
 
   return (
-    <mesh
-      ref={ref as React.MutableRefObject<Mesh>}
-      castShadow
-      receiveShadow
-      onPointerDown={(e) => { e.stopPropagation(); setDragging(true); setMoved(false) }}
-      onPointerUp={(e) => { e.stopPropagation(); setDragging(false) }}
-      onClick={(e) => { e.stopPropagation(); if (!moved) select(id) }}
-      onPointerMissed={() => setDragging(false)}
-    >
-      <ShapeFactory type={type} />
-      <meshStandardMaterial
-        color={objectConfigs[type].color}
-        metalness={0.4}
-        roughness={0.7}
-      />
-      {selected === id && (
-        <Html position={[0, 1, 0]} transform>
-          <EffectPanel objectId={id} />
+    <>
+      {objectTypes.map((t) => {
+        const list = grouped[t]
+        if (!list.length) return null
+        return (
+          <Instances key={t} limit={1000} castShadow receiveShadow>
+            <ShapeFactory type={t} />
+            <meshStandardMaterial vertexColors />
+            {list.map((obj) => {
+              const tr = transforms[obj.id]
+              const pos = tr ? tr.position : obj.position
+              const quat = tr ? tr.quaternion : [0, 0, 0, 1]
+              const rot = new THREE.Euler().setFromQuaternion(
+                new THREE.Quaternion(...quat)
+              )
+              return (
+                <Instance
+                  key={obj.id}
+                  color={objectConfigs[t].color}
+                  position={pos as any}
+                  rotation={rot}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    select(obj.id)
+                  }}
+                />
+              )
+            })}
+          </Instances>
+        )
+      })}
+      {selected && transforms[selected] && (
+        <Html position={transforms[selected].position} transform>
+          <EffectPanel objectId={selected} />
         </Html>
       )}
-    </mesh>
+    </>
   )
+}
+
+const MusicalObject: React.FC = () => {
+  const instanced = usePerformance((s) => s.instanced)
+  const objects = useObjects((s) => s.objects)
+  if (!instanced) {
+    return (
+      <>
+        {objects.map((o) => (
+          <SingleMusicalObject
+            key={o.id}
+            id={o.id}
+            type={o.type}
+            position={o.position}
+          />
+        ))}
+      </>
+    )
+  }
+  return <MusicalObjectInstances />
 }
 
 export default MusicalObject

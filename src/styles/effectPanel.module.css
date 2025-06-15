@@ -43,3 +43,20 @@
   background: var(--accent2);
   cursor: pointer;
 }
+.knob {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid var(--accent2);
+  background: rgba(255,255,255,0.1);
+  cursor: pointer;
+  transform: rotate(-90deg);
+}
+.knob::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 0;
+  height: 0;
+}

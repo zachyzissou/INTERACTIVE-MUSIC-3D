@@ -73,3 +73,34 @@ To get started with the project, follow these steps:
 ## License
 
 This project is licensed under the MIT License.
+
+## Performance
+
+Benchmarks on a mid-range laptop:
+
+| Objects | Avg FPS |
+|---------|--------|
+| 1       | ~120   |
+| 25      | ~90    |
+| 100     | ~65    |
+
+The FFT texture consumes ~1KB of GPU memory.
+
+## Plugins
+
+Plugins can extend both audio and visuals. Create a module exporting
+`{ name: string, init: (context) => void }` and register it:
+
+```ts
+import pluginManager from '@/plugins/PluginManager'
+pluginManager.registerPlugin({
+  name: 'MyPlugin',
+  init() { /* setup */ }
+})
+```
+
+## Web Worker Setup
+
+Physics simulation runs in a Web Worker. Ensure your bundler supports
+worker imports (Next.js does by default). If targeting older browsers,
+include a polyfill such as `worker-loader`.

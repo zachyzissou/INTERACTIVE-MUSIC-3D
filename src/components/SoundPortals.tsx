@@ -1,33 +1,56 @@
 // src/components/SoundPortals.tsx
-import React, { useState, useRef } from 'react'
-import { Float, useCursor } from '@react-three/drei'
+import React, { useState } from 'react'
+import { Float, useCursor, Instances, Instance } from '@react-three/drei'
 import { useObjects, ObjectType } from '../store/useObjects'
-import type { Mesh } from 'three'
 import { usePortalRing } from './usePortalRing'
 import { objectConfigs, objectTypes } from '../config/objectTypes'
+import { usePerformance } from '../store/usePerformance'
 
-// Derive portal configs from shared object settings
-const portalConfigs: { type: ObjectType; color: string }[] = objectTypes.map(
-  (t) => ({ type: t, color: objectConfigs[t].color })
-)
+const portalConfigs: { type: ObjectType; color: string }[] = objectTypes.map((t) => ({
+  type: t,
+  color: objectConfigs[t].color,
+}))
 
-// Individual Portal component with hover & rotation
+const SoundPortalsInstanced: React.FC = () => {
+  const spawn = useObjects((state) => state.spawn)
+  const { groupRef, getPosition } = usePortalRing(portalConfigs.length)
+  const [hovered, setHovered] = useState<string | null>(null)
+  useCursor(!!hovered)
+  return (
+    <group ref={groupRef}>
+      <Float floatIntensity={1} speed={1.5} rotationIntensity={0.5}>
+        <Instances limit={portalConfigs.length} castShadow receiveShadow>
+          <sphereGeometry args={[2, 32, 32]} />
+          <meshStandardMaterial vertexColors />
+          {portalConfigs.map((cfg, idx) => (
+            <Instance
+              key={cfg.type}
+              color={cfg.color}
+              position={getPosition(idx)}
+              onPointerOver={() => setHovered(cfg.type)}
+              onPointerOut={() => setHovered(null)}
+              onClick={() => spawn(cfg.type)}
+            />
+          ))}
+        </Instances>
+      </Float>
+    </group>
+  )
+}
+
 const Portal: React.FC<{ cfg: typeof portalConfigs[0]; position: [number, number, number] }> = ({ cfg, position }) => {
   const spawn = useObjects((state) => state.spawn)
-  const meshRef = useRef<Mesh>(null!)
   const [hovered, setHovered] = useState(false)
   useCursor(hovered)
   return (
     <Float position={position} floatIntensity={1} speed={1.5} rotationIntensity={0.5}>
       <mesh
-        ref={meshRef}
         castShadow
         receiveShadow
         onPointerOver={() => setHovered(true)}
         onPointerOut={() => setHovered(false)}
         onClick={() => spawn(cfg.type)}
       >
-        {/* sphere radius 2 for diameter 4 units */}
         <sphereGeometry args={[2, 32, 32]} />
         <meshStandardMaterial
           color={cfg.color}
@@ -41,16 +64,19 @@ const Portal: React.FC<{ cfg: typeof portalConfigs[0]; position: [number, number
   )
 }
 
-// SoundPortals arranged in a ring
 const SoundPortals: React.FC = () => {
   const { groupRef, getPosition } = usePortalRing(portalConfigs.length)
-  return (
-    <group ref={groupRef}>
-      {portalConfigs.map((cfg, idx) => {
-        return <Portal key={cfg.type} cfg={cfg} position={getPosition(idx)} />
-      })}
-    </group>
-  )
+  const instanced = usePerformance((s) => s.instanced)
+  if (!instanced) {
+    return (
+      <group ref={groupRef}>
+        {portalConfigs.map((cfg, idx) => (
+          <Portal key={cfg.type} cfg={cfg} position={getPosition(idx)} />
+        ))}
+      </group>
+    )
+  }
+  return <SoundPortalsInstanced />
 }
 
 export default SoundPortals
