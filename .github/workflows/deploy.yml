@@ -8,9 +8,9 @@ on:
 
 jobs:
   build-and-deploy:
-    runs-on: 
+    runs-on:
       - self-hosted
-      - unraid
+      - interactive-music-3d
 
     steps:
       - name: Checkout code
