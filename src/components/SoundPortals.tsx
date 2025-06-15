@@ -1,9 +1,10 @@
 // src/components/SoundPortals.tsx
 import React, { useState, useRef } from 'react'
-import { useFrame, useThree } from '@react-three/fiber'
+import { useFrame } from '@react-three/fiber'
 import { Float, useCursor } from '@react-three/drei'
 import { useObjects, ObjectType } from '../store/useObjects'
-import type { Mesh, Group } from 'three'
+import type { Mesh } from 'three'
+import { usePortalRing } from './usePortalRing'
 
 // Define portal types with distinct colors
 const portalConfigs: { type: ObjectType; color: string }[] = [
@@ -49,19 +50,13 @@ const Portal: React.FC<{ cfg: typeof portalConfigs[0]; position: [number, number
 
 // SoundPortals arranged in a ring
 const SoundPortals: React.FC = () => {
-  const groupRef = useRef<Group>(null!)
-  const { viewport } = useThree()
-  useFrame(({ clock }) => { if (groupRef.current) groupRef.current.rotation.y = clock.getElapsedTime() * 0.2 })
-  // dynamic ring radius based on viewport width
-  const radius = Math.min(viewport.width / 2, 10)
-  const height = 1.5
+  const { groupRef, getPosition } = usePortalRing(portalConfigs.length)
+
   const total = portalConfigs.length
   return (
     <group ref={groupRef}>
       {portalConfigs.map((cfg, idx) => {
-        const angle = (idx / total) * Math.PI * 2
-        const pos = [Math.cos(angle) * radius, height, Math.sin(angle) * radius] as [number, number, number]
-        return <Portal key={cfg.type} cfg={cfg} position={pos} />
+        return <Portal key={cfg.type} cfg={cfg} position={getPosition(idx)} />
       })}
     </group>
   )

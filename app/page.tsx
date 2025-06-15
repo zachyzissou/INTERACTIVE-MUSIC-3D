@@ -1,13 +1,14 @@
+"use client";
 import { Canvas, useThree } from '@react-three/fiber';
 import { Physics } from '@react-three/cannon';
-import FloatingSphere from '../components/FloatingSphere';
-import AudioVisualizer from '../components/AudioVisualizer';
-import Floor from '../components/Floor';
-import MusicalObject from '../components/MusicalObject';
-import SoundPortals from '../components/SoundPortals';
+import FloatingSphere from '@/components/FloatingSphere';
+import AudioVisualizer from '@/components/AudioVisualizer';
+import Floor from '@/components/Floor';
+import MusicalObject from '@/components/MusicalObject';
+import SoundPortals from '@/components/SoundPortals';
 import { useEffect, useState } from 'react';
-import { startNote, stopNote } from '../lib/tone';
-import { useObjects } from '../store/useObjects';
+import { startNote, stopNote } from '@/lib/audio';
+import { useObjects } from '@/store/useObjects';
 
 const Home = () => {
   // dynamic camera distance state
@@ -35,7 +36,18 @@ const Home = () => {
   return (
     <div style={{ height: '100vh', width: '100vw', position: 'relative' }}>
       {/* Zoom slider UI overlay */}
-      <div style={{ position: 'absolute', top: '1rem', left: '50%', transform: 'translateX(-50%)', zIndex: 10, background: 'rgba(20,20,30,0.7)', padding: '0.5rem', borderRadius: '4px' }}>
+      <div
+        style={{
+          position: 'absolute',
+          top: '1rem',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          zIndex: 10,
+          background: 'rgba(20,20,30,0.7)',
+          padding: '0.5rem',
+          borderRadius: '4px',
+        }}
+      >
         <label style={{ color: '#fff', marginRight: '0.5rem' }}>Zoom:</label>
         <input
           type="range"
