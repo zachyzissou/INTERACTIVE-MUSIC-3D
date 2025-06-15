@@ -55,7 +55,7 @@ const AudioVisualizer: React.FC = () => {
         far={100}
         position={[0, 0, 10]}
       />
-      <mesh>
+      <mesh raycast={() => null}>
         <planeGeometry args={[width, height]} />
         <shaderMaterial
           ref={materialRef}
@@ -98,11 +98,12 @@ const AudioVisualizer: React.FC = () => {
               vec3 col=hsl2rgb(vec3(0.5,1.0,low));
               col+=hsl2rgb(vec3(0.666,1.0,mid));
               col+=hsl2rgb(vec3(0.833,1.0,high));
-              gl_FragColor=vec4(col,1.0);
+              gl_FragColor=vec4(col,0.5);
             }
           `}
           depthTest={false}
           depthWrite={false}
+          transparent
         />
       </mesh>
     </>
