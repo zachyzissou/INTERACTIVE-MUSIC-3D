@@ -74,7 +74,11 @@ const AudioSettingsPanel: React.FC = () => {
               volume * 100
             }%, rgba(255,255,255,0.2) ${volume * 100}%)`,
           }}
-          onChange={(e) => setVolume(parseFloat(e.target.value))}
+          onChange={(e) => {
+            const val = parseFloat(e.target.value)
+            setVolume(val)
+            setMasterVolume(val)
+          }}
           whileTap={{ scale: 1.2 }}
         />
       </div>
