@@ -9,6 +9,7 @@ import MusicalObject from "@/components/MusicalObject";
 import SoundPortals from "@/components/SoundPortals";
 import SpawnMenu from "@/components/SpawnMenu";
 import EffectWorm from "@/components/EffectWorm";
+import AudioSettingsPanel from "@/components/AudioSettingsPanel";
 import { useEffect, useState } from "react";
 import sliderStyles from "@/styles/slider.module.css";
 import { startNote, stopNote } from "@/lib/audio";
@@ -90,6 +91,7 @@ const Home = () => {
 
       {/* Spawn menu overlay */}
       <SpawnMenu />
+      <AudioSettingsPanel />
     </div>
   );
 };

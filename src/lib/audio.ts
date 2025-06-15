@@ -6,6 +6,7 @@ let noteSynth: Tone.Synth
 let chordSynth: Tone.PolySynth
 let beatSynth: Tone.MembraneSynth
 let audioInitialized = false
+let masterVolume: Tone.Volume
 
 /**
  * Initialize the audio engine on first user interaction.
@@ -14,17 +15,18 @@ let audioInitialized = false
 async function initAudioEngine() {
   if (audioInitialized) return
   await Tone.start()
+  masterVolume = new Tone.Volume(0).toDestination()
   // Single-note synth
-  noteSynth = new Tone.Synth().toDestination()
+  noteSynth = new Tone.Synth().connect(masterVolume)
   noteSynth.oscillator.type = 'sine'
   noteSynth.envelope.attack = 0.05
   noteSynth.envelope.release = 1
   // Polyphonic chord synth
-  chordSynth = new Tone.PolySynth(Tone.Synth).toDestination()
+  chordSynth = new Tone.PolySynth(Tone.Synth).connect(masterVolume)
   chordSynth.set({ oscillator: { type: 'triangle' } })
   chordSynth.set({ envelope: { attack: 0.1, release: 1.5 } })
   // Drum synth
-  beatSynth = new Tone.MembraneSynth().toDestination()
+  beatSynth = new Tone.MembraneSynth().connect(masterVolume)
   beatSynth.pitchDecay = 0.05
   beatSynth.envelope.attack = 0.001
   beatSynth.envelope.decay = 0.3
@@ -56,6 +58,14 @@ export async function playChord(notes: string[] = ['C4', 'E4', 'G4']) {
 export async function playBeat() {
   await initAudioEngine()
   beatSynth.triggerAttackRelease('C2', '8n', Tone.now() + 0.01)
+}
+
+/**
+ * Set global output volume (0 to 1)
+ */
+export async function setMasterVolume(vol: number) {
+  await initAudioEngine()
+  masterVolume.volume.value = Tone.gainToDb(vol)
 }
 
 /**

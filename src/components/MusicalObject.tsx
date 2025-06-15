@@ -1,11 +1,12 @@
 // src/components/MusicalObject.tsx
-import React, { useRef, useState } from 'react'
+import React, { useRef, useState, useMemo } from 'react'
 import { Mesh } from 'three'
 import { useSphere } from '@react-three/cannon'
 import { useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
 import { playNote, playChord, playBeat } from '../lib/audio'
 import { ObjectType } from '../store/useObjects'
+import { objectConfigs } from '../lib/objectConfigs'
 
 // Props interface for MusicalObject component
 interface MusicalObjectProps {
@@ -14,14 +15,6 @@ interface MusicalObjectProps {
   position: [number, number, number]
 }
 
-// Map colors for all musical object types
-const colorMap: Record<ObjectType, string> = {
-  note: '#4fa3ff',     // cool blue
-  chord: '#6ee7b7',    // minty
-  beat: '#a0aec0',     // grayish
-  effect: '#ff9f1c',   // orange for effects
-  scaleCloud: '#9d4edd', // purple for scale clouds
-}
 
 export const MusicalObject: React.FC<MusicalObjectProps> = ({ id, type, position }) => {
   // physics body
@@ -41,20 +34,16 @@ export const MusicalObject: React.FC<MusicalObjectProps> = ({ id, type, position
 
   // dragging state
   const [dragging, setDragging] = useState(false)
-  const { raycaster, mouse, camera, scene, gl } = useThree()
-  const planeNormal = [0, 1, 0] // horizontal plane
+  const { raycaster, mouse, camera } = useThree()
+  const plane = useMemo(() => new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), [])
+  const intersectPoint = useMemo(() => new THREE.Vector3(), [])
 
   useFrame(() => {
-    if (dragging) {
-      // cast ray to ground plane at y=0
-      raycaster.setFromCamera(mouse, camera)
-      const plane = new THREE.Plane(new THREE.Vector3(...planeNormal), 0)
-      const intersectPoint = new THREE.Vector3()
-      raycaster.ray.intersectPlane(plane, intersectPoint)
-      // smoothly move body toward pointer
-      api.position.set(...intersectPoint.toArray())
-      api.velocity.set(0, 0, 0)
-    }
+    if (!dragging) return
+    raycaster.setFromCamera(mouse, camera)
+    raycaster.ray.intersectPlane(plane, intersectPoint)
+    api.position.set(intersectPoint.x, intersectPoint.y, intersectPoint.z)
+    api.velocity.set(0, 0, 0)
   })
 
   return (
@@ -67,7 +56,11 @@ export const MusicalObject: React.FC<MusicalObjectProps> = ({ id, type, position
       onPointerMissed={() => setDragging(false)}
     >
       <sphereGeometry args={[0.5, 32, 32]} />
-      <meshStandardMaterial color={colorMap[type]} metalness={0.4} roughness={0.7} />
+      <meshStandardMaterial
+        color={objectConfigs[type].color}
+        metalness={0.4}
+        roughness={0.7}
+      />
     </mesh>
   )
 }
