@@ -1,5 +1,6 @@
 "use client";
 import { Canvas, useThree, useFrame } from "@react-three/fiber";
+import { Physics } from "@react-three/cannon";
 import * as THREE from "three";
 import FloatingSphere from "@/components/FloatingSphere";
 import AudioVisualizer from "@/components/AudioVisualizer";
@@ -38,21 +39,23 @@ const Home = () => {
   return (
     <div style={{ height: "100vh", width: "100vw", position: "relative" }}>
       <Canvas shadows camera={{ position: [0, 5, 10], fov }}>
-        <CameraController fov={fov} />
-        <ambientLight intensity={0.3} />
-        <directionalLight
-          castShadow
-          position={[5, 10, 5]}
-          intensity={0.8}
-          shadow-mapSize-width={1024}
-          shadow-mapSize-height={1024}
-        />
-        <AudioVisualizer />
-        <Floor />
-        <MusicalObject />
-        <EffectWorm id="worm" position={[0, 1, 0]} />
-        <FloatingSphere />
-        <SoundPortals />
+        <Physics>
+          <CameraController fov={fov} />
+          <ambientLight intensity={0.3} />
+          <directionalLight
+            castShadow
+            position={[5, 10, 5]}
+            intensity={0.8}
+            shadow-mapSize-width={1024}
+            shadow-mapSize-height={1024}
+          />
+          <AudioVisualizer />
+          <Floor />
+          <MusicalObject />
+          <EffectWorm id="worm" position={[0, 1, 0]} />
+          <FloatingSphere />
+          <SoundPortals />
+        </Physics>
       </Canvas>
 
       <div className={sliderStyles.sliderWrapper}>

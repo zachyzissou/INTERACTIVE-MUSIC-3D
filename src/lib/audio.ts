@@ -9,8 +9,8 @@ let noteSynth: Tone.Synth
 let chordSynth: Tone.PolySynth
 let beatSynth: Tone.MembraneSynth
 let audioInitialized = false
-let masterVolume: Tone.Volume
-const objectSynths = new Map<string, { type: ObjectType; synth: Tone.Synth | Tone.PolySynth | Tone.MembraneSynth; chain: EffectChain }>()
+let masterVolumeNode: Tone.Volume
+const objectSynths = new Map<string, { type: ObjectType; synth: Tone.Synth | Tone.PolySynth | Tone.MembraneSynth; chain: EffectChain; meter: Tone.Meter }>()
 
 interface EffectChain {
   hp: Tone.Filter
@@ -26,19 +26,19 @@ interface EffectChain {
 async function initAudioEngine() {
   if (audioInitialized) return
   await Tone.start()
-  masterVolume = new Tone.Volume(0).toDestination()
-  masterVolume.volume.value = Tone.gainToDb(useAudioSettings.getState().volume)
+  masterVolumeNode = new Tone.Volume(0).toDestination()
+  masterVolumeNode.volume.value = Tone.gainToDb(useAudioSettings.getState().volume)
   // Single-note synth
-  noteSynth = new Tone.Synth().connect(masterVolume)
+  noteSynth = new Tone.Synth().connect(masterVolumeNode)
   noteSynth.oscillator.type = 'sine'
   noteSynth.envelope.attack = 0.05
   noteSynth.envelope.release = 1
   // Polyphonic chord synth
-  chordSynth = new Tone.PolySynth(Tone.Synth).connect(masterVolume)
+  chordSynth = new Tone.PolySynth(Tone.Synth).connect(masterVolumeNode)
   chordSynth.set({ oscillator: { type: 'triangle' } })
   chordSynth.set({ envelope: { attack: 0.1, release: 1.5 } })
   // Drum synth
-  beatSynth = new Tone.MembraneSynth().connect(masterVolume)
+  beatSynth = new Tone.MembraneSynth().connect(masterVolumeNode)
   beatSynth.pitchDecay = 0.05
   beatSynth.envelope.attack = 0.001
   beatSynth.envelope.decay = 0.3
@@ -64,7 +64,6 @@ function createChain(): EffectChain {
   hp.connect(lp)
   lp.connect(delay)
   delay.connect(reverb)
-  reverb.connect(masterVolume)
   return { hp, lp, delay, reverb }
 }
 
@@ -73,14 +72,21 @@ function getObjectSynth(id: string, type: ObjectType) {
   if (!os) {
     const chain = createChain()
     let synth: Tone.Synth | Tone.PolySynth | Tone.MembraneSynth
-    if (type === 'note') synth = new Tone.Synth()
-    else if (type === 'chord') synth = new Tone.PolySynth(Tone.Synth)
-    else synth = new Tone.MembraneSynth()
+    if (type === 'chord') synth = new Tone.PolySynth(Tone.Synth)
+    else if (type === 'beat') synth = new Tone.MembraneSynth()
+    else synth = new Tone.Synth()
+    const meter = new Tone.Meter({ normalRange: true, smoothing: 0.8 })
     synth.connect(chain.hp)
-    os = { type, synth, chain }
+    chain.reverb.connect(meter)
+    meter.connect(masterVolumeNode)
+    os = { type, synth, chain, meter }
     objectSynths.set(id, os)
   }
   return os
+}
+
+export function getObjectMeter(id: string): Tone.Meter | null {
+  return objectSynths.get(id)?.meter ?? null
 }
 
 function applyParams(chain: EffectChain, params: EffectParams) {
@@ -135,7 +141,7 @@ export async function playBeat(id: string) {
  */
 export async function setMasterVolume(vol: number) {
   await initAudioEngine()
-  masterVolume.volume.value = Tone.gainToDb(vol)
+  masterVolumeNode.volume.value = Tone.gainToDb(vol)
 }
 
 /**

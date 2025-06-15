@@ -1,10 +1,11 @@
 // src/components/MusicalObject.tsx
-import React, { useRef, useState, useMemo } from 'react'
+import React, { useRef, useState, useMemo, useEffect } from 'react'
 import { Mesh } from 'three'
 import { useSphere } from '@react-three/cannon'
 import { useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
-import { playNote, playChord, playBeat } from '../lib/audio'
+import * as Tone from 'tone'
+import { playNote, playChord, playBeat, getObjectMeter } from '../lib/audio'
 import { ObjectType } from '../store/useObjects'
 import { objectConfigs } from '../config/objectTypes'
 import ShapeFactory from './ShapeFactory'
@@ -45,6 +46,12 @@ export const SingleMusicalObject: React.FC<MusicalObjectProps> = ({ id, type, po
   const plane = useMemo(() => new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), [])
   const intersectPoint = useMemo(() => new THREE.Vector3(), [])
 
+  const meterRef = useRef<Tone.Meter | null>(null)
+
+  useEffect(() => {
+    meterRef.current = getObjectMeter(id)
+  }, [id])
+
   useFrame(() => {
     if (!dragging) return
     raycaster.setFromCamera(mouse, camera)
@@ -52,6 +59,17 @@ export const SingleMusicalObject: React.FC<MusicalObjectProps> = ({ id, type, po
     api.position.set(intersectPoint.x, intersectPoint.y, intersectPoint.z)
     api.velocity.set(0, 0, 0)
     setMoved(true)
+  })
+
+  useFrame(() => {
+    const meter = meterRef.current
+    const mesh = ref.current as unknown as THREE.Mesh
+    if (!meter || !mesh) return
+    const raw = meter.getValue()
+    const level = Array.isArray(raw) ? raw[0] : raw
+    const intensity = objectConfigs[type].pulseIntensity || 0
+    const target = 1 + level * intensity
+    mesh.scale.setScalar(THREE.MathUtils.lerp(mesh.scale.x, target, 0.2))
   })
 
   return (
