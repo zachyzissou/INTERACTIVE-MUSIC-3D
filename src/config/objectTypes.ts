@@ -1,18 +1,19 @@
-export type ObjectType = 'note' | 'chord' | 'beat' | 'effect' | 'scaleCloud' | 'loop'
+export type ObjectType = 'note' | 'chord' | 'beat' | 'loop'
+
+export type GeometryType = 'sphere' | 'cube' | 'torus' | 'torusKnot'
 
 export interface ObjectConfig {
   color: string
   label: string
-  geometry: 'sphere' | 'torus'
+  geometry: GeometryType
+  pulseIntensity?: number
 }
 
 export const objectConfigs: Record<ObjectType, ObjectConfig> = {
-  note: { color: '#4fa3ff', label: 'Note', geometry: 'sphere' },
-  chord: { color: '#6ee7b7', label: 'Chord', geometry: 'sphere' },
-  beat: { color: '#a0aec0', label: 'Beat', geometry: 'sphere' },
-  effect: { color: '#ff9f1c', label: 'Effect', geometry: 'sphere' },
-  scaleCloud: { color: '#9d4edd', label: 'Scale', geometry: 'sphere' },
-  loop: { color: '#f472b6', label: 'Loop', geometry: 'torus' },
+  note:  { color:'#4fa3ff', label:'Note',  geometry:'sphere',    pulseIntensity:0.5 },
+  chord: { color:'#6ee7b7', label:'Chord', geometry:'torus',     pulseIntensity:0.3 },
+  beat:  { color:'#a0aec0', label:'Beat',  geometry:'cube',      pulseIntensity:0.7 },
+  loop:  { color:'#f472b6', label:'Loop',  geometry:'torusKnot', pulseIntensity:0.4 },
 }
 
 export const objectTypes = Object.keys(objectConfigs) as ObjectType[]

@@ -2,7 +2,7 @@
 import { create } from 'zustand'
 import { addBody } from "../lib/physics"
 
-export type ObjectType = 'note' | 'chord' | 'beat' | 'effect' | 'scaleCloud' | 'loop'
+export type ObjectType = 'note' | 'chord' | 'beat' | 'loop'
 export interface MusicalObject {
   id: string
   type: ObjectType

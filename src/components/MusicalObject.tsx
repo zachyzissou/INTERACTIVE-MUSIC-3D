@@ -17,8 +17,6 @@ function groupByType(objects: Obj[]) {
     note: [],
     chord: [],
     beat: [],
-    effect: [],
-    scaleCloud: [],
     loop: [],
   }
   objects.forEach((o) => map[o.type].push(o))
