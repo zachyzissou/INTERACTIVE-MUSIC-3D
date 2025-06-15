@@ -12,7 +12,18 @@ jobs:
       - self-hosted
       - interactive-music-3d
 
+    env:
+      NEXT_TELEMETRY_DISABLED: 1
+
     steps:
+      - name: 🔄 Restore Next.js cache
+        uses: actions/cache@v3
+        with:
+          path: .next/cache
+          key: ${{ runner.os }}-nextjs-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-nextjs-
+
       - name: 🧾 Checkout repository
         uses: actions/checkout@v3
 
@@ -29,5 +40,7 @@ jobs:
 
       - name: 🚀 Deploy to Unraid volume
         run: |
-          echo "Deploying to /deploy-target/"
-          rsync -av --delete .next/ /deploy-target/
+          echo "Copying build into the running container"
+          docker cp .next/. interactive-music-web:/usr/share/nginx/html
+          echo "Restarting container"
+          docker restart interactive-music-web
