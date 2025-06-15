@@ -1,7 +1,7 @@
 // src/store/useObjects.ts
 import { create } from 'zustand'
 
-export type ObjectType = 'note' | 'chord' | 'beat' | 'effect' | 'scaleCloud'
+export type ObjectType = 'note' | 'chord' | 'beat' | 'effect' | 'scaleCloud' | 'loop'
 export interface MusicalObject {
   id: string
   type: ObjectType

@@ -4,15 +4,12 @@ import { Float, useCursor } from '@react-three/drei'
 import { useObjects, ObjectType } from '../store/useObjects'
 import type { Mesh } from 'three'
 import { usePortalRing } from './usePortalRing'
+import { objectConfigs, objectTypes } from '../config/objectTypes'
 
-// Define portal types with distinct colors
-const portalConfigs: { type: ObjectType; color: string }[] = [
-  { type: 'note', color: '#4fa3ff' },
-  { type: 'chord', color: '#6ee7b7' },
-  { type: 'beat', color: '#a0aec0' },
-  { type: 'effect', color: '#c084fc' },
-  { type: 'scaleCloud', color: '#38bdf8' },
-]
+// Derive portal configs from shared object settings
+const portalConfigs: { type: ObjectType; color: string }[] = objectTypes.map(
+  (t) => ({ type: t, color: objectConfigs[t].color })
+)
 
 // Individual Portal component with hover & rotation
 const Portal: React.FC<{ cfg: typeof portalConfigs[0]; position: [number, number, number] }> = ({ cfg, position }) => {
