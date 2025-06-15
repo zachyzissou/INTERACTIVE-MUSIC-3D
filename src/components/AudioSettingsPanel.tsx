@@ -1,19 +1,36 @@
 "use client";
-import React, { useEffect } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { motion } from "framer-motion";
 import { useAudioSettings, ScaleType } from "../store/useAudioSettings";
 import { setMasterVolume } from "../lib/audio";
+import { usePerformance } from "../store/usePerformance";
 import styles from "../styles/audioSettingsPanel.module.css";
 import ui from "../styles/ui.module.css";
 
-const KEYS = ["C", "C#", "D", "Eb", "E", "F", "F#", "G", "Ab", "A", "Bb", "B"];
+const KEYS = ["C", "G", "D", "A", "E", "B", "F#", "Db", "Ab", "Eb", "Bb", "F"];
 
 const AudioSettingsPanel: React.FC = () => {
   const { key, scale, volume, setScale, setVolume } = useAudioSettings();
+  const { instanced, toggleInstanced } = usePerformance();
+  const dialRef = useRef<HTMLDivElement>(null);
+  const [angle, setAngle] = useState(0);
 
   useEffect(() => {
     setMasterVolume(volume);
   }, [volume]);
+
+  const handleDrag = (_: any, info: any) => {
+    const rect = dialRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    const dx = info.point.x - cx;
+    const dy = info.point.y - cy;
+    const ang = (Math.atan2(dy, dx) * 180) / Math.PI + 180;
+    setAngle(ang);
+    const index = Math.round(ang / 30) % 12;
+    setScale(KEYS[index], scale);
+  };
 
   return (
     <motion.div
@@ -23,19 +40,17 @@ const AudioSettingsPanel: React.FC = () => {
       exit={{ y: -40, opacity: 0 }}
       transition={{ type: "spring", stiffness: 120, damping: 16 }}
     >
-      <div className={styles.row}>
-        <label>Key:</label>
-        <select
-          className={styles.select}
-          value={key}
-          onChange={(e) => setScale(e.target.value, scale)}
+      <div className={styles.row} style={{ justifyContent: "space-between" }}>
+        <motion.div
+          ref={dialRef}
+          className={styles.dial}
+          drag
+          dragMomentum={false}
+          onDrag={handleDrag}
+          style={{ rotate: angle }}
         >
-          {KEYS.map((k) => (
-            <option key={k} value={k}>
-              {k}
-            </option>
-          ))}
-        </select>
+          <span className={ui.neonText}>{key}</span>
+        </motion.div>
         <select
           className={styles.select}
           value={scale}
@@ -62,6 +77,10 @@ const AudioSettingsPanel: React.FC = () => {
           onChange={(e) => setVolume(parseFloat(e.target.value))}
           whileTap={{ scale: 1.2 }}
         />
+      </div>
+      <div className={styles.row}>
+        <label>Instancing</label>
+        <input type="checkbox" checked={instanced} onChange={toggleInstanced} />
       </div>
     </motion.div>
   );

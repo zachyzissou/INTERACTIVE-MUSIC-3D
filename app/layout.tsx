@@ -2,6 +2,7 @@
 import '../src/styles/globals.css'
 import ui from '../src/styles/ui.module.css'
 import React from 'react'
+import PluginLoader from "./PluginLoader"
 import AudioSettingsPanel from '@/components/AudioSettingsPanel'
 
 export const metadata = {
@@ -14,6 +15,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body className={ui.root}>
         <AudioSettingsPanel />
+        <PluginLoader />
         {children}
       </body>
     </html>

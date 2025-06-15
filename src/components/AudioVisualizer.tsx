@@ -14,30 +14,23 @@ const AudioVisualizer: React.FC = () => {
   const textureRef = useRef<THREE.DataTexture | null>(null)
   const materialRef = useRef<THREE.ShaderMaterial | null>(null)
 
-  // setup analyser and data texture once
   useEffect(() => {
     const ctx = Tone.getContext()
     const analyser = ctx.rawContext.createAnalyser()
-    analyser.fftSize = 256
+    analyser.fftSize = 512
     ctx.destination.connect(analyser)
     analyserRef.current = analyser
     const bufLen = analyser.frequencyBinCount
-    dataArrayRef.current = new Uint8Array(bufLen)
-    const dataTex = new THREE.DataTexture(
-      dataArrayRef.current,
-      bufLen,
-      1,
-      THREE.RedFormat,
-      THREE.UnsignedByteType
-    )
-    dataTex.minFilter = THREE.LinearFilter
-    dataTex.magFilter = THREE.LinearFilter
-    dataTex.wrapS = THREE.ClampToEdgeWrapping
-    dataTex.wrapT = THREE.ClampToEdgeWrapping
-    textureRef.current = dataTex
+    const arr = new Uint8Array(bufLen)
+    dataArrayRef.current = arr
+    const tex = new THREE.DataTexture(arr, bufLen, 1, THREE.RedFormat)
+    tex.minFilter = THREE.LinearFilter
+    tex.magFilter = THREE.LinearFilter
+    tex.wrapS = THREE.ClampToEdgeWrapping
+    tex.wrapT = THREE.ClampToEdgeWrapping
+    textureRef.current = tex
   }, [])
 
-  // on each frame, update frequency data and shader uniforms
   useFrame(({ clock }) => {
     const analyser = analyserRef.current
     const dataArray = dataArrayRef.current
@@ -46,13 +39,12 @@ const AudioVisualizer: React.FC = () => {
       analyser.getByteFrequencyData(dataArray)
       texture.needsUpdate = true
       materialRef.current.uniforms.uTime.value = clock.getElapsedTime()
-      materialRef.current.uniforms.uFreq.value = texture
+      materialRef.current.uniforms.uFreqTex.value = texture
     }
   })
 
   return (
     <>
-      {/* orthographic camera for full-screen background */}
       <OrthographicCamera
         makeDefault
         left={-width / 2}
@@ -69,8 +61,8 @@ const AudioVisualizer: React.FC = () => {
           ref={materialRef}
           uniforms={{
             uTime: { value: 0 },
-            uFreq: { value: null },
-            uResolution: { value: new THREE.Vector2(width, height) }
+            uFreqTex: { value: null },
+            uResolution: { value: new THREE.Vector2(width, height) },
           }}
           vertexShader={/* glsl */ `
             varying vec2 vUv;
@@ -82,22 +74,31 @@ const AudioVisualizer: React.FC = () => {
           fragmentShader={/* glsl */ `
             precision highp float;
             uniform float uTime;
-            uniform sampler2D uFreq;
-            uniform vec2 uResolution;
+            uniform sampler2D uFreqTex;
             varying vec2 vUv;
 
-            float fluidNoise(vec2 p) {
-              return sin(p.x*4.0 + uTime*0.5)*cos(p.y*4.0 - uTime*0.3);
+            vec3 hsl2rgb(vec3 c){
+              vec3 rgb = clamp(abs(mod(c.x*6.0+vec3(0.0,4.0,2.0),6.0)-3.0)-1.0,0.0,1.0);
+              return c.z + c.y*(rgb-0.5)*(1.0-abs(2.0*c.z-1.0));
             }
-
+            float band(float s,float e){
+              float sum=0.0;
+              for(int i=0;i<8;i++){
+                float fi=mix(s,e,float(i)/7.0)/256.0;
+                sum+=texture2D(uFreqTex,vec2(fi,0.0)).r;
+              }
+              return sum/8.0;
+            }
             void main(){
-              float f = texture2D(uFreq, vec2(vUv.x,0.)).r;
-              float I = f/255.0;
-              vec3 base = vec3(0.02,0.05,0.1);
-              vec3 peak = vec3(0.1,0.3,0.4);
-              vec3 col = mix(base, peak, I);
-              col += 0.06*fluidNoise(vUv*vec2(1.0,1.5));
-              gl_FragColor = vec4(col,1.0);
+              float low=band(0.0,85.0)/255.0;
+              float mid=band(85.0,170.0)/255.0;
+              float high=band(170.0,255.0)/255.0;
+              float amp=(low+mid+high)/3.0;
+              vec2 uv=vUv+vec2(sin(uTime+vUv.y*4.0),cos(uTime+vUv.x*4.0))*amp*0.1;
+              vec3 col=hsl2rgb(vec3(0.5,1.0,low));
+              col+=hsl2rgb(vec3(0.666,1.0,mid));
+              col+=hsl2rgb(vec3(0.833,1.0,high));
+              gl_FragColor=vec4(col,1.0);
             }
           `}
           depthTest={false}

@@ -1,5 +1,6 @@
 // src/store/useObjects.ts
 import { create } from 'zustand'
+import { addBody } from "../lib/physics"
 
 export type ObjectType = 'note' | 'chord' | 'beat' | 'effect' | 'scaleCloud' | 'loop'
 export interface MusicalObject {
@@ -22,6 +23,6 @@ export const useObjects = create<ObjectState>((set, get) => ({
       type,
       position: [0, 3, 0], // default spawn position
     }
-    set({ objects: [...get().objects, newObj] })
+    set({ objects: [...get().objects, newObj] }); addBody(id, newObj.position)
   },
 }))

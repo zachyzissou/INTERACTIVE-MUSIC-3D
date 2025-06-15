@@ -58,3 +58,13 @@
 .slider:focus::-webkit-slider-thumb {
   box-shadow: 0 0 6px var(--accent2);
 }
+.dial {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: 2px solid var(--accent2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+}
