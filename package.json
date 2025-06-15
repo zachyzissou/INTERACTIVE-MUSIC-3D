@@ -1,0 +1,28 @@
+{
+  "name": "interactive-music-3d",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --turbopack",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "@react-three/cannon": "^6.6.0",
+    "@react-three/drei": "^10.2.0",
+    "@react-three/fiber": "latest",
+    "cannon-es": "^0.20.0",
+    "meyda": "latest",
+    "next": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "three": "^0.177.0",
+    "tone": "latest",
+    "zustand": "^5.0.5"
+  },
+  "devDependencies": {
+    "@types/node": "latest",
+    "@types/react": "latest",
+    "typescript": "latest"
+  }
+}

@@ -1,0 +1,28 @@
+/* src/styles/spawnMenu.css */
+.spawn-menu {
+  position: absolute;
+  top: 50%;
+  left: 1rem;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  background: rgba(20, 20, 30, 0.7);
+  padding: 0.5rem;
+  border-radius: 4px;
+  z-index: 10;
+}
+
+.spawn-menu button {
+  background: transparent;
+  border: 1px solid #555;
+  color: #fff;
+  padding: 0.25rem 0.5rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  border-radius: 2px;
+}
+
+.spawn-menu button:hover {
+  background: rgba(100, 100, 150, 0.3);
+}

@@ -1,0 +1,12 @@
+# Ignore dependencies and build output
+node_modules/
+.next/
+
+# Mac OS files
+.DS_Store
+
+# Environment variables
+.env*
+
+# Lock files
+package-lock.json
