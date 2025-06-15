@@ -1,14 +1,18 @@
 "use client";
-import { Canvas, useThree } from '@react-three/fiber';
-import { Physics } from '@react-three/cannon';
-import FloatingSphere from '@/components/FloatingSphere';
-import AudioVisualizer from '@/components/AudioVisualizer';
-import Floor from '@/components/Floor';
-import MusicalObject from '@/components/MusicalObject';
-import SoundPortals from '@/components/SoundPortals';
-import { useEffect, useState } from 'react';
-import { startNote, stopNote } from '@/lib/audio';
-import { useObjects } from '@/store/useObjects';
+import { Canvas, useThree } from "@react-three/fiber";
+import * as THREE from "three";
+import { Physics } from "@react-three/cannon";
+import FloatingSphere from "@/components/FloatingSphere";
+import AudioVisualizer from "@/components/AudioVisualizer";
+import Floor from "@/components/Floor";
+import MusicalObject from "@/components/MusicalObject";
+import SoundPortals from "@/components/SoundPortals";
+import SpawnMenu from "@/components/SpawnMenu";
+import EffectWorm from "@/components/EffectWorm";
+import { useEffect, useState } from "react";
+import sliderStyles from "@/styles/slider.module.css";
+import { startNote, stopNote } from "@/lib/audio";
+import { useObjects } from "@/store/useObjects";
 
 const Home = () => {
   // dynamic camera field-of-view state
@@ -18,8 +22,9 @@ const Home = () => {
   function CameraController({ fov }: { fov: number }) {
     const { camera } = useThree();
     useEffect(() => {
-      camera.fov = fov;
-      camera.updateProjectionMatrix();
+      const perspCam = camera as THREE.PerspectiveCamera;
+      perspCam.fov = fov;
+      perspCam.updateProjectionMatrix();
     }, [fov, camera]);
     return null;
   }
@@ -35,7 +40,7 @@ const Home = () => {
 
   const objects = useObjects((state) => state.objects);
   return (
-    <div style={{ height: '100vh', width: '100vw', position: 'relative' }}>
+    <div style={{ height: "100vh", width: "100vw", position: "relative" }}>
       <Canvas shadows camera={{ position: [0, 5, 10], fov }}>
         {/* camera controller updates */}
         <CameraController fov={fov} />
@@ -61,6 +66,8 @@ const Home = () => {
               position={obj.position}
             />
           ))}
+          {/* experimental effect worm */}
+          <EffectWorm id="worm" position={[0, 1, 0]} />
         </Physics>
         {/* floating demo sphere */}
         <FloatingSphere />
@@ -69,19 +76,8 @@ const Home = () => {
       </Canvas>
 
       {/* Zoom slider UI overlay */}
-      <div
-        style={{
-          position: 'absolute',
-          top: '1rem',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          zIndex: 10,
-          background: 'rgba(20,20,30,0.7)',
-          padding: '0.5rem',
-          borderRadius: '4px',
-        }}
-      >
-        <label style={{ color: '#fff', marginRight: '0.5rem' }}>FOV:</label>
+      <div className={sliderStyles.sliderWrapper}>
+        <label style={{ color: "#fff", marginRight: "0.5rem" }}>FOV:</label>
         <input
           type="range"
           min={30}
@@ -91,6 +87,9 @@ const Home = () => {
           onChange={(e) => setFov(parseFloat(e.target.value))}
         />
       </div>
+
+      {/* Spawn menu overlay */}
+      <SpawnMenu />
     </div>
   );
 };

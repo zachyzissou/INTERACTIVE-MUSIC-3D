@@ -1,24 +1,17 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Sphere } from '@react-three/drei';
-import { startNote, stopNote } from '../lib/audio';
 import { Mesh } from 'three';
 
 const FloatingSphere = () => {
   const sphereRef = useRef<Mesh>(null!);
 
-  useFrame(() => {
+  useFrame(({ clock }) => {
     if (sphereRef.current) {
-      sphereRef.current.position.y = Math.sin(Date.now() * 0.001) * 1.5;
+      sphereRef.current.position.y = Math.sin(clock.getElapsedTime()) * 1.5;
     }
   });
 
-  useEffect(() => {
-    startNote();
-    return () => {
-      stopNote();
-    };
-  }, []);
 
   return (
     <>
