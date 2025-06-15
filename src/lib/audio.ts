@@ -27,7 +27,7 @@ async function initAudioEngine() {
   if (audioInitialized) return
   await Tone.start()
   masterVolumeNode = new Tone.Volume(0).toDestination()
-  masterVolumeNode.volume.value = Tone.gainToDb(useAudioSettings.getState().volume)
+  masterVolumeNode.volume.value = useAudioSettings.getState().volume * 100 - 100
   // Single-note synth
   noteSynth = new Tone.Synth().connect(masterVolumeNode)
   noteSynth.oscillator.type = 'sine'
@@ -141,7 +141,8 @@ export async function playBeat(id: string) {
  */
 export async function setMasterVolume(vol: number) {
   await initAudioEngine()
-  masterVolumeNode.volume.value = Tone.gainToDb(vol)
+  // Map slider 0-1 to -100dB to 0dB for a perceptual volume curve
+  masterVolumeNode.volume.value = vol * 100 - 100
 }
 
 /**

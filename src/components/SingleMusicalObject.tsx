@@ -79,7 +79,13 @@ export const SingleMusicalObject: React.FC<MusicalObjectProps> = ({ id, type, po
       receiveShadow
       onPointerDown={(e) => { e.stopPropagation(); setDragging(true); setMoved(false) }}
       onPointerUp={(e) => { e.stopPropagation(); setDragging(false) }}
-      onClick={(e) => { e.stopPropagation(); if (!moved) select(id) }}
+      onClick={(e) => {
+        e.stopPropagation()
+        if (!moved) select(id)
+        if (type === 'note') playNote(id)
+        if (type === 'chord') playChord(id)
+        if (type === 'beat' || type === 'loop') playBeat(id)
+      }}
       onPointerMissed={() => setDragging(false)}
     >
       <ShapeFactory type={type} />
