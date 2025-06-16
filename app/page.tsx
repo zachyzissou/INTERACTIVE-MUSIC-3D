@@ -8,6 +8,7 @@ import Floor from "@/components/Floor";
 import MusicalObject from "@/components/MusicalObject";
 import SoundPortals from "@/components/SoundPortals";
 import SpawnMenu from "@/components/SpawnMenu";
+import SpawnPreviewList from "@/components/SpawnPreviewList";
 import EffectWorm from "@/components/EffectWorm";
 import { useEffect, useState } from "react";
 import sliderStyles from "@/styles/slider.module.css";
@@ -56,6 +57,7 @@ const Home = () => {
           <FloatingSphere />
           <SoundPortals />
         </Physics>
+        <SpawnPreviewList />
       </Canvas>
 
       <div className={sliderStyles.sliderWrapper}>
