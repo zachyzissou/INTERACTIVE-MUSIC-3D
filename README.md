@@ -50,6 +50,8 @@ To get started with the project, follow these steps:
    ```bash
    npm install
    ```
+   The repository includes an `.npmrc` file that enables `legacy-peer-deps` so
+   installation succeeds despite `framer-motion-3d`'s outdated peer dependencies.
 
 3. **Run the development server:**
    ```
