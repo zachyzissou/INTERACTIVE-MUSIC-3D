@@ -11,12 +11,15 @@ let beatSynth: Tone.MembraneSynth
 let audioInitialized = false
 let masterVolumeNode: Tone.Volume
 const objectSynths = new Map<string, { type: ObjectType; synth: Tone.Synth | Tone.PolySynth | Tone.MembraneSynth; chain: EffectChain; meter: Tone.Meter }>()
+const loops = new Map<string, Tone.Loop>()
 
 interface EffectChain {
   hp: Tone.Filter
   lp: Tone.Filter
   delay: Tone.FeedbackDelay
   reverb: Tone.Reverb
+  panner: Tone.Panner3D
+  gain: Tone.Gain
 }
 
 /**
@@ -61,10 +64,14 @@ function createChain(): EffectChain {
   const lp = new Tone.Filter(20000, 'lowpass')
   const delay = new Tone.FeedbackDelay('8n', 0.5)
   const reverb = new Tone.Reverb(2)
+  const panner = new Tone.Panner3D({ panningModel: 'HRTF', distanceModel: 'linear' })
+  const gain = new Tone.Gain(1)
   hp.connect(lp)
   lp.connect(delay)
   delay.connect(reverb)
-  return { hp, lp, delay, reverb }
+  reverb.connect(panner)
+  panner.connect(gain)
+  return { hp, lp, delay, reverb, panner, gain }
 }
 
 function getObjectSynth(id: string, type: ObjectType) {
@@ -77,7 +84,7 @@ function getObjectSynth(id: string, type: ObjectType) {
     else synth = new Tone.Synth()
     const meter = new Tone.Meter({ normalRange: true, smoothing: 0.8 })
     synth.connect(chain.hp)
-    chain.reverb.connect(meter)
+    chain.gain.connect(meter)
     meter.connect(masterVolumeNode)
     os = { type, synth, chain, meter }
     objectSynths.set(id, os)
@@ -89,11 +96,26 @@ export function getObjectMeter(id: string): Tone.Meter | null {
   return objectSynths.get(id)?.meter ?? null
 }
 
+export function updateAudioPosition(id: string, pos: [number, number, number]) {
+  const os = objectSynths.get(id)
+  if (!os) return
+  os.chain.panner.positionX.value = pos[0]
+  os.chain.panner.positionY.value = pos[1]
+  os.chain.panner.positionZ.value = pos[2]
+  const dist = Math.sqrt(pos[0] * pos[0] + pos[1] * pos[1] + pos[2] * pos[2])
+  os.chain.gain.gain.value = 1 / (1 + dist * 0.1)
+}
+
 function applyParams(chain: EffectChain, params: EffectParams) {
   chain.reverb.wet.value = params.reverb
   chain.delay.wet.value = params.delay
   chain.lp.frequency.value = params.lowpass
   chain.hp.frequency.value = params.highpass
+}
+
+export function applyEffect(id: string, params: EffectParams) {
+  const os = objectSynths.get(id)
+  if (os) applyParams(os.chain, params)
 }
 
 /**
@@ -134,6 +156,45 @@ export async function playBeat(id: string) {
   const params = useEffectSettings.getState().getParams(id)
   applyParams(os.chain, params)
   ;(os.synth as Tone.MembraneSynth).triggerAttackRelease(note, '8n', Tone.now() + 0.01)
+}
+
+export async function startLoop(id: string) {
+  await initAudioEngine()
+  const { key, bpm } = useAudioSettings.getState()
+  Tone.Transport.bpm.value = bpm
+  const os = getObjectSynth(id, 'beat')
+  const params = useEffectSettings.getState().getParams(id)
+  applyParams(os.chain, params)
+  const note = transpose('C2', key)
+  const loop = new Tone.Loop((time) => {
+    ;(os.synth as Tone.MembraneSynth).triggerAttackRelease(note, '8n', time)
+  }, '1n')
+  loop.start(0)
+  loops.set(id, loop)
+  if (Tone.Transport.state !== 'started') Tone.Transport.start()
+}
+
+export function stopLoop(id: string) {
+  const loop = loops.get(id)
+  if (loop) {
+    loop.stop()
+    loops.delete(id)
+  }
+  if (loops.size === 0) Tone.Transport.stop()
+}
+
+export function isLooping(id: string): boolean {
+  return loops.has(id)
+}
+
+export function getLoopProgress(id: string): number {
+  const loop = loops.get(id)
+  if (!loop) return 0
+  const dur = Tone.Time(loop.interval).toSeconds()
+  const t = Tone.Transport.seconds
+  const start = loop.startTime || 0
+  const progress = ((t - start) % dur) / dur
+  return progress
 }
 
 /**

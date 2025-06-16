@@ -3,6 +3,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { motion } from "framer-motion";
 import { useAudioSettings, ScaleType } from "../store/useAudioSettings";
 import { setMasterVolume } from "../lib/audio";
+import * as Tone from "tone";
 import { usePerformance } from "../store/usePerformance";
 import styles from "../styles/audioSettingsPanel.module.css";
 import ui from "../styles/ui.module.css";
@@ -10,7 +11,7 @@ import ui from "../styles/ui.module.css";
 const KEYS = ["C", "G", "D", "A", "E", "B", "F#", "Db", "Ab", "Eb", "Bb", "F"];
 
 const AudioSettingsPanel: React.FC = () => {
-  const { key, scale, volume, setScale, setVolume } = useAudioSettings();
+  const { key, scale, volume, bpm, setScale, setVolume, setBpm } = useAudioSettings();
   const { instanced, toggleInstanced } = usePerformance();
   const dialRef = useRef<HTMLDivElement>(null);
   const [angle, setAngle] = useState(0);
@@ -18,6 +19,10 @@ const AudioSettingsPanel: React.FC = () => {
   useEffect(() => {
     setMasterVolume(volume);
   }, [volume]);
+
+  useEffect(() => {
+    Tone.Transport.bpm.value = bpm;
+  }, [bpm]);
 
   const handleDrag = (_: any, info: any) => {
     const rect = dialRef.current?.getBoundingClientRect();
@@ -32,13 +37,15 @@ const AudioSettingsPanel: React.FC = () => {
     setScale(KEYS[index], scale);
   };
 
+  const [open, setOpen] = useState(false);
   return (
     <motion.div
       className={`${styles.panel} ${ui.glass}`}
-      initial={{ y: -40, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      exit={{ y: -40, opacity: 0 }}
+      initial={false}
+      animate={{ x: open ? 0 : -180 }}
       transition={{ type: "spring", stiffness: 120, damping: 16 }}
+      onMouseEnter={() => setOpen(true)}
+      onMouseLeave={() => setOpen(false)}
     >
       <div className={styles.row} style={{ justifyContent: "space-between" }}>
         <motion.div
@@ -79,6 +86,19 @@ const AudioSettingsPanel: React.FC = () => {
             setVolume(val)
             setMasterVolume(val)
           }}
+          whileTap={{ scale: 1.2 }}
+        />
+      </div>
+      <div className={styles.row}>
+        <label>Tempo:</label>
+        <motion.input
+          className={styles.slider}
+          type="range"
+          min={60}
+          max={180}
+          step={1}
+          value={bpm}
+          onChange={(e) => setBpm(parseFloat(e.target.value))}
           whileTap={{ scale: 1.2 }}
         />
       </div>

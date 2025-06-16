@@ -5,13 +5,14 @@ import { useSphere } from '@react-three/cannon'
 import { useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
 import * as Tone from 'tone'
-import { playNote, playChord, playBeat, getObjectMeter } from '../lib/audio'
+import { playNote, playChord, playBeat, startLoop, stopLoop, isLooping, getObjectMeter, updateAudioPosition, applyEffect } from '../lib/audio'
 import { ObjectType } from '../store/useObjects'
 import { objectConfigs } from '../config/objectTypes'
 import ShapeFactory from './ShapeFactory'
 import { Html } from '@react-three/drei'
 import { useEffectSettings } from '../store/useEffectSettings'
 import EffectPanel from './EffectPanel'
+import LoopProgress from './LoopProgress'
 
 // Props interface for MusicalObject component
 interface MusicalObjectProps {
@@ -47,9 +48,18 @@ export const SingleMusicalObject: React.FC<MusicalObjectProps> = ({ id, type, po
   const intersectPoint = useMemo(() => new THREE.Vector3(), [])
 
   const meterRef = useRef<Tone.Meter | null>(null)
+  const paramsRef = useRef(useEffectSettings.getState().getParams(id))
 
   useEffect(() => {
     meterRef.current = getObjectMeter(id)
+    const unsub = useEffectSettings.subscribe(
+      (s) => s.effects[id],
+      (val) => {
+        paramsRef.current = val || paramsRef.current
+        applyEffect(id, paramsRef.current)
+      }
+    )
+    return () => unsub()
   }, [id])
 
   useFrame(() => {
@@ -72,6 +82,14 @@ export const SingleMusicalObject: React.FC<MusicalObjectProps> = ({ id, type, po
     mesh.scale.setScalar(THREE.MathUtils.lerp(mesh.scale.x, target, 0.2))
   })
 
+  useFrame(() => {
+    const mesh = ref.current as unknown as THREE.Mesh
+    if (mesh) {
+      updateAudioPosition(id, [mesh.position.x, mesh.position.y, mesh.position.z])
+      applyEffect(id, paramsRef.current)
+    }
+  })
+
   return (
     <mesh
       ref={ref as React.MutableRefObject<Mesh>}
@@ -84,7 +102,11 @@ export const SingleMusicalObject: React.FC<MusicalObjectProps> = ({ id, type, po
         if (!moved) select(id)
         if (type === 'note') playNote(id)
         if (type === 'chord') playChord(id)
-        if (type === 'beat' || type === 'loop') playBeat(id)
+        if (type === 'beat') playBeat(id)
+        if (type === 'loop') {
+          if (isLooping(id)) stopLoop(id)
+          else startLoop(id)
+        }
       }}
       onPointerMissed={() => setDragging(false)}
     >
@@ -99,6 +121,7 @@ export const SingleMusicalObject: React.FC<MusicalObjectProps> = ({ id, type, po
           <EffectPanel objectId={id} />
         </Html>
       )}
+      {type === 'loop' && <LoopProgress id={id} />}
     </mesh>
   )
 }

@@ -7,23 +7,24 @@ import AudioVisualizer from "@/components/AudioVisualizer";
 import Floor from "@/components/Floor";
 import MusicalObject from "@/components/MusicalObject";
 import SoundPortals from "@/components/SoundPortals";
-import SpawnMenu from "@/components/SpawnMenu";
+import SpawnIcons from "@/components/SpawnIcons";
 import EffectWorm from "@/components/EffectWorm";
-import { useEffect, useState } from "react";
-import sliderStyles from "@/styles/slider.module.css";
+import { useEffect } from "react";
 import { startNote, stopNote } from "@/lib/audio";
 import { initPhysics } from "@/lib/physics";
 
 const Home = () => {
-  const [fov, setFov] = useState(50);
-
-  function CameraController({ fov }: { fov: number }) {
+  function ZoomControls() {
     const { camera } = useThree();
     useEffect(() => {
-      const perspCam = camera as THREE.PerspectiveCamera;
-      perspCam.fov = fov;
-      perspCam.updateProjectionMatrix();
-    }, [fov, camera]);
+      const onWheel = (e: WheelEvent) => {
+        const cam = camera as THREE.PerspectiveCamera;
+        cam.fov = Math.min(100, Math.max(30, cam.fov + e.deltaY * 0.05));
+        cam.updateProjectionMatrix();
+      };
+      window.addEventListener("wheel", onWheel);
+      return () => window.removeEventListener("wheel", onWheel);
+    }, [camera]);
     return null;
   }
 
@@ -38,9 +39,9 @@ const Home = () => {
 
   return (
     <div style={{ height: "100vh", width: "100vw", position: "relative" }}>
-      <Canvas shadows camera={{ position: [0, 5, 10], fov }}>
+      <Canvas shadows camera={{ position: [0, 5, 10], fov: 50 }}>
         <Physics>
-          <CameraController fov={fov} />
+          <ZoomControls />
           <ambientLight intensity={0.3} />
           <directionalLight
             castShadow
@@ -58,19 +59,7 @@ const Home = () => {
         </Physics>
       </Canvas>
 
-      <div className={sliderStyles.sliderWrapper}>
-        <label style={{ color: "#fff", marginRight: "0.5rem" }}>FOV:</label>
-        <input
-          type="range"
-          min={30}
-          max={100}
-          step={1}
-          value={fov}
-          onChange={(e) => setFov(parseFloat(e.target.value))}
-        />
-      </div>
-
-      <SpawnMenu />
+      <SpawnIcons />
     </div>
   );
 };

@@ -70,6 +70,13 @@ To get started with the project, follow these steps:
 - Implement user controls for sound manipulation.
 - Explore additional sound synthesis techniques with Tone.js.
 
+## UI & Audio Overhaul
+
+The application now features 3D spawn icons, spatial audio with real-time effects,
+and loop playback synced to a global tempo slider. Use the collapsible panel on
+the left to adjust key, scale, tempo, and volume. Scroll over the canvas to zoom
+the camera.
+
 ## License
 
 This project is licensed under the MIT License.
