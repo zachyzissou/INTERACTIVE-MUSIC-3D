@@ -46,7 +46,8 @@ To get started with the project, follow these steps:
    ```
 
 2. **Install dependencies:**
-   ```
+   Run the following command from the project root to install all required packages:
+   ```bash
    npm install
    ```
 
