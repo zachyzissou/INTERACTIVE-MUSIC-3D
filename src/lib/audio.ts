@@ -3,6 +3,7 @@ import * as Tone from 'tone'
 import { useAudioSettings } from '../store/useAudioSettings'
 import { useEffectSettings, defaultEffectParams, EffectParams } from '../store/useEffectSettings'
 import { ObjectType } from '../store/useObjects'
+import { useLoops } from '../store/useLoops'
 
 // Synth instances (initialized once)
 let noteSynth: Tone.Synth
@@ -162,4 +163,45 @@ export function stopNote() {
   if (noteSynth) {
     noteSynth.triggerRelease(Tone.now() + 0.01)
   }
+}
+
+interface LoopInfo {
+  loop: Tone.Loop
+  start: number
+  duration: number
+}
+
+const loops = new Map<string, LoopInfo>()
+
+export function getLoopProgress(id: string): number {
+  const info = loops.get(id)
+  if (!info) return 0
+  const now = Tone.Transport.seconds
+  const elapsed = (now - info.start) % info.duration
+  return elapsed / info.duration
+}
+
+export async function startLoop(id: string, interval: string = '1m') {
+  await initAudioEngine()
+  if (loops.has(id)) return
+  const bpm = useAudioSettings.getState().bpm
+  Tone.Transport.bpm.value = bpm
+  const dur = Tone.Time(interval).toSeconds()
+  const start = Tone.Transport.seconds
+  const loop = new Tone.Loop(() => {
+    playBeat(id)
+  }, interval).start(0)
+  loops.set(id, { loop, start, duration: dur })
+  if (Tone.Transport.state !== 'started') Tone.Transport.start()
+  useLoops.getState().start(id)
+}
+
+export function stopLoop(id: string) {
+  const info = loops.get(id)
+  if (info) {
+    info.loop.stop()
+    info.loop.dispose()
+    loops.delete(id)
+  }
+  useLoops.getState().stop(id)
 }

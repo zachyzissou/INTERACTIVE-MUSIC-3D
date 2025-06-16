@@ -3,7 +3,7 @@ import React, { useState } from 'react'
 import { Float, useCursor } from '@react-three/drei'
 import { useObjects } from '../store/useObjects'
 import { objectConfigs, objectTypes, ObjectType } from '../config/objectTypes'
-import { playNote, playChord, playBeat } from '../lib/audio'
+import { playNote, playChord, playBeat, startLoop } from '../lib/audio'
 import ShapeFactory from './ShapeFactory'
 
 interface ItemProps { type: ObjectType; index: number }
@@ -19,7 +19,8 @@ const MenuItem: React.FC<ItemProps> = ({ type, index }) => {
     const id = spawn(type)
     if (type === 'note') playNote(id)
     else if (type === 'chord') playChord(id)
-    else playBeat(id)
+    else if (type === 'beat') playBeat(id)
+    else startLoop(id)
   }
 
   const color = objectConfigs[type].color
