@@ -1,6 +1,7 @@
 // src/store/useObjects.ts
 import { create } from 'zustand'
 import { addBody } from "../lib/physics"
+import { useSpawnPreviews } from './useSpawnPreviews'
 
 export type ObjectType = 'note' | 'chord' | 'beat' | 'loop'
 export interface MusicalObject {
@@ -27,6 +28,7 @@ export const useObjects = create<ObjectState>((set, get) => ({
       position: [0, 3, 0], // default spawn position
     }
     set({ objects: [...get().objects, newObj] });
+    useSpawnPreviews.getState().show(id, type)
     addBody(id, newObj.position)
     return id
   },
