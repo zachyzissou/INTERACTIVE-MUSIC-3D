@@ -11,7 +11,14 @@ let chordSynth: Tone.PolySynth
 let beatSynth: Tone.MembraneSynth
 let audioInitialized = false
 let masterVolumeNode: Tone.Volume
-const objectSynths = new Map<string, { type: ObjectType; synth: Tone.Synth | Tone.PolySynth | Tone.MembraneSynth; chain: EffectChain; meter: Tone.Meter }>()
+interface ObjectAudio {
+  type: ObjectType
+  synth: Tone.Synth | Tone.PolySynth | Tone.MembraneSynth
+  chain: EffectChain
+  meter: Tone.Meter
+  panner: PannerNode
+}
+const objectSynths = new Map<string, ObjectAudio>()
 
 interface EffectChain {
   hp: Tone.Filter
@@ -77,10 +84,18 @@ function getObjectSynth(id: string, type: ObjectType) {
     else if (type === 'beat') synth = new Tone.MembraneSynth()
     else synth = new Tone.Synth()
     const meter = new Tone.Meter({ normalRange: true, smoothing: 0.8 })
+    const ctx = Tone.getContext().rawContext
+    const panner = ctx.createPanner()
+    panner.panningModel = 'HRTF'
+    panner.distanceModel = 'inverse'
+    panner.refDistance = 1
+    panner.maxDistance = 50
+    panner.rolloffFactor = 1
     synth.connect(chain.hp)
-    chain.reverb.connect(meter)
+    chain.reverb.connect(panner)
+    Tone.connect(panner, meter)
     meter.connect(masterVolumeNode)
-    os = { type, synth, chain, meter }
+    os = { type, synth, chain, meter, panner }
     objectSynths.set(id, os)
   }
   return os
@@ -88,6 +103,10 @@ function getObjectSynth(id: string, type: ObjectType) {
 
 export function getObjectMeter(id: string): Tone.Meter | null {
   return objectSynths.get(id)?.meter ?? null
+}
+
+export function getObjectPanner(id: string): PannerNode | null {
+  return objectSynths.get(id)?.panner ?? null
 }
 
 function applyParams(chain: EffectChain, params: EffectParams) {
