@@ -1,6 +1,7 @@
 // src/components/SoundPortals.tsx
 import React, { useState } from 'react'
 import { Float, useCursor } from '@react-three/drei'
+import { useThree } from '@react-three/fiber'
 import { useObjects, ObjectType } from '../store/useObjects'
 import { usePortalRing } from './usePortalRing'
 import { objectConfigs, objectTypes } from '../config/objectTypes'
@@ -13,6 +14,7 @@ const portalConfigs: { type: ObjectType; color: string }[] = objectTypes.map((t)
 
 const Portal: React.FC<{ cfg: typeof portalConfigs[0]; position: [number, number, number] }> = ({ cfg, position }) => {
   const spawn = useObjects((state) => state.spawn)
+  const { camera } = useThree()
   const [hovered, setHovered] = useState(false)
   useCursor(hovered)
   return (
@@ -22,7 +24,10 @@ const Portal: React.FC<{ cfg: typeof portalConfigs[0]; position: [number, number
         receiveShadow
         onPointerOver={() => setHovered(true)}
         onPointerOut={() => setHovered(false)}
-        onClick={() => spawn(cfg.type)}
+        onClick={() => {
+          const pos: [number, number, number] = [camera.position.x, camera.position.y, camera.position.z]
+          spawn(cfg.type, pos)
+        }}
       >
         <ShapeFactory type={cfg.type} />
         <meshStandardMaterial

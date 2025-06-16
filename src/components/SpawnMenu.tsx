@@ -1,6 +1,7 @@
 // src/components/SpawnMenu.tsx
 import React, { useState } from 'react'
 import { Float, useCursor } from '@react-three/drei'
+import { useThree } from '@react-three/fiber'
 import { useObjects } from '../store/useObjects'
 import { objectConfigs, objectTypes, ObjectType } from '../config/objectTypes'
 import { playNote, playChord, playBeat, startLoop } from '../lib/audio'
@@ -10,13 +11,19 @@ interface ItemProps { type: ObjectType; index: number }
 
 const MenuItem: React.FC<ItemProps> = ({ type, index }) => {
   const spawn = useObjects((s) => s.spawn)
+  const { camera } = useThree()
   const [hovered, setHovered] = useState(false)
   const [active, setActive] = useState(false)
   useCursor(hovered)
 
   const handlePointerUp = () => {
     setActive(false)
-    const id = spawn(type)
+    const pos: [number, number, number] = [
+      camera.position.x,
+      camera.position.y,
+      camera.position.z,
+    ]
+    const id = spawn(type, pos)
     if (type === 'note') playNote(id)
     else if (type === 'chord') playChord(id)
     else if (type === 'beat') playBeat(id)
