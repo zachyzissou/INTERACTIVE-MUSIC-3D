@@ -3,7 +3,7 @@ import React, { useRef, useState, useMemo, useEffect } from 'react'
 import { Mesh } from 'three'
 import { useSphere } from '@react-three/cannon'
 import { useFrame, useThree } from '@react-three/fiber'
-import { motion } from 'framer-motion-3d'
+import { useSpring, a } from '@react-spring/three'
 import * as THREE from 'three'
 import * as Tone from 'tone'
 import { playNote, playChord, playBeat, getObjectMeter, getObjectPanner } from '../lib/audio'
@@ -86,8 +86,14 @@ export const SingleMusicalObject: React.FC<MusicalObjectProps> = ({ id, type, po
     }
   })
 
+  const [springs, springApi] = useSpring(() => ({ scale: 0 }))
+
+  useEffect(() => {
+    springApi.start({ scale: 1, from: { scale: 0 }, config: { tension: 160, friction: 20 } })
+  }, [springApi])
+
   return (
-    <motion.group initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', stiffness: 160, damping: 20 }}>
+    <a.group scale={springs.scale}>
       <mesh
         ref={ref as React.MutableRefObject<Mesh>}
         castShadow
@@ -117,7 +123,7 @@ export const SingleMusicalObject: React.FC<MusicalObjectProps> = ({ id, type, po
           </Html>
         )}
       </mesh>
-    </motion.group>
+    </a.group>
   )
 }
 
