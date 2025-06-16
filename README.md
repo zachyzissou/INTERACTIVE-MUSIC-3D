@@ -63,6 +63,7 @@ To get started with the project, follow these steps:
 - A 3D scene rendered with React Three Fiber.
 - A floating sphere that demonstrates basic animation.
 - Basic note generation using Tone.js, showcasing sound synthesis capabilities.
+- Spawn previews that briefly show new objects near the camera before they appear in the scene.
 
 ## Future Enhancements
 
