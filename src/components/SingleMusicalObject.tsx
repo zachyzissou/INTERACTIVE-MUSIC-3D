@@ -5,7 +5,7 @@ import { useSphere } from '@react-three/cannon'
 import { useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
 import * as Tone from 'tone'
-import { playNote, playChord, playBeat, getObjectMeter } from '../lib/audio'
+import { playNote, playChord, playBeat, getObjectMeter, getObjectPanner } from '../lib/audio'
 import { ObjectType } from '../store/useObjects'
 import { objectConfigs } from '../config/objectTypes'
 import ShapeFactory from './ShapeFactory'
@@ -47,9 +47,11 @@ export const SingleMusicalObject: React.FC<MusicalObjectProps> = ({ id, type, po
   const intersectPoint = useMemo(() => new THREE.Vector3(), [])
 
   const meterRef = useRef<Tone.Meter | null>(null)
+  const pannerRef = useRef<PannerNode | null>(null)
 
   useEffect(() => {
     meterRef.current = getObjectMeter(id)
+    pannerRef.current = getObjectPanner(id)
   }, [id])
 
   useFrame(() => {
@@ -63,13 +65,22 @@ export const SingleMusicalObject: React.FC<MusicalObjectProps> = ({ id, type, po
 
   useFrame(() => {
     const meter = meterRef.current
+    const panner = pannerRef.current
     const mesh = ref.current as unknown as THREE.Mesh
-    if (!meter || !mesh) return
-    const raw = meter.getValue()
-    const level = Array.isArray(raw) ? raw[0] : raw
-    const intensity = objectConfigs[type].pulseIntensity || 0
-    const target = 1 + level * intensity
-    mesh.scale.setScalar(THREE.MathUtils.lerp(mesh.scale.x, target, 0.2))
+    if (!mesh) return
+    if (panner) {
+      const pos = mesh.getWorldPosition(new THREE.Vector3())
+      panner.positionX.value = pos.x
+      panner.positionY.value = pos.y
+      panner.positionZ.value = pos.z
+    }
+    if (meter) {
+      const raw = meter.getValue()
+      const level = Array.isArray(raw) ? raw[0] : raw
+      const intensity = objectConfigs[type].pulseIntensity || 0
+      const target = 1 + level * intensity
+      mesh.scale.setScalar(THREE.MathUtils.lerp(mesh.scale.x, target, 0.2))
+    }
   })
 
   return (
