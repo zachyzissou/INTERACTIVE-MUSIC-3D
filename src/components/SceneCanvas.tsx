@@ -10,6 +10,7 @@ import MusicalObject from './MusicalObject'
 import SoundPortals from './SoundPortals'
 import SpawnMenu from './SpawnMenu'
 import EffectWorm from './EffectWorm'
+import LoopProgress from './LoopProgress'
 import { startNote, stopNote } from '../lib/audio'
 import { initPhysics } from '../lib/physics'
 
@@ -50,6 +51,7 @@ const SceneCanvas: React.FC<Props> = ({ fov }) => {
         <AudioVisualizer />
         <Floor />
         <MusicalObject />
+        <LoopProgress />
         <EffectWorm id="worm" position={[0, 1, 0]} />
         <FloatingSphere />
         <SoundPortals />
