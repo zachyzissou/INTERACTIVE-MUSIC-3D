@@ -10,7 +10,7 @@ import { playNote, playChord, playBeat, getObjectMeter, getObjectPanner } from '
 import { ObjectType } from '../store/useObjects'
 import { objectConfigs } from '../config/objectTypes'
 import ShapeFactory from './ShapeFactory'
-import { Html } from '@react-three/drei'
+import { AnimatePresence } from 'framer-motion'
 import { useEffectSettings } from '../store/useEffectSettings'
 import EffectPanel from './EffectPanel'
 
@@ -117,11 +117,11 @@ export const SingleMusicalObject: React.FC<MusicalObjectProps> = ({ id, type, po
           metalness={0.4}
           roughness={0.7}
         />
-        {selected === id && (
-          <Html position={[0, 1, 0]} transform>
-            <EffectPanel objectId={id} />
-          </Html>
-        )}
+        <AnimatePresence>
+          {selected === id && (
+            <EffectPanel objectId={id} position={[0, 1, 0]} />
+          )}
+        </AnimatePresence>
       </mesh>
     </a.group>
   )
