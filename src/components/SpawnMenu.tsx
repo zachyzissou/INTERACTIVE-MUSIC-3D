@@ -6,6 +6,9 @@ import { useObjects } from '../store/useObjects'
 import { objectConfigs, objectTypes, ObjectType } from '../config/objectTypes'
 import { playNote, playChord, playBeat, startLoop } from '../lib/audio'
 import ShapeFactory from './ShapeFactory'
+import { motion } from 'framer-motion-3d'
+const MMesh = motion.mesh as any
+const MMaterial = motion.meshStandardMaterial as any
 
 interface ItemProps { type: ObjectType; index: number }
 
@@ -14,10 +17,13 @@ const MenuItem: React.FC<ItemProps> = ({ type, index }) => {
   const { camera } = useThree()
   const [hovered, setHovered] = useState(false)
   const [active, setActive] = useState(false)
+  const [ripple, setRipple] = useState(false)
   useCursor(hovered)
 
   const handlePointerUp = () => {
     setActive(false)
+    setRipple(true)
+    setTimeout(() => setRipple(false), 300)
     const pos: [number, number, number] = [
       camera.position.x,
       camera.position.y,
@@ -34,23 +40,39 @@ const MenuItem: React.FC<ItemProps> = ({ type, index }) => {
 
   return (
     <Float position={[0, index * -1.2, 0]} floatIntensity={0.4} rotationIntensity={0}>
-      <mesh
+      <MMesh
         castShadow
         receiveShadow
         onPointerOver={() => setHovered(true)}
         onPointerOut={() => setHovered(false)}
         onPointerDown={() => setActive(true)}
         onPointerUp={handlePointerUp}
+        animate={{ scale: hovered || active ? 1.2 : 1 }}
+        whileTap={{ scale: 0.95 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 20 }}
       >
         <ShapeFactory type={type} />
-        <meshStandardMaterial
+        <MMaterial
           color={active ? '#ffffff' : color}
-          emissive={hovered || active ? color : '#000000'}
-          emissiveIntensity={hovered || active ? 0.6 : 0}
+          emissive={color}
+          animate={{ emissiveIntensity: hovered || active ? 0.8 : 0.4 }}
+          transition={{ duration: 0.2 }}
           metalness={0.5}
           roughness={0.5}
         />
-      </mesh>
+      </MMesh>
+      {ripple && (
+        <MMesh
+          key="ripple"
+          rotation={[-Math.PI / 2, 0, 0]}
+          initial={{ scale: 0.2, opacity: 0.6 }}
+          animate={{ scale: 1.5, opacity: 0 }}
+          transition={{ duration: 0.4, ease: 'easeOut' }}
+        >
+          <ringGeometry args={[0.6, 0.8, 32]} />
+          <meshBasicMaterial color={color} transparent opacity={0.5} />
+        </MMesh>
+      )}
     </Float>
   )
 }
