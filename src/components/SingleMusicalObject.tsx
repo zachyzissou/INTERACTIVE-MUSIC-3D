@@ -3,6 +3,7 @@ import React, { useRef, useState, useMemo, useEffect } from 'react'
 import { Mesh } from 'three'
 import { useSphere } from '@react-three/cannon'
 import { useFrame, useThree } from '@react-three/fiber'
+import { motion } from 'framer-motion-3d'
 import * as THREE from 'three'
 import * as Tone from 'tone'
 import { playNote, playChord, playBeat, getObjectMeter, getObjectPanner } from '../lib/audio'
@@ -80,37 +81,43 @@ export const SingleMusicalObject: React.FC<MusicalObjectProps> = ({ id, type, po
       const intensity = objectConfigs[type].pulseIntensity || 0
       const target = 1 + level * intensity
       mesh.scale.setScalar(THREE.MathUtils.lerp(mesh.scale.x, target, 0.2))
+      const mat = mesh.material as THREE.MeshStandardMaterial
+      mat.emissiveIntensity = THREE.MathUtils.lerp(mat.emissiveIntensity, 0.2 + level * 0.8, 0.2)
     }
   })
 
   return (
-    <mesh
-      ref={ref as React.MutableRefObject<Mesh>}
-      castShadow
-      receiveShadow
-      onPointerDown={(e) => { e.stopPropagation(); setDragging(true); setMoved(false) }}
-      onPointerUp={(e) => { e.stopPropagation(); setDragging(false) }}
-      onClick={(e) => {
-        e.stopPropagation()
-        if (!moved) select(id)
-        if (type === 'note') playNote(id)
-        if (type === 'chord') playChord(id)
-        if (type === 'beat' || type === 'loop') playBeat(id)
-      }}
-      onPointerMissed={() => setDragging(false)}
-    >
-      <ShapeFactory type={type} />
-      <meshStandardMaterial
-        color={objectConfigs[type].color}
-        metalness={0.4}
-        roughness={0.7}
-      />
-      {selected === id && (
-        <Html position={[0, 1, 0]} transform>
-          <EffectPanel objectId={id} />
-        </Html>
-      )}
-    </mesh>
+    <motion.group initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', stiffness: 160, damping: 20 }}>
+      <mesh
+        ref={ref as React.MutableRefObject<Mesh>}
+        castShadow
+        receiveShadow
+        onPointerDown={(e) => { e.stopPropagation(); setDragging(true); setMoved(false) }}
+        onPointerUp={(e) => { e.stopPropagation(); setDragging(false) }}
+        onClick={(e) => {
+          e.stopPropagation()
+          if (!moved) select(id)
+          if (type === 'note') playNote(id)
+          if (type === 'chord') playChord(id)
+          if (type === 'beat' || type === 'loop') playBeat(id)
+        }}
+        onPointerMissed={() => setDragging(false)}
+      >
+        <ShapeFactory type={type} />
+        <meshStandardMaterial
+          color={objectConfigs[type].color}
+          emissive={objectConfigs[type].color}
+          emissiveIntensity={0.2}
+          metalness={0.4}
+          roughness={0.7}
+        />
+        {selected === id && (
+          <Html position={[0, 1, 0]} transform>
+            <EffectPanel objectId={id} />
+          </Html>
+        )}
+      </mesh>
+    </motion.group>
   )
 }
 
