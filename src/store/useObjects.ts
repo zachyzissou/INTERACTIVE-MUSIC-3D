@@ -14,19 +14,19 @@ interface ObjectState {
   /**
    * Spawn a new musical object of the given type and return its id
    */
-  spawn: (type: ObjectType) => string
+  spawn: (type: ObjectType, position?: [number, number, number]) => string
 }
 
 export const useObjects = create<ObjectState>((set, get) => ({
   objects: [],
-  spawn: (type) => {
+  spawn: (type, position) => {
     const id = Date.now().toString()
     const newObj: MusicalObject = {
       id,
       type,
-      position: [0, 3, 0], // default spawn position
+      position: position ?? [0, 3, 0],
     }
-    set({ objects: [...get().objects, newObj] });
+    set({ objects: [...get().objects, newObj] })
     addBody(id, newObj.position)
     return id
   },
