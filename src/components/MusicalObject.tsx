@@ -1,6 +1,7 @@
 // src/components/MusicalObject.tsx
 import React, { useMemo } from 'react'
-import { Instances, Instance, Html } from '@react-three/drei'
+import { Instances, Instance } from '@react-three/drei'
+import { AnimatePresence } from 'framer-motion'
 import { objectConfigs, objectTypes, ObjectType } from '../config/objectTypes'
 import { useObjects, MusicalObject as Obj } from '../store/useObjects'
 import ShapeFactory from './ShapeFactory'
@@ -66,11 +67,14 @@ const MusicalObjectInstances: React.FC = () => {
           </Instances>
         )
       })}
-      {selected && transforms[selected] && (
-        <Html position={transforms[selected].position} transform>
-          <EffectPanel objectId={selected} />
-        </Html>
-      )}
+      <AnimatePresence>
+        {selected && transforms[selected] && (
+          <EffectPanel
+            objectId={selected}
+            position={transforms[selected].position as [number, number, number]}
+          />
+        )}
+      </AnimatePresence>
     </>
   )
 }

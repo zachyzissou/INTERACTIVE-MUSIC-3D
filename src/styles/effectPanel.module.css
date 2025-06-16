@@ -1,21 +1,22 @@
 .panel {
   position: relative;
-  background: rgba(20, 20, 30, 0.5);
-  backdrop-filter: blur(12px);
-  box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
-  border-radius: 0.75rem;
-  padding: 0.5rem;
+  width: 140px;
+  background: rgba(20, 20, 30, 0.6);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.1);
+  border-radius: 0.5rem;
+  padding: 0.4rem;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.4rem;
   color: var(--fg);
-  min-width: 160px;
+  pointer-events: auto;
 }
 
 .row {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.4rem;
 }
 
 .slider {
@@ -46,11 +47,11 @@
 .knob {
   -webkit-appearance: none;
   appearance: none;
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   border: 2px solid var(--accent2);
-  background: rgba(255,255,255,0.1);
+  background: rgba(255, 255, 255, 0.1);
   cursor: pointer;
   transform: rotate(-90deg);
 }

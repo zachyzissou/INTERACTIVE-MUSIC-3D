@@ -1,5 +1,6 @@
 "use client";
 import React from "react";
+import { Html } from "@react-three/drei";
 import { motion } from "framer-motion";
 import {
   useEffectSettings,
@@ -9,31 +10,36 @@ import styles from "../styles/effectPanel.module.css";
 import ui from "../styles/ui.module.css";
 
 interface EffectPanelProps {
-  objectId: string;
+  objectId: string
+  position?: [number, number, number]
 }
 
 const container = {
-  initial: {},
-  animate: { transition: { staggerChildren: 0.1 } },
-};
+  initial: { y: 10, opacity: 0 },
+  animate: { y: 0, opacity: 1, transition: { staggerChildren: 0.1 } },
+  exit: { y: 10, opacity: 0 },
+}
 const item = {
   initial: { y: 20, opacity: 0 },
   animate: { y: 0, opacity: 1 },
-};
+  exit: { y: 20, opacity: 0 },
+}
 
-const EffectPanel: React.FC<EffectPanelProps> = ({ objectId }) => {
+const EffectPanel: React.FC<EffectPanelProps> = ({ objectId, position = [0, 1, 0] }) => {
   const params = useEffectSettings(
     (s) => s.effects[objectId] || defaultEffectParams,
   );
   const setEffect = useEffectSettings((s) => s.setEffect);
 
   return (
-    <motion.div
-      className={`${styles.panel} ${ui.glass}`}
-      variants={container}
-      initial="initial"
-      animate="animate"
-    >
+    <Html position={position} transform>
+      <motion.div
+        className={`${styles.panel} ${ui.glass}`}
+        variants={container}
+        initial="initial"
+        animate="animate"
+        exit="exit"
+      >
       <motion.div className={styles.row} variants={item}>
         <label>Reverb</label>
         <motion.input
@@ -94,8 +100,9 @@ const EffectPanel: React.FC<EffectPanelProps> = ({ objectId }) => {
           whileTap={{ scale: 1.1 }}
         />
       </motion.div>
-    </motion.div>
-  );
+      </motion.div>
+    </Html>
+  )
 };
 
 export default EffectPanel;
