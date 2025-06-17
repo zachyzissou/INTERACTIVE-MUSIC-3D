@@ -1,6 +1,6 @@
 // src/components/MusicalObject.tsx
 import React, { useRef, useState, useMemo, useEffect } from 'react'
-import { Mesh } from 'three'
+import { Object3D } from 'three'
 import { useSphere } from '@react-three/cannon'
 import { useFrame, useThree } from '@react-three/fiber'
 import { useSpring, a } from '@react-spring/three'
@@ -9,7 +9,7 @@ import * as Tone from 'tone'
 import { playNote, playChord, playBeat, getObjectMeter, getObjectPanner } from '../lib/audio'
 import { ObjectType } from '../store/useObjects'
 import { objectConfigs } from '../config/objectTypes'
-import ShapeFactory from './ShapeFactory'
+import MusicIcon from './MusicIcon'
 import { AnimatePresence } from 'framer-motion'
 import { useEffectSettings } from '../store/useEffectSettings'
 import EffectPanel from './EffectPanel'
@@ -94,10 +94,8 @@ export const SingleMusicalObject: React.FC<MusicalObjectProps> = ({ id, type, po
 
   return (
     <a.group scale={springs.scale}>
-      <mesh
-        ref={ref as React.MutableRefObject<Mesh>}
-        castShadow
-        receiveShadow
+      <group
+        ref={ref as React.MutableRefObject<Object3D>}
         onPointerDown={(e) => { e.stopPropagation(); setDragging(true); setMoved(false) }}
         onPointerUp={(e) => { e.stopPropagation(); setDragging(false) }}
         onClick={(e) => {
@@ -109,20 +107,13 @@ export const SingleMusicalObject: React.FC<MusicalObjectProps> = ({ id, type, po
         }}
         onPointerMissed={() => setDragging(false)}
       >
-        <ShapeFactory type={type} />
-        <meshStandardMaterial
-          color={objectConfigs[type].color}
-          emissive={objectConfigs[type].color}
-          emissiveIntensity={0.2}
-          metalness={0.4}
-          roughness={0.7}
-        />
+        <MusicIcon type={type} />
         <AnimatePresence>
           {selected === id && (
             <EffectPanel objectId={id} position={[0, 1, 0]} />
           )}
         </AnimatePresence>
-      </mesh>
+      </group>
     </a.group>
   )
 }
