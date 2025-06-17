@@ -11,6 +11,7 @@ import SoundPortals from './SoundPortals'
 import SpawnMenu from './SpawnMenu'
 import EffectWorm from './EffectWorm'
 import LoopProgress from './LoopProgress'
+import HUD from './HUD'
 import { startNote, stopNote } from '../lib/audio'
 import { initPhysics } from '../lib/physics'
 
@@ -112,6 +113,7 @@ const SceneCanvas: React.FC = () => {
           <SoundPortals />
           <SpawnMenu />
         </Physics>
+        <HUD />
       </Canvas>
     </div>
   )

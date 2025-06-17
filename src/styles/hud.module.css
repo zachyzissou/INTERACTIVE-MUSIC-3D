@@ -1,0 +1,53 @@
+.panel {
+  width: 160px;
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  color: var(--fg);
+  pointer-events: auto;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.select {
+  background: rgba(0, 0, 0, 0.6);
+  color: var(--fg);
+  border: none;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+}
+
+.select:focus {
+  outline: 2px solid var(--accent);
+}
+
+.slider {
+  -webkit-appearance: none;
+  width: 120px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 2px;
+  outline: none;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--accent2);
+  cursor: pointer;
+}
+
+.slider::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--accent2);
+  cursor: pointer;
+}
