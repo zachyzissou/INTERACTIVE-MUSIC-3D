@@ -6,6 +6,7 @@ import { useObjects } from '../store/useObjects'
 import { objectConfigs, objectTypes, ObjectType } from '../config/objectTypes'
 import { playNote, playChord, playBeat, startLoop } from '../lib/audio'
 import ShapeFactory from './ShapeFactory'
+import ProceduralButton from './ProceduralButton'
 import { motion } from 'framer-motion-3d'
 const MMesh = motion.mesh as any
 const MMaterial = motion.meshStandardMaterial as any
@@ -37,9 +38,17 @@ const MenuItem: React.FC<ItemProps> = ({ type, index }) => {
   }
 
   const color = objectConfigs[type].color
+  const pulse = objectConfigs[type].pulseIntensity ?? 0
 
   return (
     <Float position={[0, index * -1.2, 0]} floatIntensity={0.4} rotationIntensity={0}>
+      <ProceduralButton
+        color={color}
+        pulse={pulse}
+        hover={hovered}
+        active={active}
+        position={[0, 0, -0.3]}
+      />
       <MMesh
         castShadow
         receiveShadow
