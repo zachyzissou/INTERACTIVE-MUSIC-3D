@@ -3,7 +3,7 @@
 # 1. Install dependencies
 FROM node:18-alpine AS deps
 WORKDIR /app
-COPY package.json package-lock.json ./
+COPY package.json package-lock.json .npmrc ./
 RUN npm ci --production
 
 # 2. Build assets
