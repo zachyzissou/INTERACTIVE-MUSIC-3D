@@ -61,11 +61,21 @@ To get started with the project, follow these steps:
 4. **Open your browser:**
    Navigate to `http://localhost:3000` to view the application.
 
+5. **Build for production:**
+   Use the following command to create an optimized build and start it:
+   ```bash
+   npm run build && npm start
+   ```
+
 ## Features
 
 - A 3D scene rendered with React Three Fiber.
 - A floating sphere that demonstrates basic animation.
 - Basic note generation using Tone.js, showcasing sound synthesis capabilities.
+- Scroll or pinch to zoom the camera.
+- Loop objects trigger repeating beats with a progress ring.
+- Spatial audio positions each sound in 3D space.
+- Selecting an object reveals an effect panel for reverb, delay, and filters.
 
 ## Future Enhancements
 
@@ -96,6 +106,9 @@ pluginManager.registerPlugin({
 Physics simulation runs in a Web Worker. Ensure your bundler supports
 worker imports (Next.js does by default). If targeting older browsers,
 include a polyfill such as `worker-loader`.
+Call `initPhysics()` once on startup to launch the worker. Because module
+workers require a secure context, run the site over HTTPS (or localhost)
+so the physics worker and spatial audio function correctly.
 
 ## Performance
 
