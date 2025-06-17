@@ -6,6 +6,6 @@ interface PerfState {
 }
 
 export const usePerformance = create<PerfState>((set) => ({
-  instanced: true,
+  instanced: false,
   toggleInstanced: () => set((s) => ({ instanced: !s.instanced })),
 }))

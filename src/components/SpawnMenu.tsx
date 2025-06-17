@@ -5,7 +5,7 @@ import { useThree } from '@react-three/fiber'
 import { useObjects } from '../store/useObjects'
 import { objectConfigs, objectTypes, ObjectType } from '../config/objectTypes'
 import { playNote, playChord, playBeat, startLoop } from '../lib/audio'
-import ShapeFactory from './ShapeFactory'
+import MusicIcon from './MusicIcon'
 import ProceduralButton from './ProceduralButton'
 import { motion } from 'framer-motion-3d'
 const MMesh = motion.mesh as any
@@ -60,15 +60,7 @@ const MenuItem: React.FC<ItemProps> = ({ type, index }) => {
         whileTap={{ scale: 0.95 }}
         transition={{ type: 'spring', stiffness: 300, damping: 20 }}
       >
-        <ShapeFactory type={type} />
-        <MMaterial
-          color={active ? '#ffffff' : color}
-          emissive={color}
-          animate={{ emissiveIntensity: hovered || active ? 0.8 : 0.4 }}
-          transition={{ duration: 0.2 }}
-          metalness={0.5}
-          roughness={0.5}
-        />
+        <MusicIcon type={type} />
       </MMesh>
       {ripple && (
         <MMesh
