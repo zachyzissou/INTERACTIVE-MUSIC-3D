@@ -23,6 +23,7 @@ const Portal: React.FC<{ cfg: typeof portalConfigs[0]; position: [number, number
       <mesh
         castShadow
         receiveShadow
+        scale={objectConfigs[cfg.type].baseScale}
         onPointerOver={() => setHovered(true)}
         onPointerOut={() => setHovered(false)}
         onClick={() => {

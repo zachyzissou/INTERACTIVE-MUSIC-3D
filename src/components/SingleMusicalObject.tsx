@@ -97,6 +97,7 @@ export const SingleMusicalObject: React.FC<MusicalObjectProps> = ({ id, type, po
     <a.group scale={springs.scale}>
       <group
         ref={ref as React.MutableRefObject<Object3D>}
+        scale={objectConfigs[type].baseScale}
         onPointerDown={(e) => { e.stopPropagation(); setDragging(true); setMoved(false) }}
         onPointerUp={(e) => { e.stopPropagation(); setDragging(false) }}
         onClick={(e) => {
