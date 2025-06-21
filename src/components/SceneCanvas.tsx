@@ -121,7 +121,7 @@ const SceneCanvas: React.FC = () => {
   return (
     <div ref={containerRef} style={{ height: '100%', width: '100%' }}>
       <Canvas shadows camera={{ position: [0, 5, 10], fov }}>
-        <AdaptiveDpr pixelated>
+        <AdaptiveDpr pixelated />
         <Physics>
           <CameraController fov={fov} />
           <ambientLight intensity={0.3} />
@@ -144,7 +144,6 @@ const SceneCanvas: React.FC = () => {
         <ParticleBurst count={particleCount} color="#ff66aa" />
         <BloomComposer enabled={!lowPower} />
         <HUD />
-        </AdaptiveDpr>
       </Canvas>
     </div>
   )
