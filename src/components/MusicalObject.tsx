@@ -1,3 +1,4 @@
+'use client'
 // src/components/MusicalObject.tsx
 import React, { useMemo } from 'react'
 import { Instances, Instance } from '@react-three/drei'

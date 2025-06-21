@@ -1,3 +1,4 @@
+'use client'
 import { useRef } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import type { Group } from 'three'

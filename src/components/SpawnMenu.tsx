@@ -1,3 +1,4 @@
+'use client'
 // src/components/SpawnMenu.tsx
 import React, { useState } from 'react'
 import { Float, useCursor } from '@react-three/drei'
