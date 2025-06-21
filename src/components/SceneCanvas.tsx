@@ -4,6 +4,7 @@ import { Canvas, useThree, useFrame } from '@react-three/fiber'
 import { Physics } from '@react-three/cannon'
 import { AdaptiveDpr } from '@react-three/drei'
 import * as THREE from 'three'
+import { WebGPURenderer } from 'three/src/Three.WebGPU.js'
 import FloatingSphere from './FloatingSphere'
 import AudioVisualizer from './AudioVisualizer'
 import Floor from './Floor'
@@ -20,6 +21,13 @@ import { EffectComposer, Bloom } from '@react-three/postprocessing'
 import type { BloomEffect } from 'postprocessing'
 import { getFrequencyBands } from '../lib/analyser'
 import { isLowPowerDevice } from '../lib/performance'
+
+function createRenderer({ canvas, ...props }: any) {
+  if (typeof navigator !== 'undefined' && 'gpu' in navigator) {
+    return new WebGPURenderer({ canvas, ...props })
+  }
+  return new THREE.WebGLRenderer({ canvas, ...props })
+}
 
 function CameraController({ fov }: { fov: number }) {
   const { camera } = useThree()
@@ -120,7 +128,7 @@ const SceneCanvas: React.FC = () => {
 
   return (
     <div ref={containerRef} style={{ height: '100%', width: '100%' }}>
-      <Canvas shadows camera={{ position: [0, 5, 10], fov }}>
+      <Canvas gl={createRenderer} shadows camera={{ position: [0, 5, 10], fov }}>
         <AdaptiveDpr pixelated />
         <Physics>
           <CameraController fov={fov} />
