@@ -23,9 +23,6 @@ import { getFrequencyBands } from '../lib/analyser'
 import { isLowPowerDevice } from '../lib/performance'
 
 function createRenderer({ canvas, ...props }: any) {
-  if (typeof navigator !== 'undefined' && 'gpu' in navigator) {
-    return new WebGPURenderer({ canvas, ...props })
-  }
   return new THREE.WebGLRenderer({ canvas, ...props })
 }
 
