@@ -55,6 +55,7 @@ const MusicalObjectInstances: React.FC = () => {
                   color={objectConfigs[t].color}
                   position={pos as any}
                   rotation={rot}
+                  scale={objectConfigs[t].baseScale}
                   onClick={(e) => {
                     e.stopPropagation()
                     select(obj.id)
