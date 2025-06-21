@@ -1,3 +1,4 @@
+'use client'
 // src/components/MusicalObject.tsx
 import React, { useRef, useState, useMemo, useEffect } from 'react'
 import { Object3D } from 'three'

@@ -1,3 +1,4 @@
+'use client'
 // src/components/Floor.tsx
 import React from 'react'
 import { usePlane } from '@react-three/cannon'

@@ -1,3 +1,4 @@
+'use client'
 // src/components/EffectWorm.tsx
 import React, { useRef } from 'react'
 import { useSphere } from '@react-three/cannon'
