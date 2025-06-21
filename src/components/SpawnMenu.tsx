@@ -1,6 +1,6 @@
 'use client'
 // src/components/SpawnMenu.tsx
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Float, useCursor } from '@react-three/drei'
 import { useThree } from '@react-three/fiber'
 import { useObjects } from '../store/useObjects'
@@ -8,11 +8,33 @@ import { objectConfigs, objectTypes, ObjectType } from '../config/objectTypes'
 import { playNote, playChord, playBeat, startLoop } from '../lib/audio'
 import MusicIcon from './MusicIcon'
 import ProceduralButton from './ProceduralButton'
-import { motion } from 'framer-motion-3d'
-const MMesh = motion.mesh as any
-const MMaterial = motion.meshStandardMaterial as any
+import { useSpring, a } from '@react-spring/three'
 
 interface ItemProps { type: ObjectType; index: number }
+
+const Ripple: React.FC<{ color: string; onDone: () => void }> = ({ color, onDone }) => {
+  const [springs, api] = useSpring(() => ({ scale: 0.2, opacity: 0.6 }))
+
+  useEffect(() => {
+    api.start({
+      scale: 1.5,
+      opacity: 0,
+      config: { duration: 400 },
+      onRest: onDone,
+    })
+  }, [api, onDone])
+
+  return (
+    <a.mesh rotation={[-Math.PI / 2, 0, 0]} scale={springs.scale}>
+      <ringGeometry args={[0.6, 0.8, 32]} />
+      <a.meshBasicMaterial
+        color={color}
+        transparent
+        opacity={springs.opacity as unknown as number}
+      />
+    </a.mesh>
+  )
+}
 
 const MenuItem: React.FC<ItemProps> = ({ type, index }) => {
   const spawn = useObjects((s) => s.spawn)
@@ -22,10 +44,14 @@ const MenuItem: React.FC<ItemProps> = ({ type, index }) => {
   const [ripple, setRipple] = useState(false)
   useCursor(hovered)
 
+  const { scale } = useSpring({
+    scale: active ? 0.95 : hovered ? 1.2 : 1,
+    config: { tension: 300, friction: 20 },
+  })
+
   const handlePointerUp = () => {
     setActive(false)
     setRipple(true)
-    setTimeout(() => setRipple(false), 300)
     const pos: [number, number, number] = [
       camera.position.x,
       camera.position.y,
@@ -50,30 +76,19 @@ const MenuItem: React.FC<ItemProps> = ({ type, index }) => {
         active={active}
         position={[0, 0, -0.3]}
       />
-      <MMesh
+      <a.mesh
         castShadow
         receiveShadow
         onPointerOver={() => setHovered(true)}
         onPointerOut={() => setHovered(false)}
         onPointerDown={() => setActive(true)}
         onPointerUp={handlePointerUp}
-        animate={{ scale: hovered || active ? 1.2 : 1 }}
-        whileTap={{ scale: 0.95 }}
-        transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+        scale={scale}
       >
         <MusicIcon type={type} />
-      </MMesh>
+      </a.mesh>
       {ripple && (
-        <MMesh
-          key="ripple"
-          rotation={[-Math.PI / 2, 0, 0]}
-          initial={{ scale: 0.2, opacity: 0.6 }}
-          animate={{ scale: 1.5, opacity: 0 }}
-          transition={{ duration: 0.4, ease: 'easeOut' }}
-        >
-          <ringGeometry args={[0.6, 0.8, 32]} />
-          <meshBasicMaterial color={color} transparent opacity={0.5} />
-        </MMesh>
+        <Ripple color={color} onDone={() => setRipple(false)} />
       )}
     </Float>
   )
