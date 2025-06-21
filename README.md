@@ -76,6 +76,8 @@ To get started with the project, follow these steps:
 - Loop objects trigger repeating beats with a progress ring.
 - Spatial audio positions each sound in 3D space.
 - Selecting an object reveals an effect panel for reverb, delay, and filters.
+- Dynamic bloom lighting responds to the music's bass frequencies and is
+  automatically disabled on low-power devices.
 
 ## Future Enhancements
 
