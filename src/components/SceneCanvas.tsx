@@ -12,6 +12,7 @@ import SpawnMenu from './SpawnMenu'
 import EffectWorm from './EffectWorm'
 import LoopProgress from './LoopProgress'
 import HUD from './HUD'
+import ParticleBurst from './ParticleBurst'
 import { startNote, stopNote } from '../lib/audio'
 import { initPhysics } from '../lib/physics'
 
@@ -113,6 +114,7 @@ const SceneCanvas: React.FC = () => {
           <SoundPortals />
           <SpawnMenu />
         </Physics>
+        <ParticleBurst count={1024} color="#ff66aa" />
         <HUD />
       </Canvas>
     </div>

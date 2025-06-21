@@ -5,6 +5,7 @@ import { useEffectSettings, defaultEffectParams, EffectParams } from '../store/u
 import { ObjectType } from '../store/useObjects'
 import { useLoops } from '../store/useLoops'
 
+import { beatBus } from "./events"
 // Synth instances (initialized once)
 let noteSynth: Tone.Synth
 let chordSynth: Tone.PolySynth
@@ -147,6 +148,7 @@ export async function playChord(id: string, notes: string[] = ['C4', 'E4', 'G4']
  * Play a beat kick.
  */
 export async function playBeat(id: string) {
+  beatBus.dispatchEvent(new Event("beat"));
   await initAudioEngine()
   const { key } = useAudioSettings.getState()
   const note = transpose('C2', key)
