@@ -2,6 +2,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { Canvas, useThree, useFrame } from '@react-three/fiber'
 import { Physics } from '@react-three/cannon'
+import { AdaptiveDpr } from '@react-three/drei'
 import * as THREE from 'three'
 import FloatingSphere from './FloatingSphere'
 import AudioVisualizer from './AudioVisualizer'
@@ -53,6 +54,7 @@ const SceneCanvas: React.FC = () => {
   const [fov, setFov] = useState(50)
   const containerRef = useRef<HTMLDivElement>(null)
   const [lowPower] = useState<boolean>(isLowPowerDevice())
+  const particleCount = lowPower ? 256 : 1024
 
   useEffect(() => {
     initPhysics()
@@ -119,6 +121,7 @@ const SceneCanvas: React.FC = () => {
   return (
     <div ref={containerRef} style={{ height: '100%', width: '100%' }}>
       <Canvas shadows camera={{ position: [0, 5, 10], fov }}>
+        <AdaptiveDpr pixelated />
         <Physics>
           <CameraController fov={fov} />
           <ambientLight intensity={0.3} />
@@ -138,7 +141,7 @@ const SceneCanvas: React.FC = () => {
           <SoundPortals />
           <SpawnMenu />
         </Physics>
-        <ParticleBurst count={1024} color="#ff66aa" />
+        <ParticleBurst count={particleCount} color="#ff66aa" />
         <BloomComposer enabled={!lowPower} />
         <HUD />
       </Canvas>
