@@ -120,3 +120,14 @@ Average FPS on a mid-range laptop:
 | 25      | ~90    |
 | 100     | ~65    |
 
+## Validation
+
+Before merging changes, ensure the project builds and passes type checking:
+
+```bash
+npx tsc --noEmit
+npm run build
+```
+
+Afterward, test the production build on both desktop and mobile devices to verify everything works as expected.
+
