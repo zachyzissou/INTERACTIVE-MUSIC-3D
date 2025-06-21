@@ -79,8 +79,9 @@ export const SingleMusicalObject: React.FC<MusicalObjectProps> = ({ id, type, po
     if (meter) {
       const raw = meter.getValue()
       const level = Array.isArray(raw) ? raw[0] : raw
-      const intensity = objectConfigs[type].pulseIntensity || 0
-      const target = 1 + level * intensity
+      const cfg = objectConfigs[type]
+      const intensity = cfg.pulseIntensity || 0
+      const target = cfg.baseScale * (1 + level * intensity)
       mesh.scale.setScalar(THREE.MathUtils.lerp(mesh.scale.x, target, 0.2))
       const mat = mesh.material as THREE.MeshStandardMaterial
       mat.emissiveIntensity = THREE.MathUtils.lerp(mat.emissiveIntensity, 0.2 + level * 0.8, 0.2)
