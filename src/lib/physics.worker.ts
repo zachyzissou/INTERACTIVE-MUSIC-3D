@@ -7,6 +7,8 @@ type Msg = AddMsg | RemoveMsg
 let world: RAPIER.World | null = null
 const bodies: Record<string, RAPIER.RigidBody> = {}
 const colliders: Record<string, RAPIER.Collider> = {}
+const anchors: Record<string, RAPIER.RigidBody> = {}
+const joints: Record<string, RAPIER.ImpulseJoint> = {}
 
 function step() {
   if (!world) return
@@ -43,11 +45,31 @@ onmessage = (e: MessageEvent<Msg>) => {
       RAPIER.ColliderDesc.ball(0.5),
       body
     )
+    const anchorDesc = RAPIER.RigidBodyDesc.kinematicPositionBased().setTranslation(
+      data.position[0],
+      data.position[1],
+      data.position[2]
+    )
+    const anchor = world.createRigidBody(anchorDesc)
+    const joint = world.createImpulseJoint(
+      RAPIER.JointData.spring(0, 50, 5, { x: 0, y: 0, z: 0 }, { x: 0, y: 0, z: 0 }),
+      anchor,
+      body,
+      true
+    )
     bodies[data.id] = body
     colliders[data.id] = collider
+    anchors[data.id] = anchor
+    joints[data.id] = joint
   } else if (data.type === 'remove') {
     const body = bodies[data.id]
     const collider = colliders[data.id]
+    const anchor = anchors[data.id]
+    const joint = joints[data.id]
+    if (joint) {
+      world.removeImpulseJoint(joint, true)
+      delete joints[data.id]
+    }
     if (collider) {
       world.removeCollider(collider, true)
       delete colliders[data.id]
@@ -55,6 +77,10 @@ onmessage = (e: MessageEvent<Msg>) => {
     if (body) {
       world.removeRigidBody(body)
       delete bodies[data.id]
+    }
+    if (anchor) {
+      world.removeRigidBody(anchor)
+      delete anchors[data.id]
     }
   }
 }
