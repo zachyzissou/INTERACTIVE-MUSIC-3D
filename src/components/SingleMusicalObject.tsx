@@ -9,7 +9,7 @@ import * as Tone from 'tone'
 import { playNote, playChord, playBeat, getObjectMeter, getObjectPanner } from '../lib/audio'
 import { ObjectType } from '../store/useObjects'
 import { objectConfigs } from '../config/objectTypes'
-import MusicIcon from './MusicIcon'
+import ProceduralShape from './ProceduralShape'
 import { AnimatePresence } from 'framer-motion'
 import { useEffectSettings } from '../store/useEffectSettings'
 import EffectPanel from './EffectPanel'
@@ -107,7 +107,7 @@ export const SingleMusicalObject: React.FC<MusicalObjectProps> = ({ id, type, po
         }}
         onPointerMissed={() => setDragging(false)}
       >
-        <MusicIcon type={type} />
+        <ProceduralShape type={type} />
         <AnimatePresence>
           {selected === id && (
             <EffectPanel objectId={id} position={[0, 1, 0]} />
