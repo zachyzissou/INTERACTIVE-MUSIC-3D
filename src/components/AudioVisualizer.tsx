@@ -3,41 +3,24 @@ import React, { useRef, useEffect } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import { OrthographicCamera } from '@react-three/drei'
 import * as THREE from 'three'
-import * as Tone from 'tone'
+import { getAnalyser, getFrequencyDataArray, getFrequencyTexture, getFrequencyBands } from '../lib/analyser'
 
 const AudioVisualizer: React.FC = () => {
   const { viewport } = useThree()
   const width = viewport.width
   const height = viewport.height
-  const analyserRef = useRef<AnalyserNode | null>(null)
-  const dataArrayRef = useRef<Uint8Array | null>(null)
   const textureRef = useRef<THREE.DataTexture | null>(null)
   const materialRef = useRef<THREE.ShaderMaterial | null>(null)
 
   useEffect(() => {
-    const ctx = Tone.getContext()
-    const analyser = ctx.rawContext.createAnalyser()
-    analyser.fftSize = 512
-    ctx.destination.connect(analyser)
-    analyserRef.current = analyser
-    const bufLen = analyser.frequencyBinCount
-    const arr = new Uint8Array(bufLen)
-    dataArrayRef.current = arr
-    const tex = new THREE.DataTexture(arr, bufLen, 1, THREE.RedFormat)
-    tex.minFilter = THREE.LinearFilter
-    tex.magFilter = THREE.LinearFilter
-    tex.wrapS = THREE.ClampToEdgeWrapping
-    tex.wrapT = THREE.ClampToEdgeWrapping
-    textureRef.current = tex
+    getAnalyser()
+    textureRef.current = getFrequencyTexture()
   }, [])
 
   useFrame(({ clock }) => {
-    const analyser = analyserRef.current
-    const dataArray = dataArrayRef.current
     const texture = textureRef.current
-    if (analyser && dataArray && texture && materialRef.current) {
-      analyser.getByteFrequencyData(dataArray)
-      texture.needsUpdate = true
+    if (texture && materialRef.current) {
+      getFrequencyBands()
       materialRef.current.uniforms.uTime.value = clock.getElapsedTime()
       materialRef.current.uniforms.uFreqTex.value = texture
     }
