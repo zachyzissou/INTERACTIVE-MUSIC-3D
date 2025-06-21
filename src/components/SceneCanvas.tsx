@@ -1,6 +1,6 @@
 'use client'
 import React, { useEffect, useRef, useState } from 'react'
-import { Canvas, useThree } from '@react-three/fiber'
+import { Canvas, useThree, useFrame } from '@react-three/fiber'
 import { Physics } from '@react-three/cannon'
 import * as THREE from 'three'
 import FloatingSphere from './FloatingSphere'
@@ -15,6 +15,10 @@ import HUD from './HUD'
 import ParticleBurst from './ParticleBurst'
 import { startNote, stopNote } from '../lib/audio'
 import { initPhysics } from '../lib/physics'
+import { EffectComposer, Bloom } from '@react-three/postprocessing'
+import type { BloomEffect } from 'postprocessing'
+import { getFrequencyBands } from '../lib/analyser'
+import { isLowPowerDevice } from '../lib/performance'
 
 function CameraController({ fov }: { fov: number }) {
   const { camera } = useThree()
@@ -26,9 +30,29 @@ function CameraController({ fov }: { fov: number }) {
   return null
 }
 
+const BloomComposer: React.FC<{ enabled: boolean }> = ({ enabled }) => {
+  const bloomRef = useRef<BloomEffect>(null)
+  useFrame(() => {
+    if (!enabled || !bloomRef.current) return
+    const { low } = getFrequencyBands()
+    bloomRef.current.intensity = THREE.MathUtils.lerp(
+      bloomRef.current.intensity,
+      0.5 + low * 2,
+      0.1
+    )
+  })
+  if (!enabled) return null
+  return (
+    <EffectComposer>
+      <Bloom ref={bloomRef} intensity={0.5} mipmapBlur />
+    </EffectComposer>
+  )
+}
+
 const SceneCanvas: React.FC = () => {
   const [fov, setFov] = useState(50)
   const containerRef = useRef<HTMLDivElement>(null)
+  const [lowPower] = useState<boolean>(isLowPowerDevice())
 
   useEffect(() => {
     initPhysics()
@@ -115,6 +139,7 @@ const SceneCanvas: React.FC = () => {
           <SpawnMenu />
         </Physics>
         <ParticleBurst count={1024} color="#ff66aa" />
+        <BloomComposer enabled={!lowPower} />
         <HUD />
       </Canvas>
     </div>
