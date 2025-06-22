@@ -6,6 +6,17 @@ import { ObjectType } from '../store/useObjects'
 import { useLoops } from '../store/useLoops'
 
 import { beatBus } from "./events"
+import {
+  NOTE_ATTACK,
+  NOTE_RELEASE,
+  CHORD_ATTACK,
+  CHORD_RELEASE,
+  BEAT_PITCH_DECAY,
+  BEAT_ATTACK,
+  BEAT_DECAY,
+  BEAT_SUSTAIN,
+  BEAT_RELEASE,
+} from '../config/constants'
 // Synth instances (initialized once)
 let noteSynth: Tone.Synth
 let chordSynth: Tone.PolySynth
@@ -40,19 +51,19 @@ async function initAudioEngine() {
   // Single-note synth
   noteSynth = new Tone.Synth().connect(masterVolumeNode)
   noteSynth.oscillator.type = 'sine'
-  noteSynth.envelope.attack = 0.05
-  noteSynth.envelope.release = 1
+  noteSynth.envelope.attack = NOTE_ATTACK
+  noteSynth.envelope.release = NOTE_RELEASE
   // Polyphonic chord synth
   chordSynth = new Tone.PolySynth(Tone.Synth).connect(masterVolumeNode)
   chordSynth.set({ oscillator: { type: 'triangle' } })
-  chordSynth.set({ envelope: { attack: 0.1, release: 1.5 } })
+  chordSynth.set({ envelope: { attack: CHORD_ATTACK, release: CHORD_RELEASE } })
   // Drum synth
   beatSynth = new Tone.MembraneSynth().connect(masterVolumeNode)
-  beatSynth.pitchDecay = 0.05
-  beatSynth.envelope.attack = 0.001
-  beatSynth.envelope.decay = 0.3
-  beatSynth.envelope.sustain = 0.1
-  beatSynth.envelope.release = 1
+  beatSynth.pitchDecay = BEAT_PITCH_DECAY
+  beatSynth.envelope.attack = BEAT_ATTACK
+  beatSynth.envelope.decay = BEAT_DECAY
+  beatSynth.envelope.sustain = BEAT_SUSTAIN
+  beatSynth.envelope.release = BEAT_RELEASE
   audioInitialized = true
 }
 

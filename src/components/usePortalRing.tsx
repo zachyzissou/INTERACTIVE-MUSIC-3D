@@ -2,6 +2,11 @@
 import { useRef } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import type { Group } from 'three'
+import {
+  PORTAL_RING_MIN_RADIUS,
+  PORTAL_RING_MAX_RADIUS,
+  PORTAL_RING_HEIGHT,
+} from '../config/constants'
 
 export const usePortalRing = (count: number) => {
   const groupRef = useRef<Group>(null!)
@@ -13,8 +18,11 @@ export const usePortalRing = (count: number) => {
     }
   })
 
-  const radius = Math.min(Math.max(viewport.width / 2, 6), 10)
-  const height = 1.5
+  const radius = Math.min(
+    Math.max(viewport.width / 2, PORTAL_RING_MIN_RADIUS),
+    PORTAL_RING_MAX_RADIUS
+  )
+  const height = PORTAL_RING_HEIGHT
 
   const getPosition = (idx: number): [number, number, number] => {
     const angle = (idx / count) * Math.PI * 2

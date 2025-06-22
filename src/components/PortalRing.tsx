@@ -5,6 +5,7 @@ import { Float } from '@react-three/drei'
 import type { Mesh } from 'three'
 import { usePortalRing } from './usePortalRing'
 import { playNote } from '../lib/audio'
+import { PORTAL_RADIUS } from '../config/constants'
 
 
 // Portal definitions: assign a musical note and color to each
@@ -41,7 +42,7 @@ const Portal: React.FC<{
         onClick={() => onClick(note)}
       >
         {/* Sphere radius = 2 scene units */}
-        <sphereGeometry args={[2, 32, 32]} />
+        <sphereGeometry args={[PORTAL_RADIUS, 32, 32]} />
         <meshStandardMaterial
           color={color}
           emissive={color}
