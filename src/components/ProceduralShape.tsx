@@ -5,6 +5,7 @@ import { Billboard } from '@react-three/drei'
 import * as THREE from 'three'
 import { ObjectType, objectConfigs } from '../config/objectTypes'
 import { getAnalyser, getFrequencyBands } from '../lib/analyser'
+import { PLANE_SIZE } from '../config/constants'
 
 interface ProceduralShapeProps {
   type: ObjectType
@@ -32,7 +33,7 @@ const ProceduralShape: React.FC<ProceduralShapeProps> = ({ type }) => {
   return (
     <Billboard>
       <mesh>
-        <planeGeometry args={[1, 1]} />
+        <planeGeometry args={[PLANE_SIZE, PLANE_SIZE]} />
         <shaderMaterial
           ref={mat}
           transparent

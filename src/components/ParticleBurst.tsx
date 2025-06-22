@@ -7,6 +7,7 @@ import {
   type Variable,
 } from 'three/examples/jsm/misc/GPUComputationRenderer'
 import { beatBus } from '../lib/events'
+import { PARTICLE_COUNT_HIGH } from '../config/constants'
 
 export interface ParticleBurstProps {
   count?: number
@@ -70,7 +71,7 @@ const renderFragment = /* glsl */`
 `
 
 const ParticleBurst = forwardRef<ParticleBurstHandle, ParticleBurstProps>(
-  ({ count = 1024, color = '#ff88aa' }, ref) => {
+  ({ count = PARTICLE_COUNT_HIGH, color = '#ff88aa' }, ref) => {
     const { gl } = useThree()
     const size = Math.ceil(Math.sqrt(count))
     const gpu = useRef<GPUComputationRenderer | null>(null)

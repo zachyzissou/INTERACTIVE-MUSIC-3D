@@ -2,6 +2,7 @@
 import React, { useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
+import { PLANE_SIZE } from '../config/constants'
 
 interface ProceduralButtonProps {
   position?: [number, number, number]
@@ -37,8 +38,8 @@ const ProceduralButton: React.FC<ProceduralButtonProps> = ({
   })
 
   return (
-    <mesh position={position} rotation={[-Math.PI / 2, 0, 0]}> 
-      <planeGeometry args={[1, 1]} />
+    <mesh position={position} rotation={[-Math.PI / 2, 0, 0]}>
+      <planeGeometry args={[PLANE_SIZE, PLANE_SIZE]} />
       <shaderMaterial
         ref={mat}
         transparent

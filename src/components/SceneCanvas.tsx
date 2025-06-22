@@ -21,6 +21,12 @@ import { EffectComposer, Bloom } from '@react-three/postprocessing'
 import type { BloomEffect } from 'postprocessing'
 import { getFrequencyBands } from '../lib/analyser'
 import { isLowPowerDevice } from '../lib/performance'
+import {
+  FOV_MIN,
+  FOV_MAX,
+  PARTICLE_COUNT_HIGH,
+  PARTICLE_COUNT_LOW,
+} from '../config/constants'
 
 function createRenderer({ canvas, ...props }: WebGLRendererParameters) {
   return new THREE.WebGLRenderer({ canvas, ...props })
@@ -59,7 +65,7 @@ const SceneCanvas: React.FC = () => {
   const [fov, setFov] = useState(50)
   const containerRef = useRef<HTMLDivElement>(null)
   const [lowPower] = useState<boolean>(isLowPowerDevice())
-  const particleCount = lowPower ? 256 : 1024
+  const particleCount = lowPower ? PARTICLE_COUNT_LOW : PARTICLE_COUNT_HIGH
 
   useEffect(() => {
     initPhysics()
@@ -77,7 +83,7 @@ const SceneCanvas: React.FC = () => {
 
     const handleWheel = (e: WheelEvent) => {
       e.preventDefault()
-      setFov((f) => clamp(f + e.deltaY * 0.05, 30, 100))
+      setFov((f) => clamp(f + e.deltaY * 0.05, FOV_MIN, FOV_MAX))
     }
 
     const pointers = new Map<number, PointerEvent>()
@@ -98,7 +104,7 @@ const SceneCanvas: React.FC = () => {
         const [a, b] = Array.from(pointers.values())
         const dist = Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY)
         const diff = base - dist
-        setFov((f) => clamp(f + diff * 0.1, 30, 100))
+        setFov((f) => clamp(f + diff * 0.1, FOV_MIN, FOV_MAX))
         base = dist
       }
     }
