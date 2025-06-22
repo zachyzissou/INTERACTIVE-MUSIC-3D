@@ -14,8 +14,8 @@ interface LoopState {
 
 export const useLoops = create<LoopState>((set) => ({
   active: {},
-  start: (id) => set((s) => ({ active: { ...s.active, [id]: true } })),
-  stop: (id) =>
+  start: (id: string) => set((s) => ({ active: { ...s.active, [id]: true } })),
+  stop: (id: string) =>
     set((s) => {
       const { [id]: _, ...rest } = s.active
       return { active: rest }

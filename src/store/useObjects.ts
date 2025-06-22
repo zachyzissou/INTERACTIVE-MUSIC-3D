@@ -25,7 +25,7 @@ interface ObjectState {
 
 export const useObjects = create<ObjectState>((set, get) => ({
   objects: [],
-  spawn: (type, position) => {
+  spawn: (type: ObjectType, position?: [number, number, number]) => {
     const id = Date.now().toString()
     const newObj: MusicalObject = {
       id,
