@@ -2,7 +2,10 @@
 import React, { useEffect, useRef, useImperativeHandle, forwardRef } from 'react'
 import { useThree, useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
-import { GPUComputationRenderer } from 'three/examples/jsm/misc/GPUComputationRenderer'
+import {
+  GPUComputationRenderer,
+  type Variable,
+} from 'three/examples/jsm/misc/GPUComputationRenderer'
 import { beatBus } from '../lib/events'
 
 export interface ParticleBurstProps {
@@ -71,8 +74,8 @@ const ParticleBurst = forwardRef<ParticleBurstHandle, ParticleBurstProps>(
     const { gl } = useThree()
     const size = Math.ceil(Math.sqrt(count))
     const gpu = useRef<GPUComputationRenderer | null>(null)
-    const posVar = useRef<any>(null)
-    const velVar = useRef<any>(null)
+    const posVar = useRef<Variable | null>(null)
+    const velVar = useRef<Variable | null>(null)
     const meshRef = useRef<THREE.Points>(null)
 
     const burst = () => {

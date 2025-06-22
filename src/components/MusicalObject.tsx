@@ -53,7 +53,7 @@ const MusicalObjectInstances: React.FC = () => {
                 <Instance
                   key={obj.id}
                   color={objectConfigs[t].color}
-                  position={pos as any}
+                  position={pos}
                   rotation={rot}
                   scale={objectConfigs[t].baseScale}
                   onClick={(e) => {
