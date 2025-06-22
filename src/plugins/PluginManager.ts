@@ -3,12 +3,14 @@ export interface Plugin {
   init: (context: any) => void
 }
 
+import { safeStringify } from '../lib/safeStringify'
+
 class PluginManager {
   private plugins: Plugin[] = []
   registerPlugin(plugin: Plugin) {
     this.plugins.push(plugin)
     plugin.init({})
-    console.log(`Plugin ${plugin.name} loaded`)
+    console.log(`Plugin loaded: ${safeStringify(plugin)}`)
   }
 }
 
