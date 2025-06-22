@@ -7,6 +7,7 @@ interface Props {
 }
 interface State {
   hasError: boolean
+  cyclic?: boolean
 }
 
 class ErrorBoundary extends React.Component<Props, State> {
@@ -15,8 +16,9 @@ class ErrorBoundary extends React.Component<Props, State> {
     this.state = { hasError: false }
   }
 
-  static getDerivedStateFromError(_: Error): State {
-    return { hasError: true }
+  static getDerivedStateFromError(error: Error): State {
+    const cyclic = error.message?.includes('cyclic object value')
+    return { hasError: true, cyclic }
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
@@ -27,7 +29,9 @@ class ErrorBoundary extends React.Component<Props, State> {
     if (this.state.hasError) {
       return (
         <div className={ui.glass} style={{ padding: '1rem', color: 'red' }}>
-          Something went wrong.
+          {this.state.cyclic
+            ? 'Data serialization error—please reload.'
+            : 'Something went wrong.'}
         </div>
       )
     }
