@@ -8,6 +8,7 @@ import {
 } from 'three/examples/jsm/misc/GPUComputationRenderer'
 import { beatBus } from '../lib/events'
 import { PARTICLE_COUNT_HIGH } from '../config/constants'
+import { safeStringify } from '../lib/safeStringify'
 
 export interface ParticleBurstProps {
   count?: number
@@ -108,7 +109,7 @@ const ParticleBurst = forwardRef<ParticleBurstHandle, ParticleBurstProps>(
       velVar.current.material.uniforms.burst = { value: 0 }
       posVar.current.material.uniforms.delta = { value: 0 }
       const err = compute.init()
-      if (err) console.error(err)
+      if (err) console.error(safeStringify(err))
       gpu.current = compute
     }, [gl, size])
 
