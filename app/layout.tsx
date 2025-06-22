@@ -1,17 +1,27 @@
+"use client"
 // app/layout.tsx
 import '../src/styles/globals.css'
 import ui from '../src/styles/ui.module.css'
-import React from 'react'
+import React, { useEffect } from 'react'
 import PluginLoader from "./PluginLoader"
 import AudioSettingsPanel from '@/components/AudioSettingsPanel'
 import ErrorBoundary from '@/components/ErrorBoundary'
 
-export const metadata = {
-  title: 'Interactive Music 3D',
-  description: 'Fluid physics-based 3D music creation experience',
-}
-
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  useEffect(() => {
+    window.onerror = (_msg, _src, lineno, colno, error) => {
+      console.error('Global error:', {
+        lineno,
+        colno,
+        stack: (error as Error | undefined)?.stack,
+      })
+    }
+    window.addEventListener('unhandledrejection', (e) => {
+      console.error('Unhandled rejection:', {
+        stack: (e as PromiseRejectionEvent).reason?.stack,
+      })
+    })
+  }, [])
   return (
     <html lang="en">
       <body className={ui.root}>

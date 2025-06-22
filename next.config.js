@@ -2,10 +2,14 @@ const path = require('path');
 
 module.exports = {
   reactStrictMode: true,
+  productionBrowserSourceMaps: true,
   eslint: {
     dirs: ['app', 'src']
   },
-  webpack(config) {
+  webpack(config, { dev }) {
+    if (!dev) {
+      config.devtool = 'source-map'
+    }
     config.resolve = config.resolve || {};
     config.resolve.alias = {
       ...(config.resolve.alias || {}),
