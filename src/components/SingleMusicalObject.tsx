@@ -2,7 +2,7 @@
 // src/components/MusicalObject.tsx
 import React, { useRef, useState, useMemo, useEffect } from 'react'
 import { Object3D } from 'three'
-import { useSphere } from '@react-three/cannon'
+import { RigidBody, RigidBodyApi } from '@react-three/rapier'
 import { useFrame, useThree } from '@react-three/fiber'
 import { useSpring, a } from '@react-spring/three'
 import * as THREE from 'three'
@@ -25,18 +25,9 @@ interface MusicalObjectProps {
 
 
 export const SingleMusicalObject: React.FC<MusicalObjectProps> = ({ id, type, position }) => {
-  // physics body
-  const [ref, api] = useSphere(() => ({
-    mass: 1,
-    position,
-    args: [0.5],
-    linearDamping: 0.9,
-    userData: { id, type },
-    onCollide: () => {
-      // play sound when colliding
-      triggerSound(type, id)
-    }
-  }))
+  // physics body using Rapier
+  const bodyRef = useRef<RigidBodyApi | null>(null)
+  const meshRef = useRef<Object3D>(null)
 
   // dragging state
   const [dragging, setDragging] = useState(false)
@@ -56,18 +47,21 @@ export const SingleMusicalObject: React.FC<MusicalObjectProps> = ({ id, type, po
   }, [id])
 
   useFrame(() => {
-    if (!dragging) return
+    if (!dragging || !bodyRef.current) return
     raycaster.setFromCamera(mouse, camera)
     raycaster.ray.intersectPlane(plane, intersectPoint)
-    api.position.set(intersectPoint.x, intersectPoint.y, intersectPoint.z)
-    api.velocity.set(0, 0, 0)
+    bodyRef.current.setTranslation(
+      { x: intersectPoint.x, y: intersectPoint.y, z: intersectPoint.z },
+      true
+    )
+    bodyRef.current.setLinvel({ x: 0, y: 0, z: 0 }, true)
     setMoved(true)
   })
 
   useFrame(() => {
     const meter = meterRef.current
     const panner = pannerRef.current
-    const mesh = ref.current as unknown as THREE.Mesh
+    const mesh = meshRef.current as unknown as THREE.Mesh
     if (!mesh) return
     if (panner) {
       const pos = mesh.getWorldPosition(new THREE.Vector3())
@@ -94,12 +88,26 @@ export const SingleMusicalObject: React.FC<MusicalObjectProps> = ({ id, type, po
   }, [springApi])
 
   return (
-    <a.group scale={springs.scale}>
-      <group
-        ref={ref as React.MutableRefObject<Object3D>}
-        scale={objectConfigs[type].baseScale}
-        onPointerDown={(e) => { e.stopPropagation(); setDragging(true); setMoved(false) }}
-        onPointerUp={(e) => { e.stopPropagation(); setDragging(false) }}
+    <RigidBody
+      ref={bodyRef}
+      colliders="ball"
+      linearDamping={0.9}
+      mass={1}
+      position={position}
+      onCollisionEnter={() => triggerSound(type, id)}
+    >
+      <a.group
+        ref={meshRef as React.MutableRefObject<Object3D>}
+        scale={springs.scale.to((s) => s * objectConfigs[type].baseScale)}
+        onPointerDown={(e) => {
+          e.stopPropagation()
+          setDragging(true)
+          setMoved(false)
+        }}
+        onPointerUp={(e) => {
+          e.stopPropagation()
+          setDragging(false)
+        }}
         onClick={(e) => {
           e.stopPropagation()
           if (!moved) select(id)
@@ -113,8 +121,8 @@ export const SingleMusicalObject: React.FC<MusicalObjectProps> = ({ id, type, po
             <EffectPanel objectId={id} position={[0, 1, 0]} />
           )}
         </AnimatePresence>
-      </group>
-    </a.group>
+      </a.group>
+    </RigidBody>
   )
 }
 
