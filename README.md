@@ -133,6 +133,16 @@ npm run build
 
 Afterward, test the production build on both desktop and mobile devices to verify everything works as expected.
 
+## Logging
+
+When printing objects to the console or persisting debugging data, use the helper `safeStringify` found in `src/lib/safeStringify.ts`. It gracefully handles class instances and circular references.
+
+```ts
+import { safeStringify } from '@/lib/safeStringify'
+
+console.log(safeStringify(myObject))
+```
+
 ## Store Usage
 
 State management uses small zustand stores. Refer to [docs/store-guidelines.md](docs/store-guidelines.md) for permitted data types. Avoid storing Three.js, Tone.js or DOM objects in these stores.

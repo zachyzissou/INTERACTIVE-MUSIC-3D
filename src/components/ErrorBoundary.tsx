@@ -1,6 +1,7 @@
 'use client'
 import React, { ErrorInfo, ReactNode } from 'react'
 import ui from '../styles/ui.module.css'
+import { safeStringify } from '../lib/safeStringify'
 
 interface Props {
   children: ReactNode
@@ -22,7 +23,11 @@ class ErrorBoundary extends React.Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('ErrorBoundary caught an error', error, errorInfo)
+    console.error(
+      'ErrorBoundary caught an error',
+      safeStringify(error),
+      safeStringify(errorInfo)
+    )
   }
 
   render() {
