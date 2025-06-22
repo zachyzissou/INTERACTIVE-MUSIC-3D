@@ -1,4 +1,4 @@
-"use client"
+"use client";
 // app/layout.tsx
 import '../src/styles/globals.css'
 import ui from '../src/styles/ui.module.css'
