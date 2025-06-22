@@ -7,7 +7,8 @@ import { useFrame, useThree } from '@react-three/fiber'
 import { useSpring, a } from '@react-spring/three'
 import * as THREE from 'three'
 import * as Tone from 'tone'
-import { playNote, playChord, playBeat, getObjectMeter, getObjectPanner } from '../lib/audio'
+import { getObjectMeter, getObjectPanner } from '../lib/audio'
+import { triggerSound } from '../lib/soundTriggers'
 import { ObjectType } from '../store/useObjects'
 import { objectConfigs } from '../config/objectTypes'
 import ProceduralShape from './ProceduralShape'
@@ -33,9 +34,7 @@ export const SingleMusicalObject: React.FC<MusicalObjectProps> = ({ id, type, po
     userData: { id, type },
     onCollide: () => {
       // play sound when colliding
-      if (type === 'note') playNote(id)
-      if (type === 'chord') playChord(id)
-      if (type === 'beat' || type === 'loop') playBeat(id)
+      triggerSound(type, id)
     }
   }))
 
@@ -104,9 +103,7 @@ export const SingleMusicalObject: React.FC<MusicalObjectProps> = ({ id, type, po
         onClick={(e) => {
           e.stopPropagation()
           if (!moved) select(id)
-          if (type === 'note') playNote(id)
-          if (type === 'chord') playChord(id)
-          if (type === 'beat' || type === 'loop') playBeat(id)
+          triggerSound(type, id)
         }}
         onPointerMissed={() => setDragging(false)}
       >
