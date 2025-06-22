@@ -31,7 +31,7 @@ interface EffectState {
 export const useEffectSettings = create<EffectState>((set, get) => ({
   effects: {},
   selected: null,
-  select: (id) => {
+  select: (id: string | null) => {
     if (id === null) return set({ selected: null })
     const effects = get().effects
     if (!effects[id]) {
@@ -40,12 +40,12 @@ export const useEffectSettings = create<EffectState>((set, get) => ({
       set({ selected: id })
     }
   },
-  setEffect: (id, params) =>
+  setEffect: (id: string, params: Partial<EffectParams>) =>
     set((state) => ({
       effects: {
         ...state.effects,
         [id]: { ...(state.effects[id] || defaultEffectParams), ...params },
       },
     })),
-  getParams: (id) => get().effects[id] || defaultEffectParams,
+  getParams: (id: string) => get().effects[id] || defaultEffectParams,
 }))
