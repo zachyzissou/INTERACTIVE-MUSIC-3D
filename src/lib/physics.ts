@@ -51,7 +51,12 @@ export async function initPhysics() {
   requestAnimationFrame(loop)
 }
 
-export function addBody(id: string, position: [number, number, number]) {
+export interface AddBodyOptions {
+  id: string
+  position: [number, number, number]
+}
+
+export function addBody({ id, position }: AddBodyOptions) {
   if (!world) return
   const rbDesc = RAPIER.RigidBodyDesc.dynamic().setTranslation(
     position[0],

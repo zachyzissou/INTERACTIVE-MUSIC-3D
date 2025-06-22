@@ -5,6 +5,7 @@ import { Billboard } from '@react-three/drei'
 import * as THREE from 'three'
 import { ObjectType, objectConfigs } from '../config/objectTypes'
 import { getAnalyser, getFrequencyBands } from '../lib/analyser'
+import { isAudioInitialized } from '../lib/audio'
 import { PLANE_SIZE } from '../config/constants'
 
 interface ProceduralShapeProps {
@@ -14,12 +15,9 @@ interface ProceduralShapeProps {
 const ProceduralShape: React.FC<ProceduralShapeProps> = ({ type }) => {
   const mat = useRef<THREE.ShaderMaterial>(null!)
 
-  useEffect(() => {
-    getAnalyser()
-  }, [])
 
   useFrame(({ clock }) => {
-    if (!mat.current) return
+    if (!mat.current || !isAudioInitialized()) return
     const { low, mid, high } = getFrequencyBands()
     mat.current.uniforms.uBass.value = low
     mat.current.uniforms.uMid.value = mid

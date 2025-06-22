@@ -15,7 +15,7 @@ import EffectWorm from './EffectWorm'
 import LoopProgress from './LoopProgress'
 import HUD from './HUD'
 import ParticleBurst from './ParticleBurst'
-import { startNote, stopNote } from '../lib/audio'
+import { startNote, stopNote, startAudio } from '../lib/audio'
 import { initPhysics } from '../lib/physics'
 import { EffectComposer, Bloom } from '@react-three/postprocessing'
 import type { BloomEffect } from 'postprocessing'
@@ -69,9 +69,6 @@ const SceneCanvas: React.FC = () => {
 
   useEffect(() => {
     initPhysics()
-    startNote()
-    const timer = setTimeout(() => stopNote(), 2000)
-    return () => clearTimeout(timer)
   }, [])
 
   useEffect(() => {
@@ -91,6 +88,12 @@ const SceneCanvas: React.FC = () => {
 
     const handlePointerDown = (e: PointerEvent) => {
       pointers.set(e.pointerId, e)
+      if (pointers.size === 1) {
+        startAudio().then(() => {
+          startNote()
+          setTimeout(() => stopNote(), 2000)
+        })
+      }
       if (pointers.size === 2) {
         const [a, b] = Array.from(pointers.values())
         base = Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY)

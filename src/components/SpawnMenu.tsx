@@ -6,6 +6,7 @@ import { useThree } from '@react-three/fiber'
 import { useObjects } from '../store/useObjects'
 import { objectConfigs, objectTypes, ObjectType } from '../config/objectTypes'
 import { triggerSound } from '../lib/soundTriggers'
+import { startAudio } from '../lib/audio'
 import MusicIcon from './MusicIcon'
 import ProceduralButton from './ProceduralButton'
 import { useSpring, a } from '@react-spring/three'
@@ -49,7 +50,7 @@ const MenuItem: React.FC<ItemProps> = ({ type, index }) => {
     config: { tension: 300, friction: 20 },
   })
 
-  const handlePointerUp = () => {
+  const handlePointerUp = async () => {
     setActive(false)
     setRipple(true)
     const pos: [number, number, number] = [
@@ -57,8 +58,9 @@ const MenuItem: React.FC<ItemProps> = ({ type, index }) => {
       camera.position.y,
       camera.position.z,
     ]
-    const id = spawn(type, pos)
-    triggerSound(type, id)
+    const id = spawn({ type, position: pos })
+    await startAudio()
+    triggerSound({ type, id })
   }
 
   const color = objectConfigs[type].color

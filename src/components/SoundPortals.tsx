@@ -31,7 +31,7 @@ const Portal: React.FC<{ cfg: typeof portalConfigs[0]; position: [number, number
         onPointerOut={() => setHovered(false)}
         onClick={() => {
           const pos: [number, number, number] = [camera.position.x, camera.position.y, camera.position.z]
-          spawn(cfg.type, pos)
+          spawn({ type: cfg.type, position: pos })
         }}
       >
         <ShapeFactory type={cfg.type} />

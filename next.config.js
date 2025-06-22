@@ -6,11 +6,16 @@ module.exports = {
     dirs: ['app', 'src']
   },
   webpack(config) {
-    config.resolve = config.resolve || {};
+    config.resolve = config.resolve || {}
     config.resolve.alias = {
       ...(config.resolve.alias || {}),
       '@': path.resolve(__dirname, 'src'),
-    };
-    return config;
+    }
+    config.module = config.module || { rules: [] }
+    config.module.rules.push({
+      test: /\.js\.map$/,
+      use: 'null-loader',
+    })
+    return config
   },
 };

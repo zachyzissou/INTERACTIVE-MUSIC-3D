@@ -40,12 +40,10 @@ interface EffectChain {
 }
 
 /**
- * Initialize the audio engine on first user interaction.
- * Calls Tone.start(), then creates and configures synths.
+ * Initialize the audio engine after Tone has started.
  */
-async function initAudioEngine() {
+function initAudioEngine() {
   if (audioInitialized) return
-  await Tone.start()
   masterVolumeNode = new Tone.Volume(0).toDestination()
   masterVolumeNode.volume.value = useAudioSettings.getState().volume * 100 - 100
   // Single-note synth
@@ -65,6 +63,16 @@ async function initAudioEngine() {
   beatSynth.envelope.sustain = BEAT_SUSTAIN
   beatSynth.envelope.release = BEAT_RELEASE
   audioInitialized = true
+}
+
+export function isAudioInitialized() {
+  return audioInitialized
+}
+
+export async function startAudio() {
+  await Tone.start()
+  await Tone.getContext().resume()
+  initAudioEngine()
 }
 
 function keyOffset(key: string): number {
@@ -132,8 +140,8 @@ function applyParams(chain: EffectChain, params: EffectParams) {
  * Play a single note.
  * Ensures audio engine is initialized before scheduling.
  */
-export async function playNote(id: string, note: string = 'C4') {
-  await initAudioEngine()
+export function playNote(id: string, note: string = 'C4') {
+  if (!audioInitialized) return
   const { key } = useAudioSettings.getState()
   const finalNote = transpose(note, key)
   const os = getObjectSynth(id, 'note')
@@ -145,8 +153,8 @@ export async function playNote(id: string, note: string = 'C4') {
 /**
  * Play a triad chord.
  */
-export async function playChord(id: string, notes: string[] = ['C4', 'E4', 'G4']) {
-  await initAudioEngine()
+export function playChord(id: string, notes: string[] = ['C4', 'E4', 'G4']) {
+  if (!audioInitialized) return
   const { key } = useAudioSettings.getState()
   const final = notes.map((n) => transpose(n, key))
   const os = getObjectSynth(id, 'chord')
@@ -158,9 +166,9 @@ export async function playChord(id: string, notes: string[] = ['C4', 'E4', 'G4']
 /**
  * Play a beat kick.
  */
-export async function playBeat(id: string) {
-  beatBus.dispatchEvent(new Event("beat"));
-  await initAudioEngine()
+export function playBeat(id: string) {
+  if (!audioInitialized) return
+  beatBus.dispatchEvent(new Event("beat"))
   const { key } = useAudioSettings.getState()
   const note = transpose('C2', key)
   const os = getObjectSynth(id, 'beat')
@@ -172,8 +180,8 @@ export async function playBeat(id: string) {
 /**
  * Set global output volume (0 to 1)
  */
-export async function setMasterVolume(vol: number) {
-  await initAudioEngine()
+export function setMasterVolume(vol: number) {
+  if (!audioInitialized) return
   // Map slider 0-1 to -100dB to 0dB for a perceptual volume curve
   masterVolumeNode.volume.value = vol * 100 - 100
 }
@@ -181,8 +189,8 @@ export async function setMasterVolume(vol: number) {
 /**
  * Start a sustained note used for intro cues.
  */
-export async function startNote(note: string = 'C4') {
-  await initAudioEngine()
+export function startNote(note: string = 'C4') {
+  if (!audioInitialized) return
   const { key } = useAudioSettings.getState()
   const finalNote = transpose(note, key)
   noteSynth.triggerAttackRelease(finalNote, '1n', Tone.now())
@@ -213,8 +221,8 @@ export function getLoopProgress(id: string): number {
   return elapsed / info.duration
 }
 
-export async function startLoop(id: string, interval: string = '1m') {
-  await initAudioEngine()
+export function startLoop(id: string, interval: string = '1m') {
+  if (!audioInitialized) return
   if (loops.has(id)) return
   const bpm = useAudioSettings.getState().bpm
   Tone.Transport.bpm.value = bpm

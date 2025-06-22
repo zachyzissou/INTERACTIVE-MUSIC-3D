@@ -7,8 +7,9 @@ import { useFrame, useThree } from '@react-three/fiber'
 import { useSpring, a } from '@react-spring/three'
 import * as THREE from 'three'
 import * as Tone from 'tone'
-import { getObjectMeter, getObjectPanner } from '../lib/audio'
+import { getObjectMeter, getObjectPanner, isAudioInitialized } from '../lib/audio'
 import { triggerSound } from '../lib/soundTriggers'
+import { startAudio } from '../lib/audio'
 import { ObjectType } from '../store/useObjects'
 import { objectConfigs } from '../config/objectTypes'
 import ProceduralShape from './ProceduralShape'
@@ -42,8 +43,10 @@ export const SingleMusicalObject: React.FC<MusicalObjectProps> = ({ id, type, po
   const pannerRef = useRef<PannerNode | null>(null)
 
   useEffect(() => {
-    meterRef.current = getObjectMeter(id)
-    pannerRef.current = getObjectPanner(id)
+    if (isAudioInitialized()) {
+      meterRef.current = getObjectMeter(id)
+      pannerRef.current = getObjectPanner(id)
+    }
   }, [id])
 
   useFrame(() => {
@@ -59,6 +62,7 @@ export const SingleMusicalObject: React.FC<MusicalObjectProps> = ({ id, type, po
   })
 
   useFrame(() => {
+    if (!isAudioInitialized()) return
     const meter = meterRef.current
     const panner = pannerRef.current
     const mesh = meshRef.current as unknown as THREE.Mesh
@@ -94,7 +98,7 @@ export const SingleMusicalObject: React.FC<MusicalObjectProps> = ({ id, type, po
       linearDamping={0.9}
       mass={1}
       position={position}
-      onCollisionEnter={() => triggerSound(type, id)}
+      onCollisionEnter={() => triggerSound({ type, id })}
     >
       <a.group
         ref={meshRef as React.MutableRefObject<Object3D>}
@@ -111,7 +115,9 @@ export const SingleMusicalObject: React.FC<MusicalObjectProps> = ({ id, type, po
         onClick={(e) => {
           e.stopPropagation()
           if (!moved) select(id)
-          triggerSound(type, id)
+          startAudio().then(() => {
+            triggerSound({ type, id })
+          })
         }}
         onPointerMissed={() => setDragging(false)}
       >

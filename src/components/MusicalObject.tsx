@@ -13,6 +13,7 @@ import * as THREE from 'three'
 import SingleMusicalObject from './SingleMusicalObject'
 import { usePerformance } from '../store/usePerformance'
 import { triggerSound } from '../lib/soundTriggers'
+import { startAudio } from '../lib/audio'
 
 // Group objects by type for instanced rendering
 function groupByType(objects: Obj[]) {
@@ -59,7 +60,9 @@ const MusicalObjectInstances: React.FC = () => {
                   onClick={(e) => {
                     e.stopPropagation()
                     select(obj.id)
-                    triggerSound(obj.type, obj.id)
+                    startAudio().then(() => {
+                      triggerSound({ type: obj.type, id: obj.id })
+                    })
                   }}
                 />
               )

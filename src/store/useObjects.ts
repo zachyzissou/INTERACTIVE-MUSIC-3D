@@ -15,17 +15,22 @@ export interface MusicalObject {
   position: [number, number, number]
 }
 
+interface SpawnOptions {
+  type: ObjectType
+  position?: [number, number, number]
+}
+
 interface ObjectState {
   objects: MusicalObject[]
   /**
    * Spawn a new musical object of the given type and return its id
    */
-  spawn: (type: ObjectType, position?: [number, number, number]) => string
+  spawn: (options: SpawnOptions) => string
 }
 
 export const useObjects = create<ObjectState>((set, get) => ({
   objects: [],
-  spawn: (type: ObjectType, position?: [number, number, number]) => {
+  spawn: ({ type, position }: SpawnOptions) => {
     const id = Date.now().toString()
     const newObj: MusicalObject = {
       id,
@@ -33,7 +38,7 @@ export const useObjects = create<ObjectState>((set, get) => ({
       position: position ?? [0, 3, 0],
     }
     set({ objects: [...get().objects, newObj] })
-    addBody(id, newObj.position)
+    addBody({ id, position: newObj.position })
     return id
   },
 }))
