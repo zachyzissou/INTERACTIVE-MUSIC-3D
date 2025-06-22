@@ -1,3 +1,4 @@
+'use client'
 import React from 'react'
 import { ObjectType, objectConfigs } from '../config/objectTypes'
 import { SHAPE_RADIUS } from '../config/constants'

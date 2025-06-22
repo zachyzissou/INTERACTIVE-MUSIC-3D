@@ -1,3 +1,4 @@
+'use client'
 // src/components/AudioVisualizer.tsx
 import React, { useRef, useEffect } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'

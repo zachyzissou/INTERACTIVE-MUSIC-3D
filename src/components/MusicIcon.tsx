@@ -1,3 +1,4 @@
+'use client'
 import React from 'react'
 import { Text3D } from '@react-three/drei'
 import type { FontData } from '@react-three/drei'
