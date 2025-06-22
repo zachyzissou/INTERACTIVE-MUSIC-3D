@@ -6,6 +6,7 @@ import { Float } from '@react-three/drei'
 import type { Mesh } from 'three'
 import { usePortalRing } from './usePortalRing'
 import { playNote } from '../lib/audio'
+import * as Tone from 'tone'
 import { PORTAL_RADIUS } from '../config/constants'
 
 
@@ -68,6 +69,8 @@ const PortalRing: React.FC = () => {
     const now = performance.now()
     if (now - lastClick < 50) return
     lastClick = now
+    await Tone.start()
+    await Tone.getContext().resume()
     await playNote(note)
   }
 

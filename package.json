@@ -12,10 +12,10 @@
   "dependencies": {
     "@dimforge/rapier3d-compat": "^0.17.3",
     "@react-spring/three": "^10.0.1",
-    "@react-three/rapier": "^0.12.1",
     "@react-three/drei": "^10.3.0",
     "@react-three/fiber": "9.1.2",
     "@react-three/postprocessing": "^3.0.4",
+    "@react-three/rapier": "^0.12.1",
     "framer-motion": "^12.18.1",
     "meyda": "5.6.3",
     "next": "15.3.4",
@@ -32,6 +32,7 @@
     "@types/react": "19.1.8",
     "eslint": "^9.29.0",
     "eslint-config-next": "^15.3.4",
+    "null-loader": "^4.0.1",
     "typescript": "5.8.3"
   }
 }

@@ -108,9 +108,11 @@ export const SingleMusicalObject: React.FC<MusicalObjectProps> = ({ id, type, po
           e.stopPropagation()
           setDragging(false)
         }}
-        onClick={(e) => {
+        onClick={async (e) => {
           e.stopPropagation()
           if (!moved) select(id)
+          await Tone.start()
+          await Tone.getContext().resume()
           triggerSound(type, id)
         }}
         onPointerMissed={() => setDragging(false)}

@@ -9,6 +9,7 @@ import { triggerSound } from '../lib/soundTriggers'
 import MusicIcon from './MusicIcon'
 import ProceduralButton from './ProceduralButton'
 import { useSpring, a } from '@react-spring/three'
+import * as Tone from 'tone'
 
 interface ItemProps { type: ObjectType; index: number }
 
@@ -49,7 +50,7 @@ const MenuItem: React.FC<ItemProps> = ({ type, index }) => {
     config: { tension: 300, friction: 20 },
   })
 
-  const handlePointerUp = () => {
+  const handlePointerUp = async () => {
     setActive(false)
     setRipple(true)
     const pos: [number, number, number] = [
@@ -58,6 +59,8 @@ const MenuItem: React.FC<ItemProps> = ({ type, index }) => {
       camera.position.z,
     ]
     const id = spawn(type, pos)
+    await Tone.start()
+    await Tone.getContext().resume()
     triggerSound(type, id)
   }
 

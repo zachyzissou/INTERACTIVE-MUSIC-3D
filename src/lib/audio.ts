@@ -45,8 +45,7 @@ interface EffectChain {
  */
 async function initAudioEngine() {
   if (audioInitialized) return
-  await Tone.start()
-  masterVolumeNode = new Tone.Volume(0).toDestination()
+  masterVolumeNode = new Tone.Volume({ volume: 0 }).toDestination()
   masterVolumeNode.volume.value = useAudioSettings.getState().volume * 100 - 100
   // Single-note synth
   noteSynth = new Tone.Synth().connect(masterVolumeNode)
@@ -54,7 +53,7 @@ async function initAudioEngine() {
   noteSynth.envelope.attack = NOTE_ATTACK
   noteSynth.envelope.release = NOTE_RELEASE
   // Polyphonic chord synth
-  chordSynth = new Tone.PolySynth(Tone.Synth).connect(masterVolumeNode)
+  chordSynth = new Tone.PolySynth({ voice: Tone.Synth }).connect(masterVolumeNode)
   chordSynth.set({ oscillator: { type: 'triangle' } })
   chordSynth.set({ envelope: { attack: CHORD_ATTACK, release: CHORD_RELEASE } })
   // Drum synth
@@ -77,10 +76,10 @@ function transpose(note: string, key: string) {
 }
 
 function createChain(): EffectChain {
-  const hp = new Tone.Filter(0, 'highpass')
-  const lp = new Tone.Filter(20000, 'lowpass')
-  const delay = new Tone.FeedbackDelay('8n', 0.5)
-  const reverb = new Tone.Reverb(2)
+  const hp = new Tone.Filter({ frequency: 0, type: 'highpass' })
+  const lp = new Tone.Filter({ frequency: 20000, type: 'lowpass' })
+  const delay = new Tone.FeedbackDelay({ delayTime: '8n', feedback: 0.5 })
+  const reverb = new Tone.Reverb({ decay: 2 })
   hp.connect(lp)
   lp.connect(delay)
   delay.connect(reverb)
@@ -92,7 +91,7 @@ function getObjectSynth(id: string, type: ObjectType) {
   if (!os) {
     const chain = createChain()
     let synth: Tone.Synth | Tone.PolySynth | Tone.MembraneSynth
-    if (type === 'chord') synth = new Tone.PolySynth(Tone.Synth)
+    if (type === 'chord') synth = new Tone.PolySynth({ voice: Tone.Synth })
     else if (type === 'beat') synth = new Tone.MembraneSynth()
     else synth = new Tone.Synth()
     const meter = new Tone.Meter({ normalRange: true, smoothing: 0.8 })
