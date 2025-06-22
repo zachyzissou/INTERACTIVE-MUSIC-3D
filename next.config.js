@@ -11,6 +11,11 @@ module.exports = {
       ...(config.resolve.alias || {}),
       '@': path.resolve(__dirname, 'src'),
     };
+    config.module = config.module || { rules: [] }
+    config.module.rules.push({
+      test: /\.js\.map$/,
+      use: 'null-loader'
+    })
     return config;
   },
 };

@@ -9,6 +9,7 @@ import ShapeFactory from './ShapeFactory'
 import EffectPanel from "./EffectPanel"
 import { useEffectSettings } from '../store/useEffectSettings'
 import { usePhysicsStore } from '../lib/physics'
+import * as Tone from 'tone'
 import * as THREE from 'three'
 import SingleMusicalObject from './SingleMusicalObject'
 import { usePerformance } from '../store/usePerformance'
@@ -56,9 +57,11 @@ const MusicalObjectInstances: React.FC = () => {
                   position={pos}
                   rotation={rot}
                   scale={objectConfigs[t].baseScale}
-                  onClick={(e) => {
+                  onClick={async (e) => {
                     e.stopPropagation()
                     select(obj.id)
+                    await Tone.start()
+                    await Tone.getContext().resume()
                     triggerSound(obj.type, obj.id)
                   }}
                 />
