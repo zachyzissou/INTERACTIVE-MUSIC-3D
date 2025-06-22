@@ -4,6 +4,7 @@ import { Canvas, useThree, useFrame } from '@react-three/fiber'
 import { Physics } from '@react-three/rapier'
 import { AdaptiveDpr } from '@react-three/drei'
 import * as THREE from 'three'
+import type { WebGLRendererParameters } from 'three'
 import FloatingSphere from './FloatingSphere'
 import AudioVisualizer from './AudioVisualizer'
 import Floor from './Floor'
@@ -21,7 +22,7 @@ import type { BloomEffect } from 'postprocessing'
 import { getFrequencyBands } from '../lib/analyser'
 import { isLowPowerDevice } from '../lib/performance'
 
-function createRenderer({ canvas, ...props }: any) {
+function createRenderer({ canvas, ...props }: WebGLRendererParameters) {
   return new THREE.WebGLRenderer({ canvas, ...props })
 }
 

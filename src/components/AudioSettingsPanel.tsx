@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState, useRef } from "react";
-import { motion } from "framer-motion";
+import { motion, type PanInfo } from "framer-motion";
 import { useAudioSettings, ScaleType } from "../store/useAudioSettings";
 import { setMasterVolume } from "../lib/audio";
 import { usePerformance } from "../store/usePerformance";
@@ -19,7 +19,10 @@ const AudioSettingsPanel: React.FC = () => {
     setMasterVolume(volume);
   }, [volume]);
 
-  const handleDrag = (_: any, info: any) => {
+  const handleDrag = (
+    _: MouseEvent | TouchEvent | PointerEvent,
+    info: PanInfo
+  ) => {
     const rect = dialRef.current?.getBoundingClientRect();
     if (!rect) return;
     const cx = rect.left + rect.width / 2;

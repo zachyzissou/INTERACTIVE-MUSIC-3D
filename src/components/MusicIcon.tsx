@@ -1,7 +1,10 @@
 import React from 'react'
 import { Text3D } from '@react-three/drei'
+import type { FontData } from '@react-three/drei'
 import { ObjectType, objectConfigs } from '../config/objectTypes'
-import font from '../../public/fonts/NotoMusic.json'
+import fontJson from '../../public/fonts/NotoMusic.json'
+
+const font = fontJson as unknown as FontData
 
 interface MusicIconProps {
   type: ObjectType
@@ -12,7 +15,7 @@ interface MusicIconProps {
 const MusicIcon: React.FC<MusicIconProps> = ({ type, size = 0.6, height = 0.1 }) => {
   const cfg = objectConfigs[type]
   return (
-    <Text3D font={font as any} size={size} height={height} bevelEnabled bevelSize={0.02}>
+    <Text3D font={font} size={size} height={height} bevelEnabled bevelSize={0.02}>
       {cfg.icon}
       <meshStandardMaterial color={cfg.color} emissive={cfg.color} />
     </Text3D>

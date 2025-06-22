@@ -1,6 +1,8 @@
+export interface PluginContext {}
+
 export interface Plugin {
   name: string
-  init: (context: any) => void
+  init: (context: PluginContext) => void
 }
 
 import { safeStringify } from '../lib/safeStringify'
