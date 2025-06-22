@@ -133,3 +133,7 @@ npm run build
 
 Afterward, test the production build on both desktop and mobile devices to verify everything works as expected.
 
+## Store Usage
+
+State management uses small zustand stores. Refer to [docs/store-guidelines.md](docs/store-guidelines.md) for permitted data types. Avoid storing Three.js, Tone.js or DOM objects in these stores.
+

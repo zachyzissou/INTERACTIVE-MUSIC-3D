@@ -1,5 +1,11 @@
 import { create } from 'zustand'
 
+/**
+ * Loop activity store.
+ * Only primitive flags are stored here.
+ * Never persist Tone.js objects or DOM elements.
+ */
+
 interface LoopState {
   active: Record<string, boolean>
   start: (id: string) => void
