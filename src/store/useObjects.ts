@@ -2,6 +2,12 @@
 import { create } from 'zustand'
 import { addBody } from "../lib/physics"
 
+/**
+ * Store of musical object metadata.
+ * Only primitive fields and arrays should be stored here.
+ * Complex runtime objects (Three.js, Tone.js, DOM) must be referenced by ID.
+ */
+
 export type ObjectType = 'note' | 'chord' | 'beat' | 'loop'
 export interface MusicalObject {
   id: string

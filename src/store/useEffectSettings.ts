@@ -1,5 +1,11 @@
 import { create } from 'zustand'
 
+/**
+ * Effect settings store.
+ * Stores only plain objects composed of numbers and strings.
+ * Avoid persisting Three.js, Tone.js or DOM instances here.
+ */
+
 export interface EffectParams {
   reverb: number
   delay: number

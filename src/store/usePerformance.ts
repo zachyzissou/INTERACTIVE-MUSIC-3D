@@ -1,5 +1,10 @@
 import { create } from 'zustand'
 
+/**
+ * Performance tuning store.
+ * Contains only primitive values to allow easy serialization.
+ */
+
 interface PerfState {
   instanced: boolean
   lod: boolean

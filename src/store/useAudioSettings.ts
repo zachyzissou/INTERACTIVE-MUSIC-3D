@@ -1,5 +1,11 @@
 import { create } from 'zustand'
 
+/**
+ * Audio settings store.
+ * Only simple primitives are persisted here to keep the state serializable.
+ * Do not store Three.js, Tone.js or DOM objects.
+ */
+
 export type ScaleType = 'major' | 'minor'
 
 interface AudioSettingsState {
