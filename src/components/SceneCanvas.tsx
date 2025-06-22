@@ -1,7 +1,7 @@
 'use client'
 import React, { useEffect, useRef, useState } from 'react'
 import { Canvas, useThree, useFrame } from '@react-three/fiber'
-import { Physics } from '@react-three/cannon'
+import { Physics } from '@react-three/rapier'
 import { AdaptiveDpr } from '@react-three/drei'
 import * as THREE from 'three'
 import FloatingSphere from './FloatingSphere'
