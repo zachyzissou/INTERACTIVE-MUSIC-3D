@@ -12,7 +12,7 @@ import { usePhysicsStore } from '../lib/physics'
 import * as THREE from 'three'
 import SingleMusicalObject from './SingleMusicalObject'
 import { usePerformance } from '../store/usePerformance'
-import { playNote, playChord, playBeat } from '../lib/audio'
+import { triggerSound } from '../lib/soundTriggers'
 
 // Group objects by type for instanced rendering
 function groupByType(objects: Obj[]) {
@@ -59,9 +59,7 @@ const MusicalObjectInstances: React.FC = () => {
                   onClick={(e) => {
                     e.stopPropagation()
                     select(obj.id)
-                    if (obj.type === 'note') playNote(obj.id)
-                    else if (obj.type === 'chord') playChord(obj.id)
-                    else playBeat(obj.id)
+                    triggerSound(obj.type, obj.id)
                   }}
                 />
               )

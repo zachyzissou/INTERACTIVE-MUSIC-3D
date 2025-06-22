@@ -5,7 +5,7 @@ import { Float, useCursor } from '@react-three/drei'
 import { useThree } from '@react-three/fiber'
 import { useObjects } from '../store/useObjects'
 import { objectConfigs, objectTypes, ObjectType } from '../config/objectTypes'
-import { playNote, playChord, playBeat, startLoop } from '../lib/audio'
+import { triggerSound } from '../lib/soundTriggers'
 import MusicIcon from './MusicIcon'
 import ProceduralButton from './ProceduralButton'
 import { useSpring, a } from '@react-spring/three'
@@ -58,10 +58,7 @@ const MenuItem: React.FC<ItemProps> = ({ type, index }) => {
       camera.position.z,
     ]
     const id = spawn(type, pos)
-    if (type === 'note') playNote(id)
-    else if (type === 'chord') playChord(id)
-    else if (type === 'beat') playBeat(id)
-    else startLoop(id)
+    triggerSound(type, id)
   }
 
   const color = objectConfigs[type].color
