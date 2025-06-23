@@ -46,3 +46,15 @@ export function getFrequencyBands() {
   if (texture) texture.needsUpdate = true
   return { low, mid, high }
 }
+
+export function subscribeToAudioLevel(cb: (level: number) => void) {
+  getAnalyser()
+  let raf: number
+  const tick = () => {
+    const { low, mid, high } = getFrequencyBands()
+    cb((low + mid + high) / 3)
+    raf = requestAnimationFrame(tick)
+  }
+  tick()
+  return () => cancelAnimationFrame(raf)
+}

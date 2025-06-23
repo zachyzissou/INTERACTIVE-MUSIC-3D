@@ -1,6 +1,7 @@
 "use client";
 import dynamic from "next/dynamic";
 import ZoomHUD from "@/components/ZoomHUD";
+import SpawnMenu from "@/components/SpawnMenu";
 import { useAudioSettings } from "@/store/useAudioSettings";
 import { useObjects } from "@/store/useObjects";
 import { assertPrimitives } from "@/lib/assertPrimitives";
@@ -19,6 +20,7 @@ const Home = () => {
   return (
     <div style={{ height: '100vh', width: '100vw', position: 'relative' }}>
       <SceneCanvas />
+      <SpawnMenu />
       <ZoomHUD />
     </div>
   );
