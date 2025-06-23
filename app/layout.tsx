@@ -6,6 +6,7 @@ import React, { useEffect } from 'react'
 import PluginLoader from "./PluginLoader"
 import AudioSettingsPanel from '@/components/AudioSettingsPanel'
 import ErrorBoundary from '@/components/ErrorBoundary'
+import { assertPrimitives } from '@/lib/assertPrimitives'
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   useEffect(() => {
@@ -22,6 +23,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       })
     })
   }, [])
+  const pageProps = {}
+  assertPrimitives(pageProps, 'pageProps')
   return (
     <html lang="en">
       <body className={ui.root}>
