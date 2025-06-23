@@ -5,12 +5,11 @@ import { Physics } from '@react-three/rapier'
 import { AdaptiveDpr } from '@react-three/drei'
 import * as THREE from 'three'
 import type { WebGLRendererParameters } from 'three'
-import FloatingSphere from './FloatingSphere'
+import ProceduralShapes from './ProceduralShapes'
 import AudioVisualizer from './AudioVisualizer'
 import Floor from './Floor'
 import MusicalObject from './MusicalObject'
 import SoundPortals from './SoundPortals'
-import SpawnMenu from './SpawnMenu'
 import EffectWorm from './EffectWorm'
 import LoopProgress from './LoopProgress'
 import HUD from './HUD'
@@ -130,8 +129,13 @@ const SceneCanvas: React.FC = () => {
   }, [])
 
   return (
-    <div ref={containerRef} style={{ height: '100%', width: '100%' }}>
-      <Canvas gl={createRenderer} shadows camera={{ position: [0, 5, 10], fov }}>
+    <div ref={containerRef} style={{ width: '100vw', height: '100vh' }}>
+      <Canvas
+        style={{ width: '100%', height: '100%' }}
+        gl={createRenderer}
+        shadows
+        camera={{ position: [0, 5, 10], fov }}
+      >
         <AdaptiveDpr pixelated />
         <Physics>
           <CameraController fov={fov} />
@@ -148,9 +152,8 @@ const SceneCanvas: React.FC = () => {
           <MusicalObject />
           <LoopProgress />
           <EffectWorm id="worm" position={[0, 1, 0]} />
-          <FloatingSphere />
+          <ProceduralShapes />
           <SoundPortals />
-          <SpawnMenu />
         </Physics>
         <ParticleBurst count={particleCount} color="#ff66aa" />
         <BloomComposer enabled={!lowPower} />

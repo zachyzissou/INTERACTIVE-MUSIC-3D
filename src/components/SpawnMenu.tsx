@@ -1,106 +1,68 @@
 'use client'
-// src/components/SpawnMenu.tsx
-import React, { useState, useEffect } from 'react'
-import { Float, useCursor } from '@react-three/drei'
-import { useThree } from '@react-three/fiber'
+import React, { useEffect, useState } from 'react'
+import { motion } from '@motionone/react'
 import { useObjects } from '../store/useObjects'
-import { objectConfigs, objectTypes, ObjectType } from '../config/objectTypes'
-import { triggerSound } from '../lib/soundTriggers'
-import MusicIcon from './MusicIcon'
-import ProceduralButton from './ProceduralButton'
-import { useSpring, a } from '@react-spring/three'
-import * as Tone from 'tone'
+import { objectTypes, objectConfigs } from '../config/objectTypes'
+import styles from '../styles/spawnMenu.module.css'
 
-interface ItemProps { type: ObjectType; index: number }
+const useIsMobile = () => {
+  const [mobile, setMobile] = useState(false)
+  useEffect(() => {
+    const check = () => setMobile(window.innerWidth < 640)
+    check()
+    window.addEventListener('resize', check)
+    return () => window.removeEventListener('resize', check)
+  }, [])
+  return mobile
+}
 
-const Ripple: React.FC<{ color: string; onDone: () => void }> = ({ color, onDone }) => {
-  const [springs, api] = useSpring(() => ({ scale: 0.2, opacity: 0.6 }))
+const SpawnMenu = () => {
+  const spawn = useObjects((s) => s.spawn)
+  const isMobile = useIsMobile()
+  const [open, setOpen] = useState(!isMobile)
 
   useEffect(() => {
-    api.start({
-      scale: 1.5,
-      opacity: 0,
-      config: { duration: 400 },
-      onRest: onDone,
-    })
-  }, [api, onDone])
+    setOpen(!isMobile)
+  }, [isMobile])
 
-  return (
-    <a.mesh rotation={[-Math.PI / 2, 0, 0]} scale={springs.scale}>
-      <ringGeometry args={[0.6, 0.8, 32]} />
-      <a.meshBasicMaterial
-        color={color}
-        transparent
-        opacity={springs.opacity as unknown as number}
-      />
-    </a.mesh>
-  )
-}
-
-const MenuItem: React.FC<ItemProps> = ({ type, index }) => {
-  const spawn = useObjects((s) => s.spawn)
-  const { camera } = useThree()
-  const [hovered, setHovered] = useState(false)
-  const [active, setActive] = useState(false)
-  const [ripple, setRipple] = useState(false)
-  useCursor(hovered)
-
-  const { scale } = useSpring({
-    scale: active ? 0.95 : hovered ? 1.2 : 1,
-    config: { tension: 300, friction: 20 },
-  })
-
-  const handlePointerUp = async () => {
-    setActive(false)
-    setRipple(true)
-    const pos: [number, number, number] = [
-      camera.position.x,
-      camera.position.y,
-      camera.position.z,
-    ]
-    const id = spawn(type, pos)
-    await Tone.start()
-    await Tone.getContext().resume()
-    triggerSound(type, id)
-  }
-
-  const color = objectConfigs[type].color
-  const pulse = objectConfigs[type].pulseIntensity ?? 0
-
-  return (
-    <Float position={[0, index * -1.2, 0]} floatIntensity={0.4} rotationIntensity={0}>
-      <ProceduralButton
-        color={color}
-        pulse={pulse}
-        hover={hovered}
-        active={active}
-        position={[0, 0, -0.3]}
-      />
-      <a.mesh
-        castShadow
-        receiveShadow
-        onPointerOver={() => setHovered(true)}
-        onPointerOut={() => setHovered(false)}
-        onPointerDown={() => setActive(true)}
-        onPointerUp={handlePointerUp}
-        scale={scale}
-      >
-        <MusicIcon type={type} />
-      </a.mesh>
-      {ripple && (
-        <Ripple color={color} onDone={() => setRipple(false)} />
-      )}
-    </Float>
-  )
-}
-
-const SpawnMenu: React.FC = () => {
-  return (
-    <group position={[-4, 2.5, 0]}>
-      {objectTypes.map((t, idx) => (
-        <MenuItem key={t} type={t} index={idx} />
+  return isMobile ? (
+    <motion.div
+      initial={{ height: '0px' }}
+      animate={{ height: open ? '50vh' : '0px' }}
+      transition={{ duration: 0.3 } as any}
+      className={styles.drawer}
+    >
+      <button className={styles.toggle} onClick={() => setOpen((o) => !o)} />
+      {objectTypes.map((t) => (
+        <motion.button
+          whileHover={{ scale: 1.1 }}
+          key={t}
+          className={styles.spawnButton}
+          onClick={() => spawn(t)}
+        >
+          {objectConfigs[t].label}
+        </motion.button>
       ))}
-    </group>
+    </motion.div>
+  ) : (
+    <motion.div
+      initial={{ x: '-100%' }}
+      animate={{ x: 0 }}
+      exit={{ x: '-100%' }}
+      transition={{ duration: 0.5, easing: 'ease-in-out' } as any}
+      className={styles.sidebar}
+    >
+      {objectTypes.map((t) => (
+        <motion.button
+          whileHover={{ scale: 1.1 }}
+          key={t}
+          className={styles.spawnButton}
+          onClick={() => spawn(t)}
+        >
+          {objectConfigs[t].label}
+        </motion.button>
+      ))}
+    </motion.div>
   )
 }
 

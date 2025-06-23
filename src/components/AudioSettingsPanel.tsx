@@ -1,59 +1,40 @@
-"use client";
-import React, { useEffect, useState, useRef } from "react";
-import { motion, type PanInfo } from "framer-motion";
-import { useAudioSettings, ScaleType } from "../store/useAudioSettings";
-import { setMasterVolume } from "../lib/audio";
-import { usePerformance } from "../store/usePerformance";
-import styles from "../styles/audioSettingsPanel.module.css";
-import ui from "../styles/ui.module.css";
+'use client'
+import React from 'react'
+import { motion } from '@motionone/react'
+import { useAudioSettings, ScaleType } from '../store/useAudioSettings'
+import { setMasterVolume } from '../lib/audio'
+import styles from '../styles/audioSettingsPanel.module.css'
 
-const KEYS = ["C", "G", "D", "A", "E", "B", "F#", "Db", "Ab", "Eb", "Bb", "F"];
+const KEYS = ['C','G','D','A','E','B','F#','Db','Ab','Eb','Bb','F']
 
-const AudioSettingsPanel: React.FC = () => {
-  const { key, scale, volume, setScale, setVolume } = useAudioSettings();
-  const { instanced, toggleInstanced } = usePerformance();
-  const dialRef = useRef<HTMLDivElement>(null);
-  const [angle, setAngle] = useState(0);
+const AudioSettingsPanel = () => {
+  const { key, scale, volume, setScale, setVolume } = useAudioSettings()
 
-  useEffect(() => {
-    setMasterVolume(volume);
-  }, [volume]);
-
-  const handleDrag = (
-    _: MouseEvent | TouchEvent | PointerEvent,
-    info: PanInfo
-  ) => {
-    const rect = dialRef.current?.getBoundingClientRect();
-    if (!rect) return;
-    const cx = rect.left + rect.width / 2;
-    const cy = rect.top + rect.height / 2;
-    const dx = info.point.x - cx;
-    const dy = info.point.y - cy;
-    const ang = (Math.atan2(dy, dx) * 180) / Math.PI + 180;
-    setAngle(ang);
-    const index = Math.round(ang / 30) % 12;
-    setScale(KEYS[index], scale);
-  };
+  const handleVolume = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = parseFloat(e.target.value)
+    setVolume(val)
+    setMasterVolume(val)
+  }
 
   return (
     <motion.div
-      className={`${styles.panel} ${ui.glass}`}
-      initial={{ y: -40, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      exit={{ y: -40, opacity: 0 }}
-      transition={{ type: "spring", stiffness: 120, damping: 16 }}
+      initial={{ y: '100%' }}
+      animate={{ y: 0 }}
+      transition={{ duration: 0.4 }}
+      className={styles.panel}
     >
-      <div className={styles.row} style={{ justifyContent: "space-between" }}>
-        <motion.div
-          ref={dialRef}
-          className={styles.dial}
-          drag
-          dragMomentum={false}
-          onDrag={handleDrag}
-          style={{ rotate: angle }}
+      <div className={styles.row}>
+        <select
+          className={styles.select}
+          value={key}
+          onChange={(e) => setScale(e.target.value, scale)}
         >
-          <span className={ui.neonText}>{key}</span>
-        </motion.div>
+          {KEYS.map((k) => (
+            <option key={k} value={k}>
+              {k}
+            </option>
+          ))}
+        </select>
         <select
           className={styles.select}
           value={scale}
@@ -64,33 +45,19 @@ const AudioSettingsPanel: React.FC = () => {
         </select>
       </div>
       <div className={styles.row}>
-        <label>Volume:</label>
-        <motion.input
+        <label>Volume</label>
+        <input
           className={styles.slider}
           type="range"
           min={0}
           max={1}
           step={0.01}
           value={volume}
-          style={{
-            background: `linear-gradient(to right, var(--accent2) ${
-              volume * 100
-            }%, rgba(255,255,255,0.2) ${volume * 100}%)`,
-          }}
-          onChange={(e) => {
-            const val = parseFloat(e.target.value)
-            setVolume(val)
-            setMasterVolume(val)
-          }}
-          whileTap={{ scale: 1.2 }}
+          onChange={handleVolume}
         />
       </div>
-      <div className={styles.row}>
-        <label>Instancing</label>
-        <input type="checkbox" checked={instanced} onChange={toggleInstanced} />
-      </div>
     </motion.div>
-  );
-};
+  )
+}
 
-export default AudioSettingsPanel;
+export default AudioSettingsPanel
