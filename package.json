@@ -17,6 +17,7 @@
     "@react-three/fiber": "9.1.2",
     "@react-three/postprocessing": "^3.0.4",
     "@react-three/rapier": "^0.12.1",
+    "@tonejs/midi": "^2.0.28",
     "framer-motion": "^12.18.1",
     "meyda": "5.6.3",
     "next": "15.3.4",
@@ -24,8 +25,9 @@
     "postprocessing": "^6.37.4",
     "react": "19.1.0",
     "react-dom": "19.1.0",
+    "react-knob-headless": "^0.3.0",
     "three": "^0.177.0",
-    "tone": "15.1.22",
+    "tone": "^15.1.22",
     "zustand": "^5.0.5"
   },
   "devDependencies": {
