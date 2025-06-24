@@ -127,11 +127,13 @@ Average FPS on a mid-range laptop:
 
 ## Validation
 
-Before merging changes, ensure the project builds and passes type checking:
+Before merging changes, ensure the project builds, passes type checking, and all tests run:
 
 ```bash
 npx tsc --noEmit
 npm run build
+npx playwright install
+npm test
 ```
 
 Afterward, test the production build on both desktop and mobile devices to verify everything works as expected.
