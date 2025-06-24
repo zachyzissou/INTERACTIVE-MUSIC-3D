@@ -1,0 +1,23 @@
+[
+  {
+    "name": "Ambient Pad",
+    "objects": [
+      { "type": "chord", "position": [0,1,0] }
+    ]
+  },
+  {
+    "name": "Techno Loop",
+    "objects": [
+      { "type": "beat", "position": [0,1,0] },
+      { "type": "note", "position": [2,1,0] }
+    ]
+  },
+  {
+    "name": "Jazz Combo",
+    "objects": [
+      { "type": "note", "position": [-1,1,0] },
+      { "type": "chord", "position": [1,1,0] },
+      { "type": "beat", "position": [0,1,0] }
+    ]
+  }
+]
