@@ -30,7 +30,12 @@ export const useObjects = create<ObjectState>((set, get) => ({
     const newObj: MusicalObject = {
       id,
       type,
-      position: position ?? [0, 3, 0],
+      position:
+        position ?? ([
+          Math.random() * 6 - 3,
+          3,
+          Math.random() * 6 - 3,
+        ] as [number, number, number]),
     }
     set({ objects: [...get().objects, newObj] })
     addBody(id, newObj.position)
