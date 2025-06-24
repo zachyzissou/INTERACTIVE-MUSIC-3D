@@ -55,11 +55,11 @@ To get started with the project, follow these steps:
 
 3. **Run the development server:**
    ```
-   npm run dev
-   ```
+ npm run dev
+  ```
 
 4. **Open your browser:**
-   Navigate to `http://localhost:3000` to view the application.
+   Navigate to `http://localhost:3000` to view the application. On first load you can choose an example scene to start from.
 
 5. **Build for production:**
    Use the following command to create an optimized build and start it:
@@ -68,19 +68,12 @@ To get started with the project, follow these steps:
    ```
 
 ## Features
-- Blank canvas UI with floating add button for spawning sounds.
-- New SoundInspector panel with animated entry.
-- ProceduralShapes instanced mesh visualizes audio levels.
-
-- A 3D scene rendered with React Three Fiber.
-- A floating sphere that demonstrates basic animation.
-- Basic note generation using Tone.js, showcasing sound synthesis capabilities.
-- Scroll or pinch to zoom the camera.
-- Loop objects trigger repeating beats with a progress ring.
-- Spatial audio positions each sound in 3D space.
-- Selecting an object reveals an effect panel for reverb, delay, and filters.
-- Dynamic bloom lighting responds to the music's bass frequencies and is
-  automatically disabled on low-power devices.
+- Spawn notes, chords, beats and loops from the sidebar or circular sound portals.
+- Example scenes can be loaded on first visit to quickly try out the app.
+- The SoundInspector provides a 16 step sequencer and per-object effects.
+- Instanced ProceduralShapes visualize audio levels in real time.
+- Scroll or pinch to zoom the camera, and drag objects to move them in 3D.
+- Spatial audio and bloom lighting react to your music.
 
 ## Future Enhancements
 
