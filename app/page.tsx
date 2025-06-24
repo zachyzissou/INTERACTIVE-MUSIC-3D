@@ -17,6 +17,7 @@ const Home = () => {
         {shapes.map((shape) => (
           <mesh
             key={shape.id}
+            data-cy={`shape-${shape.id}`}
             position={shape.position}
             scale={[shape.scale, shape.scale, shape.scale]}
             onClick={() => selectShape(shape.id)}
@@ -27,6 +28,7 @@ const Home = () => {
         ))}
       </Canvas>
       <button
+        data-cy="add-button"
         className="add-sound fixed bottom-4 right-4 bg-white/80 text-black rounded-full w-12 h-12 md:w-14 md:h-14 flex items-center justify-center text-2xl"
         onClick={() =>
           useShapesStore.getState().addShape({

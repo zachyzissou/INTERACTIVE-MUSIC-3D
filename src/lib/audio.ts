@@ -51,6 +51,9 @@ function initEffects() {
   bitcrusher = new BitCrusher(4).connect(distortion)
   bitcrusher.wet.value = 0.3
   masterChain = bitcrusher
+  if (typeof window !== 'undefined') {
+    ;(window as any).__toneNodes__ = { chorus, delay, reverb, bitcrusher, filter }
+  }
 }
 interface ObjectAudio {
   type: ObjectType

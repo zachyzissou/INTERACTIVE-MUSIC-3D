@@ -69,3 +69,7 @@ export const useAudioSettings = create<AudioSettingsState>((set) => ({
     setFilterFrequencyAudio(v)
   },
 }))
+
+if (typeof window !== 'undefined') {
+  ;(window as any).__useAudioSettings = useAudioSettings
+}

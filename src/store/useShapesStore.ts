@@ -20,3 +20,7 @@ export const useShapesStore = create<ShapesState>((set) => ({
   addShape: (shape: Shape) => set((state) => ({ shapes: [...state.shapes, shape] })),
   selectShape: (id: string | null) => set({ selectedShape: id }),
 }))
+
+if (typeof window !== 'undefined') {
+  ;(window as any).__useShapesStore = useShapesStore
+}
