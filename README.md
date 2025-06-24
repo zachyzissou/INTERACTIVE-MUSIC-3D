@@ -68,6 +68,9 @@ To get started with the project, follow these steps:
    ```
 
 ## Features
+- Blank canvas UI with floating add button for spawning sounds.
+- New SoundInspector panel with animated entry.
+- ProceduralShapes instanced mesh visualizes audio levels.
 
 - A 3D scene rendered with React Three Fiber.
 - A floating sphere that demonstrates basic animation.

@@ -1,0 +1,95 @@
+"use client";
+import React, { useEffect, useRef, useState } from "react";
+import { motion } from "@motionone/react";
+import Knob from "./JSAudioKnobs";
+import * as Tone from "tone";
+import { useEffectSettings, defaultEffectParams } from "@/store/useEffectSettings";
+import { ObjectType } from "@/store/useObjects";
+import { useAudioSettings } from "@/store/useAudioSettings";
+
+interface Props { objectId: string; type: ObjectType; }
+
+const stepsArray = new Array(16).fill(false);
+
+const SoundInspector: React.FC<Props> = ({ objectId, type }) => {
+  const params = useEffectSettings((s) => s.effects[objectId] || defaultEffectParams);
+  const setEffect = useEffectSettings((s) => s.setEffect);
+  const [steps, setSteps] = useState<boolean[]>(stepsArray);
+  const seqRef = useRef<Tone.Sequence | null>(null);
+  const [pitch, setPitch] = useState("C4");
+  const bpm = useAudioSettings((s) => s.bpm);
+
+  useEffect(() => {
+    seqRef.current?.dispose();
+    const callback = (_time: number, step: boolean) => {
+      if (!step) return;
+      if (type === "note") Tone.Transport.scheduleOnce(() => Tone.start(), "+0");
+    };
+    const seq = new Tone.Sequence(callback, steps, "16n");
+    seq.start(0);
+    Tone.Transport.bpm.value = bpm;
+    if (Tone.Transport.state !== "started") Tone.Transport.start();
+    seqRef.current = seq;
+    return () => {
+      seq.dispose();
+    };
+  }, [steps, pitch, bpm, type]);
+
+  const toggleStep = (i: number) => {
+    const newSteps = [...steps];
+    newSteps[i] = !newSteps[i];
+    setSteps(newSteps);
+  };
+
+  return (
+    <motion.div
+        key="panel"
+        className="fixed top-2 right-2 bg-black/60 text-white p-4 rounded-lg flex flex-col gap-2 w-56 md:w-72"
+        initial={{ opacity: 0, x: 50 }}
+        animate={{ opacity: 1, x: 0 }}
+        exit={{ opacity: 0, x: 50 }}
+      >
+        <select className="mb-2 text-black p-1 rounded">
+          <option>sine</option>
+          <option>square</option>
+          <option>triangle</option>
+        </select>
+        <div className="flex gap-2">
+          <Knob label="Reverb" min={0} max={1} step={0.01} value={params.reverb} onChange={(e)=>setEffect(objectId,{reverb:parseFloat(e.target.value)})} />
+          <Knob label="Delay" min={0} max={1} step={0.01} value={params.delay} onChange={(e)=>setEffect(objectId,{delay:parseFloat(e.target.value)})} />
+          <Knob label="Bits" min={0} max={1} step={0.01} value={0} onChange={()=>{}} />
+        </div>
+        {type === "note" && (
+          <div className="grid grid-cols-8 gap-1 mt-2">
+            {steps.map((s, i) => (
+              <input key={i} type="checkbox" checked={s} onChange={() => toggleStep(i)} />
+            ))}
+            <select value={pitch} onChange={(e)=>setPitch(e.target.value)} className="col-span-8 text-black p-1 rounded mt-1">
+              {['C4','D4','E4','F4','G4','A4','B4'].map(p=>(<option key={p}>{p}</option>))}
+            </select>
+          </div>
+        )}
+        {type === "chord" && (
+          <div className="grid grid-cols-8 gap-1 mt-2">
+            {steps.map((s,i)=>(
+              <input key={i} type="checkbox" checked={s} onChange={()=>toggleStep(i)} />
+            ))}
+            <select className="col-span-8 text-black p-1 rounded mt-1">
+              <option>major</option>
+              <option>minor</option>
+              <option>dim</option>
+            </select>
+          </div>
+        )}
+        {type === "beat" && (
+          <div className="grid grid-cols-8 gap-1 mt-2">
+            {steps.map((s,i)=>(
+              <input key={i} type="range" min={0} max={1} step={0.01} value={s ? 1 : 0} onChange={()=>toggleStep(i)} />
+            ))}
+          </div>
+        )}
+      </motion.div>
+  );
+};
+
+export default SoundInspector;
