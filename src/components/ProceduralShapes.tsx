@@ -5,6 +5,15 @@ import * as THREE from "three";
 import { getAnalyser } from "@/lib/analyser";
 import { useObjects } from "@/store/useObjects";
 import { useEffectSettings } from "@/store/useEffectSettings";
+import { useAudioSettings } from "@/store/useAudioSettings";
+
+type EffectSnapshot = {
+  chorusDepth: number;
+  reverbWet: number;
+  delayFeedback: number;
+  bitcrusherBits: number;
+  filterFrequency: number;
+};
 
 const tempObject = new THREE.Object3D();
 
@@ -16,6 +25,7 @@ const ProceduralShapes: React.FC = () => {
   const analyserRef = useRef<AnalyserNode | null>(null);
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const positions = useRef<THREE.Vector3[]>([]);
+  const effectsMap = useRef<Map<string, EffectSnapshot>>(new Map());
   const { raycaster, mouse, camera } = useThree();
   const plane = useRef(new THREE.Plane(new THREE.Vector3(0, 1, 0), 0));
   const hit = useRef(new THREE.Vector3());
@@ -29,6 +39,24 @@ const ProceduralShapes: React.FC = () => {
   useEffect(() => {
     positions.current = objects.map((o) => new THREE.Vector3(...o.position));
     if (instRef.current) instRef.current.count = objects.length;
+    objects.forEach((o) => {
+      if (!effectsMap.current.has(o.id)) {
+        const {
+          chorusDepth,
+          reverbWet,
+          delayFeedback,
+          bitcrusherBits,
+          filterFrequency,
+        } = useAudioSettings.getState();
+        effectsMap.current.set(o.id, {
+          chorusDepth,
+          reverbWet,
+          delayFeedback,
+          bitcrusherBits,
+          filterFrequency,
+        });
+      }
+    });
   }, [objects]);
 
   useFrame(() => {
@@ -58,13 +86,25 @@ const ProceduralShapes: React.FC = () => {
 
     for (let i = 0; i < objects.length; i++) {
       const pos = positions.current[i];
-      const scale = 0.8 + level * 1.2;
+      const effect = effectsMap.current.get(objects[i].id);
+      const intensity = effect
+        ?
+            effect.reverbWet +
+            effect.chorusDepth +
+            effect.delayFeedback +
+            (16 - effect.bitcrusherBits) / 16 +
+            effect.filterFrequency / 1000
+        : 0;
+      const scale = 0.8 + level * 1.2 + intensity * 0.2;
       tempObject.position.copy(pos);
       tempObject.scale.setScalar(scale);
       tempObject.updateMatrix();
       instRef.current.setMatrixAt(i, tempObject.matrix);
+      const color = new THREE.Color("hotpink").offsetHSL(0, 0, intensity * 0.2);
+      instRef.current.setColorAt(i, color);
     }
     instRef.current.instanceMatrix.needsUpdate = true;
+    if (instRef.current.instanceColor) instRef.current.instanceColor.needsUpdate = true;
   });
 
   const handlePointerDown = (e: any) => {

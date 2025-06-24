@@ -1,5 +1,14 @@
 // src/lib/audio.ts
 import * as Tone from 'tone'
+import {
+  Chorus,
+  FeedbackDelay,
+  Reverb,
+  Distortion,
+  BitCrusher,
+  AutoFilter,
+  ToneAudioNode,
+} from 'tone'
 import { useAudioSettings } from '../store/useAudioSettings'
 import { useEffectSettings, defaultEffectParams, EffectParams } from '../store/useEffectSettings'
 import { ObjectType } from '../store/useObjects'
@@ -23,6 +32,26 @@ let chordSynth: Tone.PolySynth
 let beatSynth: Tone.MembraneSynth
 let audioInitialized = false
 let masterVolumeNode: Tone.Volume
+
+let chorus: Chorus
+let delay: FeedbackDelay
+let reverb: Reverb
+let filter: AutoFilter
+let distortion: Distortion
+let bitcrusher: BitCrusher
+export let masterChain: ToneAudioNode
+
+function initEffects() {
+  if (chorus) return
+  chorus = new Chorus({ frequency: 1.5, delayTime: 3.5, depth: 0.7, feedback: 0.2 }).toDestination()
+  delay = new FeedbackDelay({ delayTime: '8n', feedback: 0.4, wet: 0.5 }).connect(chorus)
+  reverb = new Reverb({ decay: 3, preDelay: 0.01, wet: 0.5 }).connect(delay)
+  filter = new AutoFilter({ frequency: 0.5, depth: 0.7, baseFrequency: 200, octaves: 2 }).connect(reverb)
+  distortion = new Distortion({ distortion: 0.4, wet: 0.3 }).connect(filter)
+  bitcrusher = new BitCrusher(4).connect(distortion)
+  bitcrusher.wet.value = 0.3
+  masterChain = bitcrusher
+}
 interface ObjectAudio {
   type: ObjectType
   synth: Tone.Synth | Tone.PolySynth | Tone.MembraneSynth
@@ -45,7 +74,8 @@ interface EffectChain {
  */
 async function initAudioEngine() {
   if (audioInitialized) return
-  masterVolumeNode = new Tone.Volume({ volume: 0 }).toDestination()
+  initEffects()
+  masterVolumeNode = new Tone.Volume({ volume: 0 }).connect(masterChain)
   masterVolumeNode.volume.value = useAudioSettings.getState().volume * 100 - 100
   // Single-note synth
   noteSynth = new Tone.Synth().connect(masterVolumeNode)
@@ -175,6 +205,27 @@ export async function setMasterVolume(vol: number) {
   await initAudioEngine()
   // Map slider 0-1 to -100dB to 0dB for a perceptual volume curve
   masterVolumeNode.volume.value = vol * 100 - 100
+}
+
+export function setChorusDepth(v: number) {
+  initEffects()
+  chorus.depth = v
+}
+export function setReverbWet(v: number) {
+  initEffects()
+  reverb.wet.value = v
+}
+export function setDelayFeedback(v: number) {
+  initEffects()
+  delay.feedback.value = v
+}
+export function setBitcrusherBits(v: number) {
+  initEffects()
+  bitcrusher.set({ bits: v })
+}
+export function setFilterFrequency(v: number) {
+  initEffects()
+  filter.baseFrequency = v
 }
 
 /**
