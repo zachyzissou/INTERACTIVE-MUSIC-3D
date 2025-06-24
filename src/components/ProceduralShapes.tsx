@@ -16,6 +16,7 @@ const ProceduralShapes: React.FC = () => {
   const analyserRef = useRef<AnalyserNode | null>(null);
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const positions = useRef<THREE.Vector3[]>([]);
+  const ids = useRef<string[]>([]);
   const { raycaster, mouse, camera } = useThree();
   const plane = useRef(new THREE.Plane(new THREE.Vector3(0, 1, 0), 0));
   const hit = useRef(new THREE.Vector3());
@@ -27,7 +28,13 @@ const ProceduralShapes: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    positions.current = objects.map((o) => new THREE.Vector3(...o.position));
+    const prev = positions.current;
+    const prevIds = ids.current;
+    positions.current = objects.map((o, idx) => {
+      const i = prevIds.indexOf(o.id);
+      return i !== -1 ? prev[i] : new THREE.Vector3(...o.position);
+    });
+    ids.current = objects.map((o) => o.id);
     if (instRef.current) instRef.current.count = objects.length;
   }, [objects]);
 
