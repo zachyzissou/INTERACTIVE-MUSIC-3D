@@ -6,8 +6,6 @@ import * as Tone from "tone";
 import { useEffectSettings, defaultEffectParams } from "@/store/useEffectSettings";
 import { ObjectType } from "@/store/useObjects";
 import { useAudioSettings } from "@/store/useAudioSettings";
-import { triggerSound } from "../lib/soundTriggers";
-import { playNote, playChord, playBeat } from "../lib/audio";
 
 interface Props { objectId: string; type: ObjectType; }
 
@@ -23,19 +21,9 @@ const SoundInspector: React.FC<Props> = ({ objectId, type }) => {
 
   useEffect(() => {
     seqRef.current?.dispose();
-    const callback = async (_time: number, step: boolean) => {
+    const callback = (_time: number, step: boolean) => {
       if (!step) return;
-      await Tone.start();
-      await Tone.getContext().resume();
-      if (type === "note") {
-        playNote(objectId, pitch);
-      } else if (type === "chord") {
-        playChord(objectId);
-      } else if (type === "beat") {
-        playBeat(objectId);
-      } else {
-        triggerSound(type, objectId);
-      }
+      if (type === "note") Tone.Transport.scheduleOnce(() => Tone.start(), "+0");
     };
     const seq = new Tone.Sequence(callback, steps, "16n");
     seq.start(0);
@@ -45,7 +33,7 @@ const SoundInspector: React.FC<Props> = ({ objectId, type }) => {
     return () => {
       seq.dispose();
     };
-  }, [steps, pitch, bpm, type, objectId]);
+  }, [steps, pitch, bpm, type]);
 
   const toggleStep = (i: number) => {
     const newSteps = [...steps];
