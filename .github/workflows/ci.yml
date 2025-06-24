@@ -14,4 +14,13 @@ jobs:
         with:
           node-version: '18'
       - run: npm ci
+      - name: Cache Playwright browsers
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-playwright-
+      - run: npx playwright install
       - run: npx tsc --noEmit
+      - run: npm test
