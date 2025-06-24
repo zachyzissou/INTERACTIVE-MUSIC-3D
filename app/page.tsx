@@ -1,28 +1,35 @@
 "use client";
-import dynamic from "next/dynamic";
-import ZoomHUD from "@/components/ZoomHUD";
-import SpawnMenu from "@/components/SpawnMenu";
-import { useAudioSettings } from "@/store/useAudioSettings";
+import { Canvas } from "@react-three/fiber";
+import ProceduralShapes from "@/components/ProceduralShapes";
+import SoundInspector from "@/components/SoundInspector";
 import { useObjects } from "@/store/useObjects";
-import { assertPrimitives } from "@/lib/assertPrimitives";
-
-const SceneCanvas = dynamic(() => import("@/components/SceneCanvas"), {
-  ssr: false,
-});
+import { useEffectSettings } from "@/store/useEffectSettings";
 
 const Home = () => {
-  const key = useAudioSettings((s) => s.key);
-  const scale = useAudioSettings((s) => s.scale);
-  const objects = useObjects((s) => s.objects);
+  const spawn = useObjects((s) => s.spawn);
 
-  assertPrimitives({ key, scale, objects }, 'pageData');
+  const handleAdd = () => {
+    spawn("note");
+  };
+
+  const selected = useEffectSettings((s) => s.selected);
+  const objects = useObjects((s) => s.objects);
+  const selObj = objects.find((o) => o.id === selected);
 
   return (
-    <div style={{ height: '100vh', width: '100vw', position: 'relative' }}>
-      <SceneCanvas />
-      <SpawnMenu />
-      <ZoomHUD />
-    </div>
+    <>
+      <Canvas className="fixed inset-0" shadows>
+        <ambientLight intensity={0.5} />
+        <ProceduralShapes />
+      </Canvas>
+      {selObj && <SoundInspector objectId={selObj.id} type={selObj.type} />}
+      <button
+        className="add-sound fixed bottom-4 right-4 bg-white/80 text-black rounded-full w-12 h-12 md:w-14 md:h-14 flex items-center justify-center text-2xl"
+        onClick={handleAdd}
+      >
+        +
+      </button>
+    </>
   );
 };
 
