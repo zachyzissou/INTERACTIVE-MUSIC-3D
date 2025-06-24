@@ -1,43 +1,92 @@
-'use client'
-import React, { useEffect, useRef } from 'react'
-import { useFrame } from '@react-three/fiber'
-import { Sphere } from '@react-three/drei'
-import * as THREE from 'three'
-import { animate } from '@motionone/dom'
-import { subscribeToAudioLevel } from '../lib/analyser'
+"use client";
+import React, { useEffect, useRef, useState } from "react";
+import { useFrame, useThree } from "@react-three/fiber";
+import * as THREE from "three";
+import { getAnalyser } from "@/lib/analyser";
+import { useObjects } from "@/store/useObjects";
+import { useEffectSettings } from "@/store/useEffectSettings";
 
-const ProceduralShapes = () => {
-  const meshRef = useRef<THREE.Mesh>(null!)
-  const amplitude = useRef(0)
+const tempObject = new THREE.Object3D();
+
+const ProceduralShapes: React.FC = () => {
+  const objects = useObjects((s) => s.objects);
+  const select = useEffectSettings((s) => s.select);
+  const instRef = useRef<THREE.InstancedMesh>(null!);
+  const dataRef = useRef<Uint8Array | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const [dragIndex, setDragIndex] = useState<number | null>(null);
+  const positions = useRef<THREE.Vector3[]>([]);
+  const { raycaster, mouse, camera } = useThree();
+  const plane = useRef(new THREE.Plane(new THREE.Vector3(0, 1, 0), 0));
+  const hit = useRef(new THREE.Vector3());
+  const prevLevel = useRef(0);
 
   useEffect(() => {
-    const unsub = subscribeToAudioLevel((level) => {
-      const start = amplitude.current
-      const diff = level - start
-      const startTime = performance.now()
-      const duration = 100
-      const step = (t: number) => {
-        const progress = Math.min((t - startTime) / duration, 1)
-        amplitude.current = start + diff * progress
-        if (progress < 1) requestAnimationFrame(step)
-      }
-      requestAnimationFrame(step)
-    })
-    return unsub
-  }, [])
+    analyserRef.current = getAnalyser();
+    dataRef.current = new Uint8Array(analyserRef.current.frequencyBinCount);
+  }, []);
+
+  useEffect(() => {
+    positions.current = objects.map((o) => new THREE.Vector3(...o.position));
+    if (instRef.current) instRef.current.count = objects.length;
+  }, [objects]);
 
   useFrame(() => {
-    if (!meshRef.current) return
-    const scale = 1 + amplitude.current * 0.5
-    meshRef.current.scale.setScalar(scale)
-    meshRef.current.rotation.y += 0.01
-  })
+    if (!instRef.current || !analyserRef.current || !dataRef.current) return;
+    analyserRef.current.getByteFrequencyData(dataRef.current);
+    const len = dataRef.current.length;
+    let low = 0,
+      mid = 0,
+      high = 0;
+    for (let i = 0; i < len; i++) {
+      if (i < len / 3) low += dataRef.current[i];
+      else if (i < (2 * len) / 3) mid += dataRef.current[i];
+      else high += dataRef.current[i];
+    }
+    low /= len / 3;
+    mid /= len / 3;
+    high /= len / 3;
+    const level = (low + mid + high) / 3 / 255;
+    if (Math.abs(level - prevLevel.current) < 0.02 && dragIndex === null) return;
+    prevLevel.current = level;
+
+    if (dragIndex !== null) {
+      raycaster.setFromCamera(mouse, camera);
+      raycaster.ray.intersectPlane(plane.current, hit.current);
+      positions.current[dragIndex].copy(hit.current);
+    }
+
+    for (let i = 0; i < objects.length; i++) {
+      const pos = positions.current[i];
+      const scale = 0.8 + level * 1.2;
+      tempObject.position.copy(pos);
+      tempObject.scale.setScalar(scale);
+      tempObject.updateMatrix();
+      instRef.current.setMatrixAt(i, tempObject.matrix);
+    }
+    instRef.current.instanceMatrix.needsUpdate = true;
+  });
+
+  const handlePointerDown = (e: any) => {
+    e.stopPropagation();
+    setDragIndex(e.instanceId);
+  };
+
+  const handlePointerUp = (e: any) => {
+    e.stopPropagation();
+    if (dragIndex === e.instanceId) select(objects[e.instanceId].id);
+    setDragIndex(null);
+  };
 
   return (
-    <Sphere ref={meshRef} args={[1, 32, 32]} position={[0, 0, 0]}>
-      <meshStandardMaterial attach="material" color="royalblue" />
-    </Sphere>
-  )
-}
+    <instancedMesh
+      ref={instRef}
+      args={[new THREE.BoxGeometry(1, 1, 1), new THREE.MeshStandardMaterial({ color: "hotpink" }), objects.length]}
+      onPointerDown={handlePointerDown}
+      onPointerUp={handlePointerUp}
+      onPointerMissed={() => setDragIndex(null)}
+    />
+  );
+};
 
-export default ProceduralShapes
+export default ProceduralShapes;

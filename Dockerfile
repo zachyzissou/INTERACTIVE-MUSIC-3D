@@ -4,14 +4,14 @@
 FROM node:18-alpine AS deps
 WORKDIR /app
 COPY package.json package-lock.json .npmrc ./
-RUN npm ci --production
+RUN npm ci
 
 # 2. Build assets
 FROM node:18-alpine AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-RUN npm run build
+RUN npm run build && npm prune --production
 
 # 3. Run the Next.js app
 FROM node:18-alpine AS runner
