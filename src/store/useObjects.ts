@@ -38,6 +38,9 @@ export const useObjects = create<ObjectState>((set, get) => ({
         ] as [number, number, number]),
     }
     set({ objects: [...get().objects, newObj] })
+    if (typeof window !== 'undefined') {
+      ;(window as any).__objects__ = get().objects
+    }
     addBody(id, newObj.position)
     return id
   },
