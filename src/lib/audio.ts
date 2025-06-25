@@ -1,6 +1,5 @@
 // src/lib/audio.ts
-import * as Tone from 'tone'
-import {
+import type {
   Chorus,
   FeedbackDelay,
   Reverb,
@@ -8,6 +7,13 @@ import {
   BitCrusher,
   AutoFilter,
   ToneAudioNode,
+  Synth,
+  PolySynth,
+  MembraneSynth,
+  Meter,
+  Volume,
+  Filter,
+  Loop,
 } from 'tone'
 import { useAudioSettings } from '../store/useAudioSettings'
 import { useEffectSettings, defaultEffectParams, EffectParams } from '../store/useEffectSettings'
@@ -26,18 +32,38 @@ import {
   BEAT_SUSTAIN,
   BEAT_RELEASE,
 } from '../config/constants'
+
+import type * as ToneType from 'tone'
+let Tone: typeof ToneType | null = null
+
+async function ensureTone() {
+  if (!Tone) {
+    Tone = await import('tone')
+  }
+  return Tone!
+}
+
+export function getTone() {
+  return Tone
+}
 // Synth instances (initialized once)
-let noteSynth: Tone.Synth
-let chordSynth: Tone.PolySynth
-let beatSynth: Tone.MembraneSynth
+let noteSynth: Synth
+let chordSynth: PolySynth
+let beatSynth: MembraneSynth
 // Flag indicating if synthesis nodes have been created yet.
 // This stays false until a user gesture triggers Tone.start().
 let audioInitialized = false
+const audioEvents = new EventTarget()
 
 export function isAudioInitialized() {
   return audioInitialized
 }
-let masterVolumeNode: Tone.Volume
+
+export function onAudioInit(cb: () => void) {
+  audioEvents.addEventListener('init', cb)
+  return () => audioEvents.removeEventListener('init', cb)
+}
+let masterVolumeNode: Volume
 
 let chorus: Chorus
 let delay: FeedbackDelay
@@ -47,14 +73,15 @@ let distortion: Distortion
 let bitcrusher: BitCrusher
 export let masterChain: ToneAudioNode
 
-function initEffects() {
+async function initEffects() {
   if (chorus) return
-  chorus = new Chorus({ frequency: 1.5, delayTime: 3.5, depth: 0.7, feedback: 0.2 }).toDestination()
-  delay = new FeedbackDelay({ delayTime: '8n', feedback: 0.4, wet: 0.5 }).connect(chorus)
-  reverb = new Reverb({ decay: 3, preDelay: 0.01, wet: 0.5 }).connect(delay)
-  filter = new AutoFilter({ frequency: 0.5, depth: 0.7, baseFrequency: 200, octaves: 2 }).connect(reverb)
-  distortion = new Distortion({ distortion: 0.4, wet: 0.3 }).connect(filter)
-  bitcrusher = new BitCrusher(4).connect(distortion)
+  const Tone = await ensureTone()
+  chorus = new Tone.Chorus({ frequency: 1.5, delayTime: 3.5, depth: 0.7, feedback: 0.2 }).toDestination()
+  delay = new Tone.FeedbackDelay({ delayTime: '8n', feedback: 0.4, wet: 0.5 }).connect(chorus)
+  reverb = new Tone.Reverb({ decay: 3, preDelay: 0.01, wet: 0.5 }).connect(delay)
+  filter = new Tone.AutoFilter({ frequency: 0.5, depth: 0.7, baseFrequency: 200, octaves: 2 }).connect(reverb)
+  distortion = new Tone.Distortion({ distortion: 0.4, wet: 0.3 }).connect(filter)
+  bitcrusher = new Tone.BitCrusher(4).connect(distortion)
   bitcrusher.wet.value = 0.3
   masterChain = bitcrusher
   if (typeof window !== 'undefined') {
@@ -63,18 +90,18 @@ function initEffects() {
 }
 interface ObjectAudio {
   type: ObjectType
-  synth: Tone.Synth | Tone.PolySynth | Tone.MembraneSynth
+  synth: Synth | PolySynth | MembraneSynth
   chain: EffectChain
-  meter: Tone.Meter
+  meter: Meter
   panner: PannerNode
 }
 const objectSynths = new Map<string, ObjectAudio>()
 
 interface EffectChain {
-  hp: Tone.Filter
-  lp: Tone.Filter
-  delay: Tone.FeedbackDelay
-  reverb: Tone.Reverb
+  hp: Filter
+  lp: Filter
+  delay: FeedbackDelay
+  reverb: Reverb
 }
 
 /**
@@ -82,8 +109,11 @@ interface EffectChain {
  * Calls Tone.start(), then creates and configures synths.
  */
 async function initAudioEngine() {
+  const Tone = await ensureTone()
   if (audioInitialized) return
-  initEffects()
+  await Tone.start()
+  await Tone.getContext().resume()
+  await initEffects()
   masterVolumeNode = new Tone.Volume({ volume: 0 }).connect(masterChain)
   masterVolumeNode.volume.value = useAudioSettings.getState().volume * 100 - 100
   // Single-note synth
@@ -103,6 +133,7 @@ async function initAudioEngine() {
   beatSynth.envelope.sustain = BEAT_SUSTAIN
   beatSynth.envelope.release = BEAT_RELEASE
   audioInitialized = true
+  audioEvents.dispatchEvent(new Event('init'))
 }
 
 function keyOffset(key: string): number {
@@ -111,10 +142,12 @@ function keyOffset(key: string): number {
 }
 
 function transpose(note: string, key: string) {
-  return Tone.Frequency(note).transpose(keyOffset(key)).toNote()
+  const Tone = getTone()
+  return Tone ? Tone.Frequency(note).transpose(keyOffset(key)).toNote() : note
 }
 
 function createChain(): EffectChain {
+  const Tone = getTone()!
   const hp = new Tone.Filter({ frequency: 0, type: 'highpass' })
   const lp = new Tone.Filter({ frequency: 20000, type: 'lowpass' })
   const delay = new Tone.FeedbackDelay({ delayTime: '8n', feedback: 0.5 })
@@ -126,14 +159,15 @@ function createChain(): EffectChain {
 }
 
 function getObjectSynth(id: string, type: ObjectType) {
+  const Tone = getTone()!
   let os = objectSynths.get(id)
   if (!os) {
     const chain = createChain()
-    let synth: Tone.Synth | Tone.PolySynth | Tone.MembraneSynth
-    if (type === 'chord') synth = new Tone.PolySynth({ voice: Tone.Synth })
-    else if (type === 'beat') synth = new Tone.MembraneSynth()
-    else synth = new Tone.Synth()
-    const meter = new Tone.Meter({ normalRange: true, smoothing: 0.8 })
+  let synth: Synth | PolySynth | MembraneSynth
+  if (type === 'chord') synth = new Tone.PolySynth({ voice: Tone.Synth })
+  else if (type === 'beat') synth = new Tone.MembraneSynth()
+  else synth = new Tone.Synth()
+  const meter = new Tone.Meter({ normalRange: true, smoothing: 0.8 })
     const ctx = Tone.getContext().rawContext
     const panner = ctx.createPanner()
     panner.panningModel = 'HRTF'
@@ -152,7 +186,7 @@ function getObjectSynth(id: string, type: ObjectType) {
 }
 
 // Meters and panners are created on demand after audio init.
-export function getObjectMeter(id: string): Tone.Meter | null {
+export function getObjectMeter(id: string): Meter | null {
   if (!audioInitialized) return null
   return objectSynths.get(id)?.meter ?? null
 }
@@ -180,7 +214,8 @@ export async function playNote(id: string, note: string = 'C4') {
   const os = getObjectSynth(id, 'note')
   const params = useEffectSettings.getState().getParams(id)
   applyParams(os.chain, params)
-  ;(os.synth as Tone.Synth).triggerAttackRelease(finalNote, '8n', Tone.now() + 0.01)
+  const Tone = getTone()!
+  ;(os.synth as Synth).triggerAttackRelease(finalNote, '8n', Tone.now() + 0.01)
 }
 
 /**
@@ -193,7 +228,8 @@ export async function playChord(id: string, notes: string[] = ['C4', 'E4', 'G4']
   const os = getObjectSynth(id, 'chord')
   const params = useEffectSettings.getState().getParams(id)
   applyParams(os.chain, params)
-  ;(os.synth as Tone.PolySynth).triggerAttackRelease(final, '4n', Tone.now() + 0.01)
+  const Tone = getTone()!
+  ;(os.synth as PolySynth).triggerAttackRelease(final, '4n', Tone.now() + 0.01)
 }
 
 /**
@@ -207,7 +243,8 @@ export async function playBeat(id: string) {
   const os = getObjectSynth(id, 'beat')
   const params = useEffectSettings.getState().getParams(id)
   applyParams(os.chain, params)
-  ;(os.synth as Tone.MembraneSynth).triggerAttackRelease(note, '8n', Tone.now() + 0.01)
+  const Tone = getTone()!
+  ;(os.synth as MembraneSynth).triggerAttackRelease(note, '8n', Tone.now() + 0.01)
 }
 
 /**
@@ -219,24 +256,24 @@ export async function setMasterVolume(vol: number) {
   masterVolumeNode.volume.value = vol * 100 - 100
 }
 
-export function setChorusDepth(v: number) {
-  initEffects()
+export async function setChorusDepth(v: number) {
+  await initEffects()
   chorus.depth = v
 }
-export function setReverbWet(v: number) {
-  initEffects()
+export async function setReverbWet(v: number) {
+  await initEffects()
   reverb.wet.value = v
 }
-export function setDelayFeedback(v: number) {
-  initEffects()
+export async function setDelayFeedback(v: number) {
+  await initEffects()
   delay.feedback.value = v
 }
-export function setBitcrusherBits(v: number) {
-  initEffects()
+export async function setBitcrusherBits(v: number) {
+  await initEffects()
   bitcrusher.set({ bits: v })
 }
-export function setFilterFrequency(v: number) {
-  initEffects()
+export async function setFilterFrequency(v: number) {
+  await initEffects()
   filter.baseFrequency = v
 }
 
@@ -247,6 +284,7 @@ export async function startNote(note: string = 'C4') {
   await initAudioEngine()
   const { key } = useAudioSettings.getState()
   const finalNote = transpose(note, key)
+  const Tone = getTone()!
   noteSynth.triggerAttackRelease(finalNote, '1n', Tone.now())
 }
 
@@ -255,12 +293,13 @@ export async function startNote(note: string = 'C4') {
  */
 export function stopNote() {
   if (noteSynth) {
+    const Tone = getTone()!
     noteSynth.triggerRelease(Tone.now() + 0.01)
   }
 }
 
 interface LoopInfo {
-  loop: Tone.Loop
+  loop: Loop
   start: number
   duration: number
 }
@@ -270,6 +309,7 @@ const loops = new Map<string, LoopInfo>()
 export function getLoopProgress(id: string): number {
   const info = loops.get(id)
   if (!info) return 0
+  const Tone = getTone()!
   const now = Tone.Transport.seconds
   const elapsed = (now - info.start) % info.duration
   return elapsed / info.duration
@@ -279,6 +319,7 @@ export async function startLoop(id: string, interval: string = '1m') {
   await initAudioEngine()
   if (loops.has(id)) return
   const bpm = useAudioSettings.getState().bpm
+  const Tone = getTone()!
   Tone.Transport.bpm.value = bpm
   const dur = Tone.Time(interval).toSeconds()
   const start = Tone.Transport.seconds
@@ -293,6 +334,7 @@ export async function startLoop(id: string, interval: string = '1m') {
 export function stopLoop(id: string) {
   const info = loops.get(id)
   if (info) {
+    const Tone = getTone()!
     info.loop.stop()
     info.loop.dispose()
     loops.delete(id)

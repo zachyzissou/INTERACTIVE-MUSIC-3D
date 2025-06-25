@@ -67,9 +67,13 @@ const SceneCanvas: React.FC = () => {
 
   useEffect(() => {
     initPhysics()
-    startNote()
-    const timer = setTimeout(() => stopNote(), 2000)
-    return () => clearTimeout(timer)
+    const start = async () => {
+      window.removeEventListener('pointerdown', start)
+      await startNote()
+      setTimeout(() => stopNote(), 2000)
+    }
+    window.addEventListener('pointerdown', start, { once: true })
+    return () => window.removeEventListener('pointerdown', start)
   }, [])
 
   const clamp = useCallback(

@@ -6,8 +6,8 @@ import { RigidBody, RigidBodyApi } from '@react-three/rapier'
 import { useFrame, useThree } from '@react-three/fiber'
 import { useSpring, a } from '@react-spring/three'
 import * as THREE from 'three'
-import * as Tone from 'tone'
 import { getObjectMeter, getObjectPanner } from '../lib/audio'
+import type { Meter } from 'tone'
 import { triggerSound } from '../lib/soundTriggers'
 import { ObjectType } from '../store/useObjects'
 import { objectConfigs } from '../config/objectTypes'
@@ -36,7 +36,7 @@ export const SingleMusicalObject: React.FC<MusicalObjectProps> = ({ id, type, po
   const plane = useMemo(() => new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), [])
   const intersectPoint = useMemo(() => new THREE.Vector3(), [])
 
-  const meterRef = useRef<Tone.Meter | null>(null)
+  const meterRef = useRef<Meter | null>(null)
   const pannerRef = useRef<PannerNode | null>(null)
 
   useFrame(() => {
@@ -95,9 +95,6 @@ export const SingleMusicalObject: React.FC<MusicalObjectProps> = ({ id, type, po
     async (e: any) => {
       e.stopPropagation()
       if (!moved) select(id)
-      await Tone.start()
-      await Tone.getContext().resume()
-      // First user interaction initializes audio and creates nodes
       await triggerSound(type, id)
       meterRef.current = getObjectMeter(id)
       pannerRef.current = getObjectPanner(id)

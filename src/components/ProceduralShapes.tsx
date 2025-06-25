@@ -32,8 +32,11 @@ const ProceduralShapes: React.FC = () => {
   const prevLevel = useRef(0);
 
   useEffect(() => {
-    analyserRef.current = getAnalyser();
-    dataRef.current = new Uint8Array(analyserRef.current.frequencyBinCount);
+    const analyser = getAnalyser();
+    if (analyser) {
+      analyserRef.current = analyser;
+      dataRef.current = new Uint8Array(analyser.frequencyBinCount);
+    }
   }, []);
 
   useEffect(() => {

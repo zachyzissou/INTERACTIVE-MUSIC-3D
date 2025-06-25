@@ -2,17 +2,19 @@
 import React, { useEffect, useRef, useState } from "react";
 import { motion } from "@motionone/react";
 import Knob from "./JSAudioKnobs";
-import * as Tone from "tone";
+import type * as ToneType from "tone";
+import { getTone, playNote, playChord, playBeat, isAudioInitialized, onAudioInit } from "@/lib/audio";
 import { useEffectSettings, defaultEffectParams } from "@/store/useEffectSettings";
 import { ObjectType } from "@/store/useObjects";
 import { useAudioSettings } from "@/store/useAudioSettings";
-import { playNote, playChord, playBeat } from "@/lib/audio";
 
 interface Props { objectId: string; type: ObjectType; }
 
 const stepsArray = new Array(16).fill(false);
 
 function chordNotes(root: string, type: string) {
+  const Tone = getTone() as typeof ToneType | null
+  if (!Tone) return [root]
   const base = Tone.Frequency(root);
   const intervals = type === "minor" ? [0, 3, 7] : type === "dim" ? [0, 3, 6] : [0, 4, 7];
   return intervals.map((i) => base.transpose(i).toNote());
@@ -22,16 +24,24 @@ const SoundInspector: React.FC<Props> = ({ objectId, type }) => {
   const params = useEffectSettings((s) => s.effects[objectId] || defaultEffectParams);
   const setEffect = useEffectSettings((s) => s.setEffect);
   const [steps, setSteps] = useState<boolean[]>(stepsArray);
-  const seqRef = useRef<Tone.Sequence | null>(null);
+  const seqRef = useRef<ToneType.Sequence | null>(null);
   const [pitch, setPitch] = useState("C4");
   const [chordType, setChordType] = useState("major");
   const bpm = useAudioSettings((s) => s.bpm);
+  const [audioReady, setAudioReady] = useState(isAudioInitialized());
+
+  useEffect(() => onAudioInit(() => setAudioReady(true)), []);
 
   useEffect(() => {
-    Tone.Transport.bpm.value = bpm;
-  }, [bpm]);
+    if (audioReady) {
+      const Tone = getTone()!
+      Tone.Transport.bpm.value = bpm
+    }
+  }, [bpm, audioReady])
 
   useEffect(() => {
+    if (!audioReady) return;
+    const Tone = getTone()!
     seqRef.current?.dispose();
     const callback = (_time: number, step: boolean) => {
       if (!step) return;
@@ -46,7 +56,7 @@ const SoundInspector: React.FC<Props> = ({ objectId, type }) => {
     return () => {
       seq.dispose();
     };
-  }, [steps, pitch, chordType, type, objectId]);
+  }, [steps, pitch, chordType, type, objectId, audioReady]);
 
   const toggleStep = (i: number) => {
     const arr = [...steps];
