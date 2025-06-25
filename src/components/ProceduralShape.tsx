@@ -4,23 +4,32 @@ import { useFrame } from '@react-three/fiber'
 import { Billboard } from '@react-three/drei'
 import * as THREE from 'three'
 import { ObjectType, objectConfigs } from '../config/objectTypes'
-import { getAnalyser, getFrequencyBands } from '../lib/analyser'
+import { getAnalyserBands } from '../lib/analyser'
+const distortGLSL = `
+float distort(vec3 p, float t, float bass, float mid, float high, float harmonics){
+  float d = sin(p.x*8.0 + t)*bass*0.2;
+  d += sin(p.y*12.0 + t*1.5)*mid*0.15;
+  d += sin(p.z*15.0 + t*2.0)*high*0.1*harmonics;
+  return d;
+}`
 import { PLANE_SIZE } from '../config/constants'
 
 interface ProceduralShapeProps {
   type: ObjectType
+  seed?: number
+  harmonics?: number
 }
 
-const ProceduralShape: React.FC<ProceduralShapeProps> = ({ type }) => {
+const ProceduralShape: React.FC<ProceduralShapeProps> = ({ type, seed = 0, harmonics = 1 }) => {
   const mat = useRef<THREE.ShaderMaterial>(null!)
 
   useEffect(() => {
-    getAnalyser()
+    getAnalyserBands()
   }, [])
 
   useFrame(({ clock }) => {
     if (!mat.current) return
-    const { low, mid, high } = getFrequencyBands()
+    const { bass: low, mid, treble: high } = getAnalyserBands()
     mat.current.uniforms.uBass.value = low
     mat.current.uniforms.uMid.value = mid
     mat.current.uniforms.uHigh.value = high
@@ -46,13 +55,23 @@ const ProceduralShape: React.FC<ProceduralShapeProps> = ({ type }) => {
             uAudio: { value: 0 },
             uColor: { value: color },
             uType: { value: shapeType },
+            uSeed: { value: seed },
+            uHarmonics: { value: harmonics },
           }}
           vertexShader={`
             varying vec2 vUv;
             uniform float uAudio;
+            uniform float uTime;
+            uniform float uBass;
+            uniform float uMid;
+            uniform float uHigh;
+            uniform float uHarmonics;
+            ${distortGLSL}
             void main(){
               vUv = uv;
-              vec3 pos = position + normal * uAudio * 0.1;
+              vec3 pos = position;
+              pos += normal * distort(position, uTime, uBass, uMid, uHigh, uHarmonics);
+              pos += normal * uAudio * 0.1;
               gl_Position = projectionMatrix * modelViewMatrix * vec4(pos,1.0);
             }
           `}

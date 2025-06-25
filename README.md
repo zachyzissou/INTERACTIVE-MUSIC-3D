@@ -19,6 +19,8 @@ Spawn, select and sculpt floating shapes that generate notes, chords, beats or l
 - **Per-shape Audio**
   - First click → `Tone.start()` (user gesture handshake) + confirmation ping.
   - Click shape → triggers its note/chord/beat/loop.
+- **Installable PWA** — add to home screen for offline access.
+- **Startup Performance Selector** — choose Low/Balanced/High GPU mode.
 - **Audio-reactive Shaders** — shapes pulse and ripple in sync with FFT levels.
 - **Responsive Canvas** — camera and renderer resize with the window.
 - **Global Audio Engine**  
@@ -54,11 +56,13 @@ Spawn, select and sculpt floating shapes that generate notes, chords, beats or l
     npm run dev
     # → http://localhost:3000
     ```
-4. **Production build**  
+4. **Production build**
     ```bash
     npm run build
     npm run start
     ```
+5. **Install as PWA**
+    - Open the site and choose "Add to Home Screen" when prompted.
 
 ---
 
@@ -73,7 +77,8 @@ Spawn, select and sculpt floating shapes that generate notes, chords, beats or l
     2. **Simple/Advanced** toggle
     3. **Performance** preset dropdown
     4. **Knobs** instantly update audio & visuals
-       - **Bitcrusher** bits/rate  
+       - **Bitcrusher** bits/rate
+  - Quality prompt appears on first visit allowing GPU mode selection.
 - **3D Scene**  
   - Left-click a shape to select & play.  
   - Drag to move it around.

@@ -4,7 +4,7 @@ import React, { useRef, useEffect } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import { OrthographicCamera } from '@react-three/drei'
 import * as THREE from 'three'
-import { getAnalyser, getFrequencyDataArray, getFrequencyTexture, getFrequencyBands } from '../lib/analyser'
+import { getAnalyser, getFrequencyDataArray, getFrequencyTexture, getAnalyserBands } from '../lib/analyser'
 
 const AudioVisualizer: React.FC = () => {
   const { viewport } = useThree()
@@ -21,7 +21,7 @@ const AudioVisualizer: React.FC = () => {
   useFrame(({ clock }) => {
     const texture = textureRef.current
     if (texture && materialRef.current) {
-      getFrequencyBands()
+      getAnalyserBands()
       materialRef.current.uniforms.uTime.value = clock.getElapsedTime()
       materialRef.current.uniforms.uFreqTex.value = texture
     }

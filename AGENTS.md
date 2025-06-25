@@ -38,6 +38,8 @@ Our single AI agent serves as a **full-stack pair programmer**, capable of:
 * **Shape System**: Managing scalable, instanced meshes, base scaling, interactive feedback.
 * **Physics & Input**: Integrating Rapier physics, drag controls, spring interactions, spatial audio panning.
 * **Performance & Mobile**: Applying adaptive DPR, LOD, merging, conditional features for mobile.
+* **Progressive Enhancement**: Detect hardware and scale visuals accordingly.
+* **PWA Integration**: Handle offline manifest, install flow, localStorage.
 * **CI/CD & Validation**: Maintaining Dockerfile, GitHub Actions workflows, and build/test pipelines.
 * **Documentation**: Updating README, agent.md, and inline code comments.
 
@@ -96,6 +98,26 @@ Task: Procedural 3D Button and HUD Panel
    - Use `<Html>` from drei for sliders and selectors.
 
 3. Update `src/styles/hud.module.css` with minimalist glassmorphic styling.
+```
+
+### UI Fusion
+```
+Task: Shape spawn from button, morph-on-click
+```
+
+### Audio Shapes
+```
+Task: Shape sound synthesis + visual attributes
+```
+
+### PWA Support
+```
+Task: Manifest, meta, install logic
+```
+
+### GPU Modes
+```
+Task: Startup selector for shader complexity
 ```
 
 ### Audio / Visualizers
