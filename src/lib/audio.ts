@@ -30,7 +30,13 @@ import {
 let noteSynth: Tone.Synth
 let chordSynth: Tone.PolySynth
 let beatSynth: Tone.MembraneSynth
+// Flag indicating if synthesis nodes have been created yet.
+// This stays false until a user gesture triggers Tone.start().
 let audioInitialized = false
+
+export function isAudioInitialized() {
+  return audioInitialized
+}
 let masterVolumeNode: Tone.Volume
 
 let chorus: Chorus
@@ -145,11 +151,14 @@ function getObjectSynth(id: string, type: ObjectType) {
   return os
 }
 
+// Meters and panners are created on demand after audio init.
 export function getObjectMeter(id: string): Tone.Meter | null {
+  if (!audioInitialized) return null
   return objectSynths.get(id)?.meter ?? null
 }
 
 export function getObjectPanner(id: string): PannerNode | null {
+  if (!audioInitialized) return null
   return objectSynths.get(id)?.panner ?? null
 }
 
