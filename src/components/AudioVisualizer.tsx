@@ -14,8 +14,10 @@ const AudioVisualizer: React.FC = () => {
   const materialRef = useRef<THREE.ShaderMaterial | null>(null)
 
   useEffect(() => {
-    getAnalyser()
-    textureRef.current = getFrequencyTexture()
+    const analyser = getAnalyser()
+    if (analyser) {
+      textureRef.current = getFrequencyTexture()
+    }
   }, [])
 
   useFrame(({ clock }) => {

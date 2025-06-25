@@ -33,9 +33,15 @@ let beatSynth: Tone.MembraneSynth
 // Flag indicating if synthesis nodes have been created yet.
 // This stays false until a user gesture triggers Tone.start().
 let audioInitialized = false
+const audioEvents = new EventTarget()
 
 export function isAudioInitialized() {
   return audioInitialized
+}
+
+export function onAudioInit(cb: () => void) {
+  audioEvents.addEventListener('init', cb)
+  return () => audioEvents.removeEventListener('init', cb)
 }
 let masterVolumeNode: Tone.Volume
 
@@ -103,6 +109,7 @@ async function initAudioEngine() {
   beatSynth.envelope.sustain = BEAT_SUSTAIN
   beatSynth.envelope.release = BEAT_RELEASE
   audioInitialized = true
+  audioEvents.dispatchEvent(new Event('init'))
 }
 
 function keyOffset(key: string): number {
