@@ -1,6 +1,5 @@
-import * as Tone from 'tone'
 import * as THREE from 'three'
-import { isAudioInitialized } from './audio'
+import { isAudioInitialized, getTone } from './audio'
 
 let analyser: AnalyserNode | null = null
 let dataArray: Uint8Array | null = null
@@ -9,6 +8,7 @@ let texture: THREE.DataTexture | null = null
 export function getAnalyser() {
   if (!analyser) {
     if (!isAudioInitialized()) return null
+    const Tone = getTone()!
     const ctx = Tone.getContext()
     analyser = ctx.rawContext.createAnalyser()
     analyser.fftSize = 512

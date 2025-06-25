@@ -5,7 +5,7 @@ import * as THREE from 'three'
 import { useObjects } from '@/store/useObjects'
 import { useSelectedShape } from '@/store/useSelectedShape'
 import { triggerSound } from '@/lib/soundTriggers'
-import * as Tone from 'tone'
+import { startNote } from '@/lib/audio'
 
 /**
  * 3D plus button that morphs into a sphere when clicked.
@@ -64,8 +64,7 @@ export default function SpawnMeshButton() {
 
   const handleClick = async () => {
     if (animating) return
-    await Tone.start()
-    await Tone.getContext().resume()
+    await startNote('C5')
     setAnimating(true)
   }
 
