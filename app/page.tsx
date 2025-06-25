@@ -4,18 +4,14 @@ import { Physics } from "@react-three/rapier";
 import { PerspectiveCamera, AdaptiveDpr } from "@react-three/drei";
 import MusicalObject from "@/components/MusicalObject";
 import BottomDrawer from "@/components/BottomDrawer";
-import SoundInspector from "@/components/SoundInspector";
-import { useEffectSettings } from "@/store/useEffectSettings";
-import { useObjects } from "@/store/useObjects";
+import { useSelectedShape } from "@/store/useSelectedShape";
 import ExampleModal from "@/components/ExampleModal";
 import { useEffect } from "react";
 import * as Tone from "tone";
 import { playNote } from "@/lib/audio";
 
 export default function Home() {
-  const selected = useEffectSettings((s) => s.selected);
-  const objects = useObjects((s) => s.objects);
-  const objType = objects.find((o) => o.id === selected)?.type;
+  const selected = useSelectedShape((s) => s.selected);
 
   useEffect(() => {
     const start = async () => {
@@ -30,20 +26,19 @@ export default function Home() {
 
   return (
     <>
-      <Canvas className="fixed inset-0 w-screen h-screen" shadows>
-        <AdaptiveDpr pixelated />
-        <Physics>
-          <PerspectiveCamera makeDefault fov={50} position={[0, 5, 10]} />
-          <ambientLight intensity={0.4} />
-          <directionalLight position={[5, 10, 5]} intensity={0.8} castShadow />
-          <pointLight position={[0, 5, -5]} intensity={0.5} />
-          <MusicalObject />
-        </Physics>
-      </Canvas>
+      <div className="w-screen h-screen">
+        <Canvas className="w-full h-full" shadows>
+          <AdaptiveDpr pixelated />
+          <Physics>
+            <PerspectiveCamera makeDefault fov={50} position={[0, 5, 10]} />
+            <ambientLight intensity={0.4} />
+            <directionalLight position={[5, 10, 5]} intensity={0.8} castShadow />
+            <pointLight position={[0, 5, -5]} intensity={0.5} />
+            <MusicalObject />
+          </Physics>
+        </Canvas>
+      </div>
       <ExampleModal />
-      {selected && objType && (
-        <SoundInspector objectId={selected} type={objType} />
-      )}
       <BottomDrawer />
     </>
   );

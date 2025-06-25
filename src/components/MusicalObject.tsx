@@ -2,12 +2,10 @@
 // src/components/MusicalObject.tsx
 import React, { useMemo } from 'react'
 import { Instances, Instance } from '@react-three/drei'
-import { AnimatePresence } from 'framer-motion'
 import { objectConfigs, objectTypes, ObjectType } from '../config/objectTypes'
 import { useObjects, MusicalObject as Obj } from '../store/useObjects'
 import ShapeFactory from './ShapeFactory'
-import EffectPanel from "./EffectPanel"
-import { useEffectSettings } from '../store/useEffectSettings'
+import { useSelectedShape } from '../store/useSelectedShape'
 import { usePhysicsStore } from '../lib/physics'
 import * as Tone from 'tone'
 import * as THREE from 'three'
@@ -31,8 +29,8 @@ const MusicalObjectInstances: React.FC = () => {
   const objects = useObjects((s) => s.objects)
   const grouped = useMemo(() => groupByType(objects), [objects])
   const transforms = usePhysicsStore((s) => s.transforms)
-  const select = useEffectSettings((s) => s.select)
-  const selected = useEffectSettings((s) => s.selected)
+  const select = useSelectedShape((s) => s.selectShape)
+  const selected = useSelectedShape((s) => s.selected)
 
   return (
     <>
@@ -70,14 +68,7 @@ const MusicalObjectInstances: React.FC = () => {
           </Instances>
         )
       })}
-      <AnimatePresence>
-        {selected && transforms[selected] && (
-          <EffectPanel
-            objectId={selected}
-            position={transforms[selected].position as [number, number, number]}
-          />
-        )}
-      </AnimatePresence>
+      {/* EffectPanel removed - Drawer handles UI */}
     </>
   )
 }

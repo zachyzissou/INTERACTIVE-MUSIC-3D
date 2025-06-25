@@ -12,9 +12,7 @@ import { triggerSound } from '../lib/soundTriggers'
 import { ObjectType } from '../store/useObjects'
 import { objectConfigs } from '../config/objectTypes'
 import ProceduralShape from './ProceduralShape'
-import { AnimatePresence } from 'framer-motion'
-import { useEffectSettings } from '../store/useEffectSettings'
-import EffectPanel from './EffectPanel'
+import { useSelectedShape } from '../store/useSelectedShape'
 
 // Props interface for MusicalObject component
 interface MusicalObjectProps {
@@ -32,8 +30,8 @@ export const SingleMusicalObject: React.FC<MusicalObjectProps> = ({ id, type, po
   // dragging state
   const [dragging, setDragging] = useState(false)
   const [moved, setMoved] = useState(false)
-  const select = useEffectSettings((s) => s.select)
-  const selected = useEffectSettings((s) => s.selected)
+  const select = useSelectedShape((s) => s.selectShape)
+  const selected = useSelectedShape((s) => s.selected)
   const { raycaster, mouse, camera } = useThree()
   const plane = useMemo(() => new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), [])
   const intersectPoint = useMemo(() => new THREE.Vector3(), [])
@@ -118,11 +116,6 @@ export const SingleMusicalObject: React.FC<MusicalObjectProps> = ({ id, type, po
         onPointerMissed={() => setDragging(false)}
       >
         <ProceduralShape type={type} />
-        <AnimatePresence>
-          {selected === id && (
-            <EffectPanel objectId={id} position={[0, 1, 0]} />
-          )}
-        </AnimatePresence>
       </a.group>
     </RigidBody>
   )
