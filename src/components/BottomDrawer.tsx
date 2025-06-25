@@ -1,5 +1,5 @@
 'use client'
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import { motion } from '@motionone/react'
 import { useObjects } from '@/store/useObjects'
 import { useAudioSettings } from '@/store/useAudioSettings'
@@ -33,19 +33,17 @@ export default function BottomDrawer() {
   const { setEffect, getParams } = useEffectSettings()
   const params = selected ? getParams(selected) : null
 
-  const spawnShape = () => {
+  const spawnShape = useCallback(() => {
     const id = spawn('note')
     selectShape(id)
     triggerSound('note', id)
-  }
+  }, [spawn, selectShape])
 
-  const togglePlay = () => {
+  const togglePlay = useCallback(() => {
     if (!selected) return
-    const target = objects.find(o => o.id === selected)
+    const target = objects.find((o) => o.id === selected)
     if (!target) return
     if (playing && target.type === 'loop') {
-      // stopLoop is defined in audio.ts
-      // dynamic import to avoid circular
       const { stopLoop } = require('@/lib/audio')
       stopLoop(selected)
       setPlaying(false)
@@ -53,7 +51,7 @@ export default function BottomDrawer() {
       triggerSound(mode, selected)
       setPlaying(true)
     }
-  }
+  }, [selected, objects, playing, mode])
 
   const drawerClosedY = 120
   return (

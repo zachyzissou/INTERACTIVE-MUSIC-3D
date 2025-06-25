@@ -1,5 +1,5 @@
 'use client'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState, useCallback } from 'react'
 import { Canvas, useThree, useFrame } from '@react-three/fiber'
 import { Physics } from '@react-three/rapier'
 import { AdaptiveDpr } from '@react-three/drei'
@@ -73,45 +73,60 @@ const SceneCanvas: React.FC = () => {
     return () => clearTimeout(timer)
   }, [])
 
+  const clamp = useCallback(
+    (val: number, min: number, max: number) =>
+      Math.min(max, Math.max(min, val)),
+    []
+  )
+
+  const handleWheel = useCallback(
+    (e: WheelEvent) => {
+      e.preventDefault()
+      setFov((f) => clamp(f + e.deltaY * 0.05, FOV_MIN, FOV_MAX))
+    },
+    [clamp]
+  )
+
+  const pointers = useRef(new Map<number, PointerEvent>())
+  const baseDist = useRef(0)
+
+  const handlePointerDown = useCallback((e: PointerEvent) => {
+    pointers.current.set(e.pointerId, e)
+    if (pointers.current.size === 2) {
+      const [a, b] = Array.from(pointers.current.values())
+      baseDist.current = Math.hypot(
+        a.clientX - b.clientX,
+        a.clientY - b.clientY
+      )
+    }
+  }, [])
+
+  const handlePointerMove = useCallback(
+    (e: PointerEvent) => {
+      if (!pointers.current.has(e.pointerId)) return
+      pointers.current.set(e.pointerId, e)
+      if (pointers.current.size === 2 && baseDist.current) {
+        const [a, b] = Array.from(pointers.current.values())
+        const dist = Math.hypot(
+          a.clientX - b.clientX,
+          a.clientY - b.clientY
+        )
+        const diff = baseDist.current - dist
+        setFov((f) => clamp(f + diff * 0.1, FOV_MIN, FOV_MAX))
+        baseDist.current = dist
+      }
+    },
+    [clamp]
+  )
+
+  const handlePointerUp = useCallback((e: PointerEvent) => {
+    pointers.current.delete(e.pointerId)
+    if (pointers.current.size < 2) baseDist.current = 0
+  }, [])
+
   useEffect(() => {
     const container = containerRef.current
     if (!container) return
-
-    const clamp = (val: number, min: number, max: number) =>
-      Math.min(max, Math.max(min, val))
-
-    const handleWheel = (e: WheelEvent) => {
-      e.preventDefault()
-      setFov((f) => clamp(f + e.deltaY * 0.05, FOV_MIN, FOV_MAX))
-    }
-
-    const pointers = new Map<number, PointerEvent>()
-    let base = 0
-
-    const handlePointerDown = (e: PointerEvent) => {
-      pointers.set(e.pointerId, e)
-      if (pointers.size === 2) {
-        const [a, b] = Array.from(pointers.values())
-        base = Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY)
-      }
-    }
-
-    const handlePointerMove = (e: PointerEvent) => {
-      if (!pointers.has(e.pointerId)) return
-      pointers.set(e.pointerId, e)
-      if (pointers.size === 2 && base) {
-        const [a, b] = Array.from(pointers.values())
-        const dist = Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY)
-        const diff = base - dist
-        setFov((f) => clamp(f + diff * 0.1, FOV_MIN, FOV_MAX))
-        base = dist
-      }
-    }
-
-    const handlePointerUp = (e: PointerEvent) => {
-      pointers.delete(e.pointerId)
-      if (pointers.size < 2) base = 0
-    }
 
     container.addEventListener('wheel', handleWheel, { passive: false })
     container.addEventListener('pointerdown', handlePointerDown)
@@ -126,7 +141,7 @@ const SceneCanvas: React.FC = () => {
       container.removeEventListener('pointerup', handlePointerUp)
       container.removeEventListener('pointercancel', handlePointerUp)
     }
-  }, [])
+  }, [handleWheel, handlePointerDown, handlePointerMove, handlePointerUp])
 
   return (
     <div ref={containerRef} style={{ width: '100vw', height: '100vh' }}>

@@ -1,6 +1,6 @@
 'use client'
 // src/components/PortalRing.tsx
-import React, { useRef } from 'react'
+import React, { useRef, useCallback } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { Float } from '@react-three/drei'
 import type { Mesh } from 'three'
@@ -64,15 +64,18 @@ const PortalRing: React.FC = () => {
   const { groupRef, getPosition } = usePortalRing(portalConfigs.length)
 
   // debounce click interval
-  let lastClick = 0
-  const handlePortalClick = async (note: string) => {
-    const now = performance.now()
-    if (now - lastClick < 50) return
-    lastClick = now
-    await Tone.start()
-    await Tone.getContext().resume()
-    await playNote(note)
-  }
+  const lastClick = useRef(0)
+  const handlePortalClick = useCallback(
+    async (note: string) => {
+      const now = performance.now()
+      if (now - lastClick.current < 50) return
+      lastClick.current = now
+      await Tone.start()
+      await Tone.getContext().resume()
+      await playNote(note)
+    },
+    []
+  )
 
   return (
     <group ref={groupRef}>

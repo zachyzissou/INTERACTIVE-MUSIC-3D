@@ -1,5 +1,5 @@
 'use client'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useCallback } from 'react'
 import { motion } from '@motionone/react'
 import { useObjects } from '../store/useObjects'
 import { objectTypes, objectConfigs } from '../config/objectTypes'
@@ -21,6 +21,10 @@ const SpawnMenu = () => {
   const isMobile = useIsMobile()
   const [open, setOpen] = useState(!isMobile)
 
+  const handleSpawn = useCallback((t: string) => {
+    spawn(t as any)
+  }, [spawn])
+
   useEffect(() => {
     setOpen(!isMobile)
   }, [isMobile])
@@ -38,7 +42,7 @@ const SpawnMenu = () => {
           whileHover={{ scale: 1.1 }}
           key={t}
           className={styles.spawnButton}
-          onClick={() => spawn(t)}
+          onClick={() => handleSpawn(t)}
         >
           {objectConfigs[t].label}
         </motion.button>
@@ -57,7 +61,7 @@ const SpawnMenu = () => {
           whileHover={{ scale: 1.1 }}
           key={t}
           className={styles.spawnButton}
-          onClick={() => spawn(t)}
+          onClick={() => handleSpawn(t)}
         >
           {objectConfigs[t].label}
         </motion.button>
