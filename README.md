@@ -48,10 +48,12 @@ To get started with the project, follow these steps:
 2. **Install dependencies:**
    Run the following command from the project root to install all required packages:
    ```bash
-   npm install
-   ```
-   The repository includes an `.npmrc` file that enables `legacy-peer-deps` to
-   avoid peer dependency conflicts during installation.
+ npm install
+  ```
+  The repository includes an `.npmrc` file that enables `legacy-peer-deps` to
+  avoid peer dependency conflicts during installation. If new dependencies are
+  added (e.g. `@motionone/react` and `@react-three/drei`), run the install
+  command again.
 
 3. **Run the development server:**
    ```
@@ -68,12 +70,22 @@ To get started with the project, follow these steps:
    ```
 
 ## Features
+- Full-screen immersive canvas with animated gradient background (Blobmixer style).
+- Corner FAB for spawning shapes.
+- Contextual bottom drawer with Motion One animations.
 - Spawn notes, chords, beats and loops from the sidebar or circular sound portals.
 - Example scenes can be loaded on first visit to quickly try out the app.
 - The SoundInspector provides a 16 step sequencer and per-object effects.
 - Instanced ProceduralShapes visualize audio levels in real time.
 - Scroll or pinch to zoom the camera, and drag objects to move them in 3D.
 - Spatial audio and bloom lighting react to your music.
+
+## UI & Controls
+
+- Tap the **+** button in the bottom-left corner to spawn a shape.
+- Selecting a shape opens the bottom drawer with playback and effect knobs.
+- Use the Note/Chord/Beat/Loop tabs to trigger different sounds.
+- Close the drawer with the "Close" button or by deselecting the shape.
 
 ## Future Enhancements
 
