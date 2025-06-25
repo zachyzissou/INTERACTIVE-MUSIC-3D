@@ -17,7 +17,7 @@ import { startNote, stopNote } from '../lib/audio'
 import { initPhysics } from '../lib/physics'
 import { EffectComposer, Bloom } from '@react-three/postprocessing'
 import type { BloomEffect } from 'postprocessing'
-import { getFrequencyBands } from '../lib/analyser'
+import { getAnalyserBands } from '../lib/analyser'
 import { isLowPowerDevice } from '../lib/performance'
 import {
   FOV_MIN,
@@ -44,10 +44,10 @@ const BloomComposer: React.FC<{ enabled: boolean }> = ({ enabled }) => {
   const bloomRef = useRef<BloomEffect>(null)
   useFrame(() => {
     if (!enabled || !bloomRef.current) return
-    const { low } = getFrequencyBands()
+    const { bass } = getAnalyserBands()
     bloomRef.current.intensity = THREE.MathUtils.lerp(
       bloomRef.current.intensity,
-      0.5 + low * 2,
+      0.5 + bass * 2,
       0.1
     )
   })

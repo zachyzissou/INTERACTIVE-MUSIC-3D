@@ -7,7 +7,10 @@ import * as THREE from "three";
 import AnimatedGradient from "@/components/AnimatedGradient";
 import MusicalObject from "@/components/MusicalObject";
 import BottomDrawer from "@/components/BottomDrawer";
-import SpawnMeshButton from "@/components/SpawnMeshButton";
+import PlusButton3D from "@/components/PlusButton3D";
+import PerformanceSelector from "@/components/PerformanceSelector";
+import PwaInstallPrompt from "@/components/PwaInstallPrompt";
+import ShapeEditorPanel from "@/components/ShapeEditorPanel";
 import { useSelectedShape } from "@/store/useSelectedShape";
 import ExampleModal from "@/components/ExampleModal";
 import * as Tone from "tone";
@@ -60,10 +63,13 @@ export default function Home() {
             <pointLight position={[0, 5, -5]} intensity={0.5} />
             <MusicalObject />
           </Physics>
-          <SpawnMeshButton />
+          <PlusButton3D />
         </Canvas>
       </div>
       <ExampleModal />
+      <ShapeEditorPanel />
+      <PerformanceSelector />
+      <PwaInstallPrompt />
       <BottomDrawer />
     </>
   );

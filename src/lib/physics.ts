@@ -59,7 +59,9 @@ export function addBody(id: string, position: [number, number, number]) {
     position[2]
   )
   const body = world.createRigidBody(rbDesc)
-  const collider = world.createCollider(RAPIER.ColliderDesc.ball(0.5), body)
+  const colDesc = RAPIER.ColliderDesc.ball(0.5)
+  colDesc.setRestitution(0.5)
+  const collider = world.createCollider(colDesc, body)
   const anchorDesc = RAPIER.RigidBodyDesc.kinematicPositionBased().setTranslation(
     position[0],
     position[1],

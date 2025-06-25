@@ -31,7 +31,7 @@ export function getFrequencyTexture() {
   return texture!
 }
 
-export function getFrequencyBands() {
+export function getAnalyserBands() {
   const analyserNode = getAnalyser()
   const arr = getFrequencyDataArray()
   analyserNode.getByteFrequencyData(arr)
@@ -44,15 +44,15 @@ export function getFrequencyBands() {
   const mid = band(85, 170) / 255
   const high = band(170, 255) / 255
   if (texture) texture.needsUpdate = true
-  return { low, mid, high }
+  return { bass: low, mid, treble: high }
 }
 
 export function subscribeToAudioLevel(cb: (level: number) => void) {
   getAnalyser()
   let raf: number
   const tick = () => {
-    const { low, mid, high } = getFrequencyBands()
-    cb((low + mid + high) / 3)
+    const { bass, mid, treble } = getAnalyserBands()
+    cb((bass + mid + treble) / 3)
     raf = requestAnimationFrame(tick)
   }
   tick()
