@@ -1,6 +1,6 @@
 'use client'
 // src/components/MusicalObject.tsx
-import React, { useRef, useState, useMemo, useEffect } from 'react'
+import React, { useRef, useState, useMemo, useEffect, useCallback } from 'react'
 import { Object3D } from 'three'
 import { RigidBody, RigidBodyApi } from '@react-three/rapier'
 import { useFrame, useThree } from '@react-three/fiber'
@@ -85,6 +85,30 @@ export const SingleMusicalObject: React.FC<MusicalObjectProps> = ({ id, type, po
     springApi.start({ scale: 1, from: { scale: 0 }, config: { tension: 160, friction: 20 } })
   }, [springApi])
 
+  const onPointerDown = useCallback((e: any) => {
+    e.stopPropagation()
+    setDragging(true)
+    setMoved(false)
+  }, [])
+
+  const onPointerUp = useCallback((e: any) => {
+    e.stopPropagation()
+    setDragging(false)
+  }, [])
+
+  const onClick = useCallback(
+    async (e: any) => {
+      e.stopPropagation()
+      if (!moved) select(id)
+      await Tone.start()
+      await Tone.getContext().resume()
+      triggerSound(type, id)
+    },
+    [moved, select, id, type]
+  )
+
+  const onMiss = useCallback(() => setDragging(false), [])
+
   return (
     <RigidBody
       ref={bodyRef}
@@ -97,23 +121,10 @@ export const SingleMusicalObject: React.FC<MusicalObjectProps> = ({ id, type, po
       <a.group
         ref={meshRef as React.MutableRefObject<Object3D>}
         scale={springs.scale.to((s) => s * objectConfigs[type].baseScale)}
-        onPointerDown={(e) => {
-          e.stopPropagation()
-          setDragging(true)
-          setMoved(false)
-        }}
-        onPointerUp={(e) => {
-          e.stopPropagation()
-          setDragging(false)
-        }}
-        onClick={async (e) => {
-          e.stopPropagation()
-          if (!moved) select(id)
-          await Tone.start()
-          await Tone.getContext().resume()
-          triggerSound(type, id)
-        }}
-        onPointerMissed={() => setDragging(false)}
+        onPointerDown={onPointerDown}
+        onPointerUp={onPointerUp}
+        onClick={onClick}
+        onPointerMissed={onMiss}
       >
         <ProceduralShape type={type} />
       </a.group>
