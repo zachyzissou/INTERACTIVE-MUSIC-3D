@@ -1,5 +1,6 @@
 import * as Tone from 'tone'
 import * as THREE from 'three'
+import { isAudioInitialized } from './audio'
 
 let analyser: AnalyserNode | null = null
 let dataArray: Uint8Array | null = null
@@ -7,32 +8,43 @@ let texture: THREE.DataTexture | null = null
 
 export function getAnalyser() {
   if (!analyser) {
+    if (!isAudioInitialized()) return null
     const ctx = Tone.getContext()
     analyser = ctx.rawContext.createAnalyser()
     analyser.fftSize = 512
     ctx.destination.connect(analyser)
     dataArray = new Uint8Array(analyser.frequencyBinCount)
-    texture = new THREE.DataTexture(dataArray, analyser.frequencyBinCount, 1, THREE.RedFormat)
+    texture = new THREE.DataTexture(
+      dataArray,
+      analyser.frequencyBinCount,
+      1,
+      THREE.RedFormat
+    )
     texture.minFilter = THREE.LinearFilter
     texture.magFilter = THREE.LinearFilter
     texture.wrapS = THREE.ClampToEdgeWrapping
     texture.wrapT = THREE.ClampToEdgeWrapping
   }
-  return analyser!
+  return analyser
 }
 
 export function getFrequencyDataArray() {
-  getAnalyser()
-  return dataArray!
+  const a = getAnalyser()
+  if (!a || !dataArray) return new Uint8Array(0)
+  return dataArray
 }
 
 export function getFrequencyTexture() {
-  getAnalyser()
-  return texture!
+  const a = getAnalyser()
+  if (!a || !texture) return null
+  return texture
 }
 
 export function getAnalyserBands() {
   const analyserNode = getAnalyser()
+  if (!analyserNode || !dataArray) {
+    return { bass: 0, mid: 0, treble: 0 }
+  }
   const arr = getFrequencyDataArray()
   analyserNode.getByteFrequencyData(arr)
   const band = (s: number, e: number) => {
@@ -48,7 +60,7 @@ export function getAnalyserBands() {
 }
 
 export function subscribeToAudioLevel(cb: (level: number) => void) {
-  getAnalyser()
+  if (!getAnalyser()) return () => {}
   let raf: number
   const tick = () => {
     const { bass, mid, treble } = getAnalyserBands()
