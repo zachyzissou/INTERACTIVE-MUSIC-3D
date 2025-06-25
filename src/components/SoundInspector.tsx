@@ -6,7 +6,7 @@ import * as Tone from "tone";
 import { useEffectSettings, defaultEffectParams } from "@/store/useEffectSettings";
 import { ObjectType } from "@/store/useObjects";
 import { useAudioSettings } from "@/store/useAudioSettings";
-import { playNote, playChord, playBeat } from "@/lib/audio";
+import { playNote, playChord, playBeat, isAudioInitialized, onAudioInit } from "@/lib/audio";
 
 interface Props { objectId: string; type: ObjectType; }
 
@@ -26,12 +26,16 @@ const SoundInspector: React.FC<Props> = ({ objectId, type }) => {
   const [pitch, setPitch] = useState("C4");
   const [chordType, setChordType] = useState("major");
   const bpm = useAudioSettings((s) => s.bpm);
+  const [audioReady, setAudioReady] = useState(isAudioInitialized());
+
+  useEffect(() => onAudioInit(() => setAudioReady(true)), []);
 
   useEffect(() => {
-    Tone.Transport.bpm.value = bpm;
-  }, [bpm]);
+    if (audioReady) Tone.Transport.bpm.value = bpm;
+  }, [bpm, audioReady]);
 
   useEffect(() => {
+    if (!audioReady) return;
     seqRef.current?.dispose();
     const callback = (_time: number, step: boolean) => {
       if (!step) return;
@@ -46,7 +50,7 @@ const SoundInspector: React.FC<Props> = ({ objectId, type }) => {
     return () => {
       seq.dispose();
     };
-  }, [steps, pitch, chordType, type, objectId]);
+  }, [steps, pitch, chordType, type, objectId, audioReady]);
 
   const toggleStep = (i: number) => {
     const arr = [...steps];
