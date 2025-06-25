@@ -1,5 +1,9 @@
 import * as THREE from 'three'
+<<<<<<< snj072-codex/troubleshoot-audiocontext-and-react-error-#185
 import { isAudioInitialized, getTone } from './audio'
+=======
+import { isAudioInitialized } from './audio'
+>>>>>>> main
 
 let analyser: AnalyserNode | null = null
 let dataArray: Uint8Array | null = null
@@ -8,7 +12,10 @@ let texture: THREE.DataTexture | null = null
 export function getAnalyser() {
   if (!analyser) {
     if (!isAudioInitialized()) return null
+<<<<<<< snj072-codex/troubleshoot-audiocontext-and-react-error-#185
     const Tone = getTone()!
+=======
+>>>>>>> main
     const ctx = Tone.getContext()
     analyser = ctx.rawContext.createAnalyser()
     analyser.fftSize = 512

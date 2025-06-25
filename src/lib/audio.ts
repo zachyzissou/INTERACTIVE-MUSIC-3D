@@ -63,7 +63,11 @@ export function onAudioInit(cb: () => void) {
   audioEvents.addEventListener('init', cb)
   return () => audioEvents.removeEventListener('init', cb)
 }
+<<<<<<< snj072-codex/troubleshoot-audiocontext-and-react-error-#185
 let masterVolumeNode: Volume
+=======
+let masterVolumeNode: Tone.Volume
+>>>>>>> main
 
 let chorus: Chorus
 let delay: FeedbackDelay

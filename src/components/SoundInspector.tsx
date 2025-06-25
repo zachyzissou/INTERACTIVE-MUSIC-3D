@@ -7,6 +7,10 @@ import { getTone, playNote, playChord, playBeat, isAudioInitialized, onAudioInit
 import { useEffectSettings, defaultEffectParams } from "@/store/useEffectSettings";
 import { ObjectType } from "@/store/useObjects";
 import { useAudioSettings } from "@/store/useAudioSettings";
+<<<<<<< snj072-codex/troubleshoot-audiocontext-and-react-error-#185
+=======
+import { playNote, playChord, playBeat, isAudioInitialized, onAudioInit } from "@/lib/audio";
+>>>>>>> main
 
 interface Props { objectId: string; type: ObjectType; }
 
@@ -33,6 +37,7 @@ const SoundInspector: React.FC<Props> = ({ objectId, type }) => {
   useEffect(() => onAudioInit(() => setAudioReady(true)), []);
 
   useEffect(() => {
+<<<<<<< snj072-codex/troubleshoot-audiocontext-and-react-error-#185
     if (audioReady) {
       const Tone = getTone()!
       Tone.Transport.bpm.value = bpm
@@ -42,6 +47,13 @@ const SoundInspector: React.FC<Props> = ({ objectId, type }) => {
   useEffect(() => {
     if (!audioReady) return;
     const Tone = getTone()!
+=======
+    if (audioReady) Tone.Transport.bpm.value = bpm;
+  }, [bpm, audioReady]);
+
+  useEffect(() => {
+    if (!audioReady) return;
+>>>>>>> main
     seqRef.current?.dispose();
     const callback = (_time: number, step: boolean) => {
       if (!step) return;
