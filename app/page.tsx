@@ -2,6 +2,7 @@
 import { Canvas } from "@react-three/fiber";
 import { Physics } from "@react-three/rapier";
 import { PerspectiveCamera, AdaptiveDpr } from "@react-three/drei";
+import AnimatedGradient from "@/components/AnimatedGradient";
 import MusicalObject from "@/components/MusicalObject";
 import BottomDrawer from "@/components/BottomDrawer";
 import { useSelectedShape } from "@/store/useSelectedShape";
@@ -26,9 +27,10 @@ export default function Home() {
 
   return (
     <>
-      <div className="w-screen h-screen">
+      <div className="h-screen w-screen relative">
         <Canvas className="w-full h-full" shadows>
           <AdaptiveDpr pixelated />
+          <AnimatedGradient />
           <Physics>
             <PerspectiveCamera makeDefault fov={50} position={[0, 5, 10]} />
             <ambientLight intensity={0.4} />
