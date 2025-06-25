@@ -1,0 +1,2 @@
+[Service]
+work_directory = "/mnt/user/appdata/interactive-music"
