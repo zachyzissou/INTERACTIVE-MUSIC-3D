@@ -7,6 +7,7 @@
 - `useSelectedShape` and `useEffectSettings` Zustand stores
 - Tailwind CSS, Motion One and `@react-three/drei` dependencies documented
 - Revised README with new architecture tree
+- GitHub Actions caching and BuildKit-based Docker layer cache
 
 ### Changed
 - Removed legacy `SpawnMenu`, `SoundPortals`, and fixed `EffectsPanel`

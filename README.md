@@ -110,6 +110,14 @@ src/
 - **Dockerfile** — multi-stage build: dependencies, build, production runner.  
 - **GitHub Actions** — builds & pushes Docker image, deploys self-hosted container.
 
+## 🔧 CI/CD Enhancements
+
+- Docker layer caching via BuildKit
+- NPM dependency cache between runs
+- Shallow git clone for faster checkouts
+- Conditional build triggers ignoring docs
+- Self-hosted runner workspace persistence
+
 ---
 
 ## 📈 Roadmap & Future

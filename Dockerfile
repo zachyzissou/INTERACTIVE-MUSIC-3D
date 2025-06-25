@@ -1,28 +1,33 @@
-# Multi-stage Dockerfile for Next.js production build
+# syntax=docker/dockerfile:1.4
+# Optimized multi-stage Dockerfile for Next.js production build
 
-# 1. Install dependencies
 FROM node:18-alpine AS deps
 WORKDIR /app
-COPY package.json package-lock.json .npmrc ./
-RUN npm ci
 
-# 2. Build assets
+# Install system packages first to leverage caching
+RUN apk add --no-cache python3 make g++
+
+# Copy only package manifests to install dependencies
+COPY package.json package-lock.json .
+
+RUN --mount=type=cache,target=/root/.npm \
+    --mount=type=cache,target=/root/.cache \
+    npm ci
+
 FROM node:18-alpine AS builder
 WORKDIR /app
+
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+
 RUN npm run build && npm prune --production
 
-# 3. Run the Next.js app
 FROM node:18-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 
-# Copy built assets and dependencies
-COPY --from=builder /app/ .
+COPY --from=builder /app .
 
-# Expose the port Next.js listens on
 EXPOSE 3000
 
-# Start the server
 CMD ["npm", "run", "start"]

@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - main
+    paths-ignore:
+      - 'docs/**'
+      - 'README.md'
   workflow_dispatch:
 
 jobs:
@@ -16,6 +19,16 @@ jobs:
       NEXT_TELEMETRY_DISABLED: 1
 
     steps:
+      - name: Determine changed paths
+        id: changes
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            src:
+              - '**/*'
+              - '!docs/**'
+              - '!README.md'
+
       - name: 🔄 Restore Next.js cache
         uses: actions/cache@v3
         with:
@@ -26,22 +39,43 @@ jobs:
 
       - name: 🧾 Checkout repository
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+          single-branch: true
 
       - name: 🔧 Set up Node.js
+        if: steps.changes.outputs.src == 'true'
         uses: actions/setup-node@v3
         with:
           node-version: 18
 
+      - name: 📦 Cache npm
+        if: steps.changes.outputs.src == 'true'
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-npm-
+
       - name: 📦 Install dependencies
+        if: steps.changes.outputs.src == 'true'
         run: npm ci
 
       - name: 🏗️ Build Next.js site
+        if: steps.changes.outputs.src == 'true'
         run: npm run build
 
       - name: Rebuild & restart web container
+        if: steps.changes.outputs.src == 'true'
+        env:
+          DOCKER_BUILDKIT: 1
         run: |
           echo "Building Docker image from workspace"
-          docker build -t interactive-music-web .
+          docker build \
+            --cache-from=type=local,src=./.buildcache \
+            --cache-to=type=local,dest=./.buildcache,mode=max \
+            -t interactive-music-web .
           echo "Stopping and removing old container if exists"
           docker rm -f interactive-music-web || true
           echo "Starting new container from built image"
