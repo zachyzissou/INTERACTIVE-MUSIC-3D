@@ -6,7 +6,6 @@ import { useAudioSettings } from '@/store/useAudioSettings'
 import { useEffectSettings } from '@/store/useEffectSettings'
 import { useSelectedShape } from '@/store/useSelectedShape'
 import { triggerSound } from '@/lib/soundTriggers'
-import * as Tone from 'tone'
 import Knob from './JSAudioKnobs'
 import { objectTypes, ObjectType } from '@/config/objectTypes'
 import { usePerformanceSettings, PerfLevel } from '@/store/usePerformanceSettings'
@@ -46,8 +45,6 @@ export default function BottomDrawer() {
       stopLoop(selected)
       setPlaying(false)
     } else {
-      await Tone.start()
-      await Tone.getContext().resume()
       await triggerSound(mode, selected)
       setPlaying(true)
     }

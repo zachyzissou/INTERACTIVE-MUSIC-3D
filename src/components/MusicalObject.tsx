@@ -7,7 +7,6 @@ import { useObjects, MusicalObject as Obj } from '../store/useObjects'
 import ShapeFactory from './ShapeFactory'
 import { useSelectedShape } from '../store/useSelectedShape'
 import { usePhysicsStore } from '../lib/physics'
-import * as Tone from 'tone'
 import * as THREE from 'three'
 import SingleMusicalObject from './SingleMusicalObject'
 import { usePerformanceSettings } from '../store/usePerformanceSettings'
@@ -58,8 +57,6 @@ const MusicalObjectInstances: React.FC = () => {
                   onClick={async (e) => {
                     e.stopPropagation()
                     select(obj.id)
-                    await Tone.start()
-                    await Tone.getContext().resume()
                     await triggerSound(obj.type, obj.id)
                   }}
                 />
