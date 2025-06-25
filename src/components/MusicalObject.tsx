@@ -10,7 +10,7 @@ import { usePhysicsStore } from '../lib/physics'
 import * as Tone from 'tone'
 import * as THREE from 'three'
 import SingleMusicalObject from './SingleMusicalObject'
-import { usePerformance } from '../store/usePerformance'
+import { usePerformanceSettings } from '../store/usePerformanceSettings'
 import { triggerSound } from '../lib/soundTriggers'
 
 // Group objects by type for instanced rendering
@@ -74,7 +74,8 @@ const MusicalObjectInstances: React.FC = () => {
 }
 
 const MusicalObject: React.FC = () => {
-  const instanced = usePerformance((s) => s.instanced)
+  const level = usePerformanceSettings((s) => s.level)
+  const instanced = level !== 'low'
   const objects = useObjects((s) => s.objects)
   if (!instanced) {
     return (

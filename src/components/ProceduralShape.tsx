@@ -24,6 +24,7 @@ const ProceduralShape: React.FC<ProceduralShapeProps> = ({ type }) => {
     mat.current.uniforms.uBass.value = low
     mat.current.uniforms.uMid.value = mid
     mat.current.uniforms.uHigh.value = high
+    mat.current.uniforms.uAudio.value = (low + mid + high) / 3
     mat.current.uniforms.uTime.value = clock.getElapsedTime()
   })
 
@@ -42,14 +43,17 @@ const ProceduralShape: React.FC<ProceduralShapeProps> = ({ type }) => {
             uBass: { value: 0 },
             uMid: { value: 0 },
             uHigh: { value: 0 },
+            uAudio: { value: 0 },
             uColor: { value: color },
             uType: { value: shapeType },
           }}
           vertexShader={`
             varying vec2 vUv;
+            uniform float uAudio;
             void main(){
               vUv = uv;
-              gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
+              vec3 pos = position + normal * uAudio * 0.1;
+              gl_Position = projectionMatrix * modelViewMatrix * vec4(pos,1.0);
             }
           `}
           fragmentShader={`
@@ -59,6 +63,7 @@ const ProceduralShape: React.FC<ProceduralShapeProps> = ({ type }) => {
             uniform float uBass;
             uniform float uMid;
             uniform float uHigh;
+            uniform float uAudio;
             uniform vec3 uColor;
             uniform int uType;
 
@@ -105,7 +110,7 @@ const ProceduralShape: React.FC<ProceduralShapeProps> = ({ type }) => {
               vec3 normal = getNormal(pos);
               vec3 lightDir = normalize(vec3(0.3,0.6,0.8));
               float diff = clamp(dot(normal, lightDir),0.0,1.0);
-              vec3 col = uColor*(0.4+0.6*diff);
+              vec3 col = uColor*(0.4+0.6*diff + uAudio*0.3);
               col += vec3(uBass,uMid,uHigh)*0.4;
               gl_FragColor = vec4(col,1.0);
             }

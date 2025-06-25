@@ -8,16 +8,19 @@ Spawn, select and sculpt floating shapes that generate notes, chords, beats or l
 ## 🚀 Features
 
 - **Full-screen 3D Canvas** — fills your browser viewport (`100vw` × `100vh`), no dead space.  
-- **Procedural Shapes** — click “+” to spawn spheres, cubes, torii, prisms, etc., with physics.  
+- **Procedural Shapes** — click the 3D “+” in the corner to warp a new shape into existence with physics.
 - **Dynamic Bottom Drawer UI**  
-  - **No shape selected** → only “+” button in bottom-left.  
+  - **No shape selected** → collapsed drawer, only the 3D spawn control.
   - **Shape selected** → slides up with:  
     - **Mode Tabs**: Note | Chord | Beat | Loop  
-    - **Playback Controls**: Play ↔ Pause  
-    - **Effect Knobs**: Volume, Chorus, Delay, Reverb, Filter, Bitcrusher  
-- **Per-shape Audio**  
-  - First click → `Tone.start()` (user gesture handshake) + confirmation ping.  
-  - Click shape → triggers its note/chord/beat/loop.  
+    - **Playback Controls**: Play ↔ Pause
+    - **Effect Knobs**: Simple vs. Advanced chain
+    - **Performance Presets**: Low | Medium | High
+- **Per-shape Audio**
+  - First click → `Tone.start()` (user gesture handshake) + confirmation ping.
+  - Click shape → triggers its note/chord/beat/loop.
+- **Audio-reactive Shaders** — shapes pulse and ripple in sync with FFT levels.
+- **Responsive Canvas** — camera and renderer resize with the window.
 - **Global Audio Engine**  
   - Unified synth chain with master-volume, chorus, reverb, delay, distortion, bitcrusher.  
   - Live updates via Zustand stores (`useAudioSettings`, `useEffectSettings`).  
@@ -61,20 +64,15 @@ Spawn, select and sculpt floating shapes that generate notes, chords, beats or l
 
 ## 📐 UI & Controls
 
-- **Spawn (“+”) Button**  
-  - Always in bottom-left corner.  
-  - Click to add a new shape and select it.  
-- **Bottom Drawer**  
-  - **Collapsed**: only shows “+”.  
-  - **Expanded** when a shape is selected:  
-    1. **Mode tabs** (Note, Chord, Beat, Loop)  
-    2. **Play/Pause** toggle  
-    3. **Sliders/Knobs** for:  
-       - Master **Volume**  
-       - **Chorus** wet/dry  
-       - **Delay** time/feedback  
-       - **Reverb** room/decay  
-       - **Filter** cutoff/Q  
+- **Spawn (“+”) Button**
+  - 3D mesh in bottom-left. Clicking warps into the spawned shape.
+- **Bottom Drawer**
+  - **Collapsed**: just the spawn control.
+  - **Expanded** when a shape is selected:
+    1. **Mode tabs** (Note, Chord, Beat, Loop)
+    2. **Simple/Advanced** toggle
+    3. **Performance** preset dropdown
+    4. **Knobs** instantly update audio & visuals
        - **Bitcrusher** bits/rate  
 - **3D Scene**  
   - Left-click a shape to select & play.  

@@ -17,5 +17,18 @@
 - Outdated README sections on web workers and performance tables
 
 ### Fixed
-- AudioContext now starts on first user gesture  
+- AudioContext now starts on first user gesture
+
+## [Unreleased] – 2025-06-25
+
+### Added
+- 3D spawn button with GLSL warp
+- Audio-reactive shader deformation
+- Performance presets (Low/Medium/High)
+- Simple vs. Advanced drawer modes
+- Responsive canvas resizing
+
+### Changed
+- Unified BottomDrawer as sole control surface
+
 
