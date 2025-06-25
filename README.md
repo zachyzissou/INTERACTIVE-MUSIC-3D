@@ -1,159 +1,131 @@
 # Interactive Music 3D
 
-This project is an experimental interactive music website built using Next.js, React, and React Three Fiber. It features a 3D scene with a floating sphere and demonstrates basic note generation using Tone.js.
+A browser-based, procedural 3D music sandbox built with Next.js, React Three Fiber, Tone.js, Cannon-ES physics, and Zustand.  
+Spawn, select and sculpt floating shapes that generate notes, chords, beats or loops — all in real time.
 
-## Project Structure
+---
 
-```
-interactive-music-3d
-├── app
-│   ├── layout.tsx          # Global layout for the App Router
-│   └── page.tsx            # Main 3D scene
-├── src
-│   ├── components          # Reusable React Three Fiber components
-│   ├── lib                 # Shared utilities (audio helpers, stores)
-│   └── styles              # CSS modules
-├── package.json            # npm configuration and dependencies
-├── tsconfig.json           # TypeScript configuration
-├── next.config.js          # Next.js configuration
-└── README.md               # Project documentation
-```
+## 🚀 Features
 
-## Prerequisites
+- **Full-screen 3D Canvas** — fills your browser viewport (`100vw` × `100vh`), no dead space.  
+- **Procedural Shapes** — click “+” to spawn spheres, cubes, torii, prisms, etc., with physics.  
+- **Dynamic Bottom Drawer UI**  
+  - **No shape selected** → only “+” button in bottom-left.  
+  - **Shape selected** → slides up with:  
+    - **Mode Tabs**: Note | Chord | Beat | Loop  
+    - **Playback Controls**: Play ↔ Pause  
+    - **Effect Knobs**: Volume, Chorus, Delay, Reverb, Filter, Bitcrusher  
+- **Per-shape Audio**  
+  - First click → `Tone.start()` (user gesture handshake) + confirmation ping.  
+  - Click shape → triggers its note/chord/beat/loop.  
+- **Global Audio Engine**  
+  - Unified synth chain with master-volume, chorus, reverb, delay, distortion, bitcrusher.  
+  - Live updates via Zustand stores (`useAudioSettings`, `useEffectSettings`).  
+- **Physics & Interactivity**  
+  - Drag & drop shapes in 3D world.  
+  - Collision-triggered sounds.  
+- **Modern Tooling**  
+  - Next.js App Router (v15)  
+  - TypeScript + ESLint + Prettier  
+  - Tailwind CSS for styling  
+  - Motion One for smooth UI animations  
+  - `@react-three/drei` for gradient backdrops  
+  - GitHub Actions → Docker CI/CD → self-hosted runner
 
-- Node.js >=14.x is required. If you don't have `node` or `npm` installed, you can install it using [nvm](https://github.com/nvm-sh/nvm):
+---
 
-  ```zsh
-  # Install nvm
-  curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | zsh
-  # Restart your shell or source nvm
-  source ~/.zshrc
-  # Install the latest LTS version of Node.js
-  nvm install --lts
-  # Verify installation
-  node -v
-  npm -v
-  ```
+## 🏗️ Getting Started
 
-## Getting Started
+1. **Clone & install**  
+    ```bash
+    git clone https://github.com/zachyzissou/INTERACTIVE-MUSIC-3D.git
+    cd INTERACTIVE-MUSIC-3D
+    npm ci
+    npm install @motionone/react @react-three/drei tailwindcss
+    ```
+2. **Environment**  
+   - Node.js **18.x** LTS  
+   - No extra `.env` required out of the box  
+3. **Local development**  
+    ```bash
+    npm run dev
+    # → http://localhost:3000
+    ```
+4. **Production build**  
+    ```bash
+    npm run build
+    npm run start
+    ```
 
-To get started with the project, follow these steps:
+---
 
-1. **Clone the repository:**
-   ```
-   git clone <repository-url>
-   cd interactive-music-3d
-   ```
+## 📐 UI & Controls
 
-2. **Install dependencies:**
-   Run the following command from the project root to install all required packages:
-   ```bash
- npm install
-  ```
-  The repository includes an `.npmrc` file that enables `legacy-peer-deps` to
-  avoid peer dependency conflicts during installation. If new dependencies are
-  added (e.g. `@motionone/react` and `@react-three/drei`), run the install
-  command again.
+- **Spawn (“+”) Button**  
+  - Always in bottom-left corner.  
+  - Click to add a new shape and select it.  
+- **Bottom Drawer**  
+  - **Collapsed**: only shows “+”.  
+  - **Expanded** when a shape is selected:  
+    1. **Mode tabs** (Note, Chord, Beat, Loop)  
+    2. **Play/Pause** toggle  
+    3. **Sliders/Knobs** for:  
+       - Master **Volume**  
+       - **Chorus** wet/dry  
+       - **Delay** time/feedback  
+       - **Reverb** room/decay  
+       - **Filter** cutoff/Q  
+       - **Bitcrusher** bits/rate  
+- **3D Scene**  
+  - Left-click a shape to select & play.  
+  - Drag to move it around.
 
-3. **Run the development server:**
-   ```
- npm run dev
-  ```
+---
 
-4. **Open your browser:**
-   Navigate to `http://localhost:3000` to view the application. On first load you can choose an example scene to start from.
+## 🧩 Architecture
 
-5. **Build for production:**
-   Use the following command to create an optimized build and start it:
-   ```bash
-   npm run build && npm start
-   ```
+app/
+├─ layout.tsx # Global layout + <ErrorBoundary>
+├─ page.tsx # Full-screen <Canvas> + <BottomDrawer>
+src/
+├─ components/
+│ ├─ BottomDrawer.tsx # Drawer UI with Motion One
+│ ├─ MusicalObject.tsx # Shape rendering + onClick trigger
+│ └─ …
+├─ lib/
+│ ├─ audio.ts # Tone.js engine & effect chain
+│ ├─ safeStringify.ts # (dev only) prevent circular JSON errors
+│ └─ …
+├─ store/
+│ ├─ useAudioSettings.ts # Global audio params
+│ ├─ useEffectSettings.ts # Per-shape effect state
+│ ├─ useObjects.ts # All spawned shapes
+│ └─ useSelectedShape.ts # Currently selected shape
+└─ styles/…
 
-## Features
-- Full-screen immersive canvas with animated gradient background (Blobmixer style).
-- Corner FAB for spawning shapes.
-- Contextual bottom drawer with Motion One animations.
-- Spawn notes, chords, beats and loops from the sidebar or circular sound portals.
-- Example scenes can be loaded on first visit to quickly try out the app.
-- The SoundInspector provides a 16 step sequencer and per-object effects.
-- Instanced ProceduralShapes visualize audio levels in real time.
-- Scroll or pinch to zoom the camera, and drag objects to move them in 3D.
-- Spatial audio and bloom lighting react to your music.
+---
 
-## UI & Controls
+## 🔧 Deployment
 
-- Tap the **+** button in the bottom-left corner to spawn a shape.
-- Selecting a shape opens the bottom drawer with playback and effect knobs.
-- Use the Note/Chord/Beat/Loop tabs to trigger different sounds.
-- Close the drawer with the "Close" button or by deselecting the shape.
+- **Dockerfile** — multi-stage build: dependencies, build, production runner.  
+- **GitHub Actions** — builds & pushes Docker image, deploys self-hosted container.
 
-## Future Enhancements
+---
 
-- Add more interactive elements to the 3D scene.
-- Implement user controls for sound manipulation.
-- Explore additional sound synthesis techniques with Tone.js.
+## 📈 Roadmap & Future
 
-## License
+- ➕ More shapes: torus knot, custom parametrics  
+- 🎛️ Deeper sequencer & pattern editor  
+- 🌐 Multi-user jam sessions (WebRTC)  
+- 🎚️ VST-style plugin export  
+- 📱 Mobile optimizations
 
-This project is licensed under the MIT License.
+---
 
+## 🤝 Contributing
 
-## Plugins
+1. Fork & branch  
+2. `npm run lint && npm run test`  
+3. PR with clear descriptions & screenshots
 
-Plugins can extend both audio and visuals. Create a module exporting
-`{ name: string, init: (context) => void }` and register it:
-
-```ts
-import pluginManager from '@/plugins/PluginManager'
-pluginManager.registerPlugin({
-  name: 'MyPlugin',
-  init() { /* setup */ }
-})
-```
-
-## Web Worker Setup
-
-Physics simulation runs in a Web Worker. Ensure your bundler supports
-worker imports (Next.js does by default). If targeting older browsers,
-include a polyfill such as `worker-loader`.
-Call `initPhysics()` once on startup to launch the worker. Because module
-workers require a secure context, run the site over HTTPS (or localhost)
-so the physics worker and spatial audio function correctly.
-
-## Performance
-
-Average FPS on a mid-range laptop:
-
-| Objects | Avg FPS |
-|---------|--------|
-| 1       | ~120   |
-| 25      | ~90    |
-| 100     | ~65    |
-
-## Validation
-
-Before merging changes, ensure the project builds, passes type checking, and all tests run:
-
-```bash
-npx tsc --noEmit
-npm run build
-npx playwright install
-npm test
-```
-
-Afterward, test the production build on both desktop and mobile devices to verify everything works as expected.
-
-## Logging
-
-When printing objects to the console or persisting debugging data, use the helper `safeStringify` found in `src/lib/safeStringify.ts`. It gracefully handles class instances and circular references.
-
-```ts
-import { safeStringify } from '@/lib/safeStringify'
-
-console.log(safeStringify(myObject))
-```
-
-## Store Usage
-
-State management uses small zustand stores. Refer to [docs/store-guidelines.md](docs/store-guidelines.md) for permitted data types. Avoid storing Three.js, Tone.js or DOM objects in these stores.
-
+*Enjoy building & jamming!*
