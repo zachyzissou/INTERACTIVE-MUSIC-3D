@@ -8,11 +8,10 @@ import { useSelectedShape } from '@/store/useSelectedShape'
 import { triggerSound } from '@/lib/soundTriggers'
 import * as Tone from 'tone'
 import Knob from './JSAudioKnobs'
-import { PlusIcon } from '@heroicons/react/24/solid'
 import { objectTypes, ObjectType } from '@/config/objectTypes'
+import { usePerformanceSettings, PerfLevel } from '@/store/usePerformanceSettings'
 
 export default function BottomDrawer() {
-  const spawn = useObjects(s => s.spawn)
   const objects = useObjects(s => s.objects)
   const { selected, selectShape } = useSelectedShape(s => ({
     selected: s.selected,
@@ -21,6 +20,9 @@ export default function BottomDrawer() {
   const obj = useMemo(() => objects.find(o => o.id === selected), [objects, selected])
   const [mode, setMode] = useState<ObjectType>('note')
   const [playing, setPlaying] = useState(false)
+  const [advanced, setAdvanced] = useState(false)
+  const perfLevel = usePerformanceSettings(s => s.level)
+  const setPerfLevel = usePerformanceSettings(s => s.setLevel)
 
   const {
     volume, setVolume,
@@ -34,13 +36,6 @@ export default function BottomDrawer() {
   const { setEffect, getParams } = useEffectSettings()
   const params = selected ? getParams(selected) : null
 
-  const spawnShape = useCallback(async () => {
-    await Tone.start()
-    await Tone.getContext().resume()
-    const id = spawn('note')
-    selectShape(id)
-    await triggerSound('note', id)
-  }, [spawn, selectShape])
 
   const togglePlay = useCallback(async () => {
     if (!selected) return
@@ -80,13 +75,26 @@ export default function BottomDrawer() {
                 </button>
               ))}
             </div>
+            <div className="flex items-center gap-2 py-1">
+              <label className="text-xs">Advanced</label>
+              <input type="checkbox" checked={advanced} onChange={() => setAdvanced(a => !a)} />
+              <select value={perfLevel} onChange={e => setPerfLevel(e.target.value as PerfLevel)} className="text-black rounded ml-auto text-xs">
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+              </select>
+            </div>
             <div className="flex gap-4 overflow-x-auto py-2">
               <Knob label="Vol" min={0} max={1} step={0.01} value={volume} onChange={(e) => setVolume(parseFloat(e.target.value))} />
-              <Knob label="Chorus" min={0} max={1} step={0.01} value={chorusDepth} onChange={(e) => setChorusDepth(parseFloat(e.target.value))} />
-              <Knob label="Delay" min={0} max={1} step={0.01} value={delayFeedback} onChange={(e) => setDelayFeedback(parseFloat(e.target.value))} />
+              {advanced && (
+                <>
+                  <Knob label="Chorus" min={0} max={1} step={0.01} value={chorusDepth} onChange={(e) => setChorusDepth(parseFloat(e.target.value))} />
+                  <Knob label="Delay" min={0} max={1} step={0.01} value={delayFeedback} onChange={(e) => setDelayFeedback(parseFloat(e.target.value))} />
+                  <Knob label="Bits" min={1} max={16} step={1} value={bitcrusherBits} onChange={(e) => setBitcrusherBits(parseInt(e.target.value, 10))} />
+                </>
+              )}
               <Knob label="Reverb" min={0} max={1} step={0.01} value={reverbWet} onChange={(e) => setReverbWet(parseFloat(e.target.value))} />
               <Knob label="Filter" min={20} max={1000} step={10} value={filterFrequency} onChange={(e) => setFilterFrequency(parseFloat(e.target.value))} />
-              <Knob label="Bits" min={1} max={16} step={1} value={bitcrusherBits} onChange={(e) => setBitcrusherBits(parseInt(e.target.value, 10))} />
             </div>
             {params && (
               <div className="flex gap-4 overflow-x-auto pb-2">
@@ -107,12 +115,6 @@ export default function BottomDrawer() {
           </div>
         )}
       </motion.div>
-      <button
-        onClick={spawnShape}
-        className="fixed bottom-4 left-4 md:bottom-6 md:left-6 w-12 h-12 rounded-full bg-indigo-600 shadow-2xl hover:bg-indigo-500 flex items-center justify-center pointer-events-auto"
-      >
-        <PlusIcon className="w-6 h-6 text-white" />
-      </button>
     </div>
   )
 }

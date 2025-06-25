@@ -9,7 +9,6 @@ import ProceduralShapes from './ProceduralShapes'
 import AudioVisualizer from './AudioVisualizer'
 import Floor from './Floor'
 import MusicalObject from './MusicalObject'
-import SoundPortals from './SoundPortals'
 import EffectWorm from './EffectWorm'
 import LoopProgress from './LoopProgress'
 import HUD from './HUD'
@@ -168,7 +167,6 @@ const SceneCanvas: React.FC = () => {
           <LoopProgress />
           <EffectWorm id="worm" position={[0, 1, 0]} />
           <ProceduralShapes />
-          <SoundPortals />
         </Physics>
         <ParticleBurst count={particleCount} color="#ff66aa" />
         <BloomComposer enabled={!lowPower} />

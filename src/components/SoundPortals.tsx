@@ -9,7 +9,7 @@ import { objectConfigs, objectTypes } from '../config/objectTypes'
 import ShapeFactory from './ShapeFactory'
 import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUtils'
 import * as THREE from 'three'
-import { usePerformance } from '../store/usePerformance'
+import { usePerformanceSettings } from '../store/usePerformanceSettings'
 
 const portalConfigs: { type: ObjectType; color: string }[] = objectTypes.map((t) => ({
   type: t,
@@ -49,7 +49,8 @@ const Portal: React.FC<{ cfg: typeof portalConfigs[0]; position: [number, number
 
 const SoundPortals: React.FC = () => {
   const { groupRef, getPosition } = usePortalRing(portalConfigs.length)
-  const lod = usePerformance((s) => s.lod)
+  const level = usePerformanceSettings((s) => s.level)
+  const lod = level !== 'low'
 
   const merged = useMemo(() => {
     const geoms = portalConfigs.map((cfg, idx) => {
