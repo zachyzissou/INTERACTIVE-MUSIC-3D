@@ -4,7 +4,7 @@ import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import { getAnalyser } from "@/lib/analyser";
 import { useObjects } from "@/store/useObjects";
-import { useEffectSettings } from "@/store/useEffectSettings";
+import { useSelectedShape } from "@/store/useSelectedShape";
 import { useAudioSettings } from "@/store/useAudioSettings";
 
 type EffectSnapshot = {
@@ -19,7 +19,7 @@ const tempObject = new THREE.Object3D();
 
 const ProceduralShapes: React.FC = () => {
   const objects = useObjects((s) => s.objects);
-  const select = useEffectSettings((s) => s.select);
+  const select = useSelectedShape((s) => s.selectShape);
   const instRef = useRef<THREE.InstancedMesh>(null!);
   const dataRef = useRef<Uint8Array | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
