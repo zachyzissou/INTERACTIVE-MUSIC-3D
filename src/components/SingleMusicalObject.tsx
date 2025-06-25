@@ -39,11 +39,6 @@ export const SingleMusicalObject: React.FC<MusicalObjectProps> = ({ id, type, po
   const meterRef = useRef<Tone.Meter | null>(null)
   const pannerRef = useRef<PannerNode | null>(null)
 
-  useEffect(() => {
-    meterRef.current = getObjectMeter(id)
-    pannerRef.current = getObjectPanner(id)
-  }, [id])
-
   useFrame(() => {
     if (!dragging || !bodyRef.current) return
     raycaster.setFromCamera(mouse, camera)
@@ -102,7 +97,10 @@ export const SingleMusicalObject: React.FC<MusicalObjectProps> = ({ id, type, po
       if (!moved) select(id)
       await Tone.start()
       await Tone.getContext().resume()
-      triggerSound(type, id)
+      // First user interaction initializes audio and creates nodes
+      await triggerSound(type, id)
+      meterRef.current = getObjectMeter(id)
+      pannerRef.current = getObjectPanner(id)
     },
     [moved, select, id, type]
   )
@@ -116,7 +114,11 @@ export const SingleMusicalObject: React.FC<MusicalObjectProps> = ({ id, type, po
       linearDamping={0.9}
       mass={1}
       position={position}
-      onCollisionEnter={() => triggerSound(type, id)}
+      onCollisionEnter={async () => {
+        await triggerSound(type, id)
+        meterRef.current = getObjectMeter(id)
+        pannerRef.current = getObjectPanner(id)
+      }}
     >
       <a.group
         ref={meshRef as React.MutableRefObject<Object3D>}

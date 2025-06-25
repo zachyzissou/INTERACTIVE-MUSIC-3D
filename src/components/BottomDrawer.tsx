@@ -6,6 +6,7 @@ import { useAudioSettings } from '@/store/useAudioSettings'
 import { useEffectSettings } from '@/store/useEffectSettings'
 import { useSelectedShape } from '@/store/useSelectedShape'
 import { triggerSound } from '@/lib/soundTriggers'
+import * as Tone from 'tone'
 import Knob from './JSAudioKnobs'
 import { PlusIcon } from '@heroicons/react/24/solid'
 import { objectTypes, ObjectType } from '@/config/objectTypes'
@@ -33,13 +34,15 @@ export default function BottomDrawer() {
   const { setEffect, getParams } = useEffectSettings()
   const params = selected ? getParams(selected) : null
 
-  const spawnShape = useCallback(() => {
+  const spawnShape = useCallback(async () => {
+    await Tone.start()
+    await Tone.getContext().resume()
     const id = spawn('note')
     selectShape(id)
-    triggerSound('note', id)
+    await triggerSound('note', id)
   }, [spawn, selectShape])
 
-  const togglePlay = useCallback(() => {
+  const togglePlay = useCallback(async () => {
     if (!selected) return
     const target = objects.find((o) => o.id === selected)
     if (!target) return
@@ -48,7 +51,9 @@ export default function BottomDrawer() {
       stopLoop(selected)
       setPlaying(false)
     } else {
-      triggerSound(mode, selected)
+      await Tone.start()
+      await Tone.getContext().resume()
+      await triggerSound(mode, selected)
       setPlaying(true)
     }
   }, [selected, objects, playing, mode])

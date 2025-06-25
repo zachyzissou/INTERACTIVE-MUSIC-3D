@@ -60,7 +60,7 @@ const MusicalObjectInstances: React.FC = () => {
                     select(obj.id)
                     await Tone.start()
                     await Tone.getContext().resume()
-                    triggerSound(obj.type, obj.id)
+                    await triggerSound(obj.type, obj.id)
                   }}
                 />
               )

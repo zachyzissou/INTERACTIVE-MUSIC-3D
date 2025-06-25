@@ -4,14 +4,14 @@ import { playNote, playChord, playBeat, startLoop } from './audio'
 /**
  * Trigger a sound based on object type.
  */
-export function triggerSound(type: ObjectType, id: string): void {
+export async function triggerSound(type: ObjectType, id: string): Promise<void> {
   if (type === 'note') {
-    playNote(id)
+    await playNote(id)
   } else if (type === 'chord') {
-    playChord(id)
+    await playChord(id)
   } else if (type === 'beat') {
-    playBeat(id)
+    await playBeat(id)
   } else {
-    startLoop(id)
+    await startLoop(id)
   }
 }
