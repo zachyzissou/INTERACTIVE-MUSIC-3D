@@ -9,6 +9,8 @@ interface Props {
 interface State {
   hasError: boolean
   cyclic?: boolean
+  error?: Error
+  errorInfo?: ErrorInfo
 }
 
 class ErrorBoundary extends React.Component<Props, State> {
@@ -32,15 +34,26 @@ class ErrorBoundary extends React.Component<Props, State> {
         componentStack: errorInfo.componentStack,
       })
     )
+    this.setState({ error, errorInfo })
   }
 
   render() {
     if (this.state.hasError) {
+      const isDev = process.env.NODE_ENV !== 'production'
       return (
         <div className={ui.glass} style={{ padding: '1rem', color: 'red' }}>
           {this.state.cyclic
             ? 'Data serialization error—please reload.'
             : 'Something went wrong.'}
+          {isDev && this.state.error && (
+            <pre style={{ whiteSpace: 'pre-wrap' }}>
+              {this.state.error.message}
+              {'\n'}
+              {this.state.error.stack}
+              {'\n'}
+              {this.state.errorInfo?.componentStack}
+            </pre>
+          )}
         </div>
       )
     }

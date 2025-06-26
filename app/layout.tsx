@@ -13,6 +13,9 @@ import { safeStringify } from '@/lib/safeStringify'
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     registerServiceWorker()
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('RootLayout mounted')
+    }
     window.onerror = (_msg, _src, lineno, colno, error) => {
       console.error(
         'Global error:',

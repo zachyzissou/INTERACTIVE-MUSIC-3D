@@ -56,6 +56,9 @@ const MusicalObjectInstances: React.FC = () => {
                   scale={objectConfigs[t].baseScale}
                   onClick={async (e) => {
                     e.stopPropagation()
+                    if (process.env.NODE_ENV !== 'production') {
+                      console.log('Clicked object', obj.id)
+                    }
                     select(obj.id)
                     await triggerSound(obj.type, obj.id)
                   }}
