@@ -28,6 +28,11 @@ function ResizeHandler() {
 }
 
 export default function CanvasScene() {
+  React.useEffect(() => {
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('CanvasScene mounted')
+    }
+  }, [])
   return (
     <Canvas className="w-full h-full" shadows>
       <AdaptiveDpr pixelated />
