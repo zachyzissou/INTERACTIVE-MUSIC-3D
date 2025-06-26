@@ -1,9 +1,8 @@
-import { enableAudioInit, initAudioEngine, playSpawnSound } from '../audio'
+import { startAudioContext, playSpawnSound } from '../audio'
 import { useAudioEngine } from '@/store/useAudioEngine'
 
 export async function startAudio() {
-  enableAudioInit()
-  await initAudioEngine()
+  await startAudioContext()
   useAudioEngine.getState().setAudioReady(true)
   await playSpawnSound()
 }

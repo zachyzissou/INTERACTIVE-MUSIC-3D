@@ -40,7 +40,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body className={ui.root}>
-        <ErrorBoundary>
+        <ErrorBoundary verbose>
           <AudioSettingsPanel />
           <PluginLoader />
           {children}
