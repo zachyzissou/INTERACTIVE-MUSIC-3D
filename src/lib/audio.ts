@@ -53,6 +53,7 @@ let beatSynth: MembraneSynth
 // Flag indicating if synthesis nodes have been created yet.
 // This stays false until a user gesture triggers Tone.start().
 let audioInitialized = false
+let initPromise: Promise<void> | null = null
 const audioEvents = new EventTarget()
 
 export function isAudioInitialized() {
@@ -109,31 +110,40 @@ interface EffectChain {
  * Calls Tone.start(), then creates and configures synths.
  */
 async function initAudioEngine() {
-  const Tone = await ensureTone()
   if (audioInitialized) return
-  await Tone.start()
-  await Tone.getContext().resume()
-  await initEffects()
-  masterVolumeNode = new Tone.Volume({ volume: 0 }).connect(masterChain)
-  masterVolumeNode.volume.value = useAudioSettings.getState().volume * 100 - 100
-  // Single-note synth
-  noteSynth = new Tone.Synth().connect(masterVolumeNode)
-  noteSynth.oscillator.type = 'sine'
-  noteSynth.envelope.attack = NOTE_ATTACK
-  noteSynth.envelope.release = NOTE_RELEASE
-  // Polyphonic chord synth
-  chordSynth = new Tone.PolySynth({ voice: Tone.Synth }).connect(masterVolumeNode)
-  chordSynth.set({ oscillator: { type: 'triangle' } })
-  chordSynth.set({ envelope: { attack: CHORD_ATTACK, release: CHORD_RELEASE } })
-  // Drum synth
-  beatSynth = new Tone.MembraneSynth().connect(masterVolumeNode)
-  beatSynth.pitchDecay = BEAT_PITCH_DECAY
-  beatSynth.envelope.attack = BEAT_ATTACK
-  beatSynth.envelope.decay = BEAT_DECAY
-  beatSynth.envelope.sustain = BEAT_SUSTAIN
-  beatSynth.envelope.release = BEAT_RELEASE
-  audioInitialized = true
-  audioEvents.dispatchEvent(new Event('init'))
+  if (initPromise) return initPromise
+  initPromise = (async () => {
+    const Tone = await ensureTone()
+    if (audioInitialized) { initPromise = null; return }
+    await Tone.start()
+    await Tone.getContext().resume()
+    await initEffects()
+    masterVolumeNode = new Tone.Volume({ volume: 0 }).connect(masterChain)
+    masterVolumeNode.volume.value =
+      useAudioSettings.getState().volume * 100 - 100
+    // Single-note synth
+    noteSynth = new Tone.Synth().connect(masterVolumeNode)
+    noteSynth.oscillator.type = 'sine'
+    noteSynth.envelope.attack = NOTE_ATTACK
+    noteSynth.envelope.release = NOTE_RELEASE
+    // Polyphonic chord synth
+    chordSynth = new Tone.PolySynth({ voice: Tone.Synth }).connect(
+      masterVolumeNode
+    )
+    chordSynth.set({ oscillator: { type: 'triangle' } })
+    chordSynth.set({ envelope: { attack: CHORD_ATTACK, release: CHORD_RELEASE } })
+    // Drum synth
+    beatSynth = new Tone.MembraneSynth().connect(masterVolumeNode)
+    beatSynth.pitchDecay = BEAT_PITCH_DECAY
+    beatSynth.envelope.attack = BEAT_ATTACK
+    beatSynth.envelope.decay = BEAT_DECAY
+    beatSynth.envelope.sustain = BEAT_SUSTAIN
+    beatSynth.envelope.release = BEAT_RELEASE
+    audioInitialized = true
+    initPromise = null
+    audioEvents.dispatchEvent(new Event('init'))
+  })()
+  return initPromise
 }
 
 function keyOffset(key: string): number {
