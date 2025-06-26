@@ -5,6 +5,7 @@ import { safeStringify } from '../lib/safeStringify'
 
 interface Props {
   children: ReactNode
+  verbose?: boolean
 }
 interface State {
   hasError: boolean
@@ -45,7 +46,7 @@ class ErrorBoundary extends React.Component<Props, State> {
           {this.state.cyclic
             ? 'Data serialization error—please reload.'
             : 'Something went wrong.'}
-          {isDev && this.state.error && (
+          {(isDev || this.props.verbose) && this.state.error && (
             <pre style={{ whiteSpace: 'pre-wrap' }}>
               {this.state.error.message}
               {'\n'}

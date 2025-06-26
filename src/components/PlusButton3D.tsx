@@ -5,7 +5,7 @@ import { useRef, useState } from 'react'
 import * as THREE from 'three'
 import { useObjects } from '@/store/useObjects'
 import { useSelectedShape } from '@/store/useSelectedShape'
-import { startAudio } from '@/lib/audio/startAudio'
+import { startAudioContext } from '@/lib/audio'
 import vertex from '@/shaders/plusButton.vert.glsl?raw'
 import fragment from '@/shaders/plusButton.frag.glsl?raw'
 
@@ -35,7 +35,7 @@ export default function PlusButton3D() {
       onClick={async () => {
         if (busy) return
         setBusy(true)
-        await startAudio()
+        await startAudioContext()
         api.start({ distort: 1, scale: 0, config: { duration: 400 }, onRest: () => {
           const id = spawn('note')
           select(id)

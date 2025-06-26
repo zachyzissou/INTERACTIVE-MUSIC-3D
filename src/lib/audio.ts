@@ -69,6 +69,17 @@ export function onAudioInit(cb: () => void) {
 export function enableAudioInit() {
   allowInit = true
 }
+
+/**
+ * Resume the AudioContext after a user gesture.
+ */
+export async function startAudioContext() {
+  enableAudioInit()
+  await initAudioEngine()
+  if (process.env.NODE_ENV !== 'production') {
+    console.log('Audio context started')
+  }
+}
 let masterVolumeNode: Volume
 
 let chorus: Chorus
