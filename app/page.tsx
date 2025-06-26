@@ -41,9 +41,7 @@ export default function Home() {
   React.useEffect(() => {
     const start = async () => {
       window.removeEventListener('pointerdown', start)
-      await Tone.start()
-      await Tone.getContext().resume()
-      playNote('init')
+      await playNote('init')
     }
     window.addEventListener('pointerdown', start, { once: true })
     return () => window.removeEventListener('pointerdown', start)

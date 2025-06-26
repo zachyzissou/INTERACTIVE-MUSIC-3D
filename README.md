@@ -17,7 +17,7 @@ Spawn, select and sculpt floating shapes that generate notes, chords, beats or l
     - **Effect Knobs**: Simple vs. Advanced chain
     - **Performance Presets**: Low | Medium | High
 - **Per-shape Audio**
-  - First click → `Tone.start()` (user gesture handshake) + confirmation ping.
+  - First click → initializes audio via `playNote('init')`.
   - Click shape → triggers its note/chord/beat/loop.
 - **Installable PWA** — add to home screen for offline access.
 - **Startup Performance Selector** — choose Low/Balanced/High GPU mode.
