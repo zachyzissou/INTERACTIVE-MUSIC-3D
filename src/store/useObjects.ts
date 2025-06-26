@@ -24,7 +24,9 @@ interface ObjectState {
 }
 
 export const useObjects = create<ObjectState>((set, get) => ({
-  objects: [],
+  objects: typeof window !== 'undefined'
+    ? JSON.parse(localStorage.getItem('objects') || '[]')
+    : [],
   spawn: (type: ObjectType, position?: [number, number, number]) => {
     const id = Date.now().toString()
     const newObj: MusicalObject = {
@@ -37,9 +39,11 @@ export const useObjects = create<ObjectState>((set, get) => ({
           Math.random() * 6 - 3,
         ] as [number, number, number]),
     }
-    set({ objects: [...get().objects, newObj] })
+    const updated = [...get().objects, newObj]
+    set({ objects: updated })
     if (typeof window !== 'undefined') {
-      ;(window as any).__objects__ = get().objects
+      localStorage.setItem('objects', JSON.stringify(updated))
+      ;(window as any).__objects__ = updated
     }
     addBody(id, newObj.position)
     return id

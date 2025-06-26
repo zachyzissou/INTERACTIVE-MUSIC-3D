@@ -6,6 +6,8 @@ import * as THREE from 'three'
 import { useObjects } from '@/store/useObjects'
 import { useSelectedShape } from '@/store/useSelectedShape'
 import { startNote } from '@/lib/audio'
+import vertex from '@/shaders/plusButton.vert.glsl?raw'
+import fragment from '@/shaders/plusButton.frag.glsl?raw'
 
 export default function PlusButton3D() {
   const { viewport } = useThree()
@@ -47,35 +49,11 @@ export default function PlusButton3D() {
         ref={mat}
         transparent
         uniforms={{
-          uTime: { value: 0 },
           uDistort: { value: 0 },
           uColor: { value: new THREE.Color('#4fa3ff') },
         }}
-        vertexShader={`
-          varying vec2 vUv;
-          void main(){
-            vUv = uv;
-            gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
-          }
-        `}
-        fragmentShader={`
-          precision highp float;
-          varying vec2 vUv;
-          uniform float uDistort;
-          uniform vec3 uColor;
-          float sdPlus(vec2 p,float b,float t){
-            p=abs(p);
-            p-=b;
-            if(p.x<0.0||p.y<0.0) return max(p.x,p.y)-t;
-            return length(max(p,0.0))-t;
-          }
-          void main(){
-            vec2 p=vUv*2.0-1.0;
-            float d=sdPlus(p,0.2,0.05-uDistort*0.05);
-            float a=smoothstep(0.02,0.0,d);
-            gl_FragColor=vec4(uColor,a);
-          }
-        `}
+        vertexShader={vertex}
+        fragmentShader={fragment}
       />
     </a.mesh>
   )

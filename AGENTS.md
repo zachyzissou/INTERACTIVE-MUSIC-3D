@@ -119,6 +119,8 @@ Task: Shape sound synthesis + visual attributes
 ```
 Task: Manifest, meta, install logic
 ```
+Service worker registration lives in `src/lib/registerServiceWorker.ts` and the
+worker script is `public/sw.js` for offline caching.
 
 ### GPU Modes
 
