@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { usePerformanceSettings, PerfLevel } from '@/store/usePerformanceSettings'
-import { a, useSpring } from '@react-spring/three'
+import { a, useSpring } from '@react-spring/web'
 
 export default function PerformanceSelector() {
   const [show, setShow] = useState(false)

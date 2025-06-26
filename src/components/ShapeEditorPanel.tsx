@@ -1,6 +1,6 @@
 'use client'
 import { Html } from '@react-three/drei'
-import { a, useSpring } from '@react-spring/three'
+import { a, useSpring } from '@react-spring/web'
 import { useSelectedShape } from '@/store/useSelectedShape'
 import { useEffectSettings } from '@/store/useEffectSettings'
 
