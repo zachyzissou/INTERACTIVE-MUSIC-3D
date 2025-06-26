@@ -54,6 +54,7 @@ let beatSynth: MembraneSynth
 // This stays false until a user gesture triggers Tone.start().
 let audioInitialized = false
 let initPromise: Promise<void> | null = null
+let allowInit = false
 const audioEvents = new EventTarget()
 
 export function isAudioInitialized() {
@@ -63,6 +64,10 @@ export function isAudioInitialized() {
 export function onAudioInit(cb: () => void) {
   audioEvents.addEventListener('init', cb)
   return () => audioEvents.removeEventListener('init', cb)
+}
+
+export function enableAudioInit() {
+  allowInit = true
 }
 let masterVolumeNode: Volume
 
@@ -109,8 +114,8 @@ interface EffectChain {
  * Initialize the audio engine on first user interaction.
  * Calls Tone.start(), then creates and configures synths.
  */
-async function initAudioEngine() {
-  if (audioInitialized) return
+export async function initAudioEngine() {
+  if (audioInitialized || !allowInit) return
   if (initPromise) return initPromise
   initPromise = (async () => {
     const Tone = await ensureTone()
@@ -219,6 +224,7 @@ function applyParams(chain: EffectChain, params: EffectParams) {
  */
 export async function playNote(id: string, note: string = 'C4') {
   await initAudioEngine()
+  if (!audioInitialized) return
   const { key } = useAudioSettings.getState()
   const finalNote = transpose(note, key)
   const os = getObjectSynth(id, 'note')
@@ -233,6 +239,7 @@ export async function playNote(id: string, note: string = 'C4') {
  */
 export async function playChord(id: string, notes: string[] = ['C4', 'E4', 'G4']) {
   await initAudioEngine()
+  if (!audioInitialized) return
   const { key } = useAudioSettings.getState()
   const final = notes.map((n) => transpose(n, key))
   const os = getObjectSynth(id, 'chord')
@@ -248,6 +255,7 @@ export async function playChord(id: string, notes: string[] = ['C4', 'E4', 'G4']
 export async function playBeat(id: string) {
   beatBus.dispatchEvent(new Event("beat"));
   await initAudioEngine()
+  if (!audioInitialized) return
   const { key } = useAudioSettings.getState()
   const note = transpose('C2', key)
   const os = getObjectSynth(id, 'beat')
@@ -262,6 +270,7 @@ export async function playBeat(id: string) {
  */
 export async function setMasterVolume(vol: number) {
   await initAudioEngine()
+  if (!audioInitialized) return
   // Map slider 0-1 to -100dB to 0dB for a perceptual volume curve
   masterVolumeNode.volume.value = vol * 100 - 100
 }
@@ -292,6 +301,7 @@ export async function setFilterFrequency(v: number) {
  */
 export async function startNote(note: string = 'C4') {
   await initAudioEngine()
+  if (!audioInitialized) return
   const { key } = useAudioSettings.getState()
   const finalNote = transpose(note, key)
   const Tone = getTone()!
@@ -327,6 +337,7 @@ export function getLoopProgress(id: string): number {
 
 export async function startLoop(id: string, interval: string = '1m') {
   await initAudioEngine()
+  if (!audioInitialized) return
   if (loops.has(id)) return
   const bpm = useAudioSettings.getState().bpm
   const Tone = getTone()!
@@ -350,4 +361,18 @@ export function stopLoop(id: string) {
     loops.delete(id)
   }
   useLoops.getState().stop(id)
+}
+
+let spawnSynth: Synth | null = null
+export async function playSpawnSound() {
+  await initAudioEngine()
+  if (!audioInitialized) return
+  const Tone = getTone()!
+  if (!spawnSynth) {
+    spawnSynth = new Tone.Synth({
+      oscillator: { type: 'sine' },
+      envelope: { attack: 0.01, decay: 0.2, sustain: 0, release: 0.3 }
+    }).connect(masterVolumeNode)
+  }
+  spawnSynth.triggerAttackRelease('C6', '16n', Tone.now())
 }
