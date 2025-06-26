@@ -11,13 +11,13 @@ export default function PwaInstallPrompt() {
   const [promptEvent, setPromptEvent] = useState<BeforeInstallPromptEvent | null>(null)
   const [visible, setVisible] = useState(false)
   useEffect(() => {
-    const handler = (e: any) => {
+    const handler = (e: BeforeInstallPromptEvent) => {
       e.preventDefault()
       setPromptEvent(e)
       setVisible(true)
     }
-    window.addEventListener('beforeinstallprompt', handler as any)
-    return () => window.removeEventListener('beforeinstallprompt', handler as any)
+    window.addEventListener('beforeinstallprompt', handler as EventListener)
+    return () => window.removeEventListener('beforeinstallprompt', handler as EventListener)
   }, [])
   if (!visible || !promptEvent) return null
   return (

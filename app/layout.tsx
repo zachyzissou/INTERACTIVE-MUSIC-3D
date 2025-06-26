@@ -3,6 +3,7 @@
 import '../src/styles/globals.css'
 import ui from '../src/styles/ui.module.css'
 import React, { useEffect } from 'react'
+import { registerServiceWorker } from '@/lib/registerServiceWorker'
 import PluginLoader from "./PluginLoader"
 import AudioSettingsPanel from '@/components/AudioSettingsPanel'
 import ErrorBoundary from '@/components/ErrorBoundary'
@@ -11,6 +12,7 @@ import { safeStringify } from '@/lib/safeStringify'
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   useEffect(() => {
+    registerServiceWorker()
     window.onerror = (_msg, _src, lineno, colno, error) => {
       console.error(
         'Global error:',

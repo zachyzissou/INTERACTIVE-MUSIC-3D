@@ -3,13 +3,16 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from "framer-motion";
 import scenes from "@/config/exampleScenes.json";
 import { useObjects } from "@/store/useObjects";
+import type { ObjectType } from "@/store/useObjects";
 
 const ExampleModal: React.FC = () => {
   const [open, setOpen] = useState(true);
   const spawn = useObjects((s) => s.spawn);
 
   const load = (scene: (typeof scenes)[0]) => {
-    scene.objects.forEach(obj => spawn(obj.type as any, obj.position as any));
+    scene.objects.forEach(obj =>
+      spawn(obj.type as ObjectType, obj.position as [number, number, number])
+    );
     setOpen(false);
   };
 

@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useRef, useState } from "react";
-import { useFrame, useThree } from "@react-three/fiber";
+import { useFrame, useThree, ThreeEvent } from "@react-three/fiber";
 import * as THREE from "three";
 import { getAnalyser } from "@/lib/analyser";
 import { useObjects } from "@/store/useObjects";
@@ -110,12 +110,12 @@ const ProceduralShapes: React.FC = () => {
     if (instRef.current.instanceColor) instRef.current.instanceColor.needsUpdate = true;
   });
 
-  const handlePointerDown = (e: any) => {
+  const handlePointerDown = (e: ThreeEvent<PointerEvent>) => {
     e.stopPropagation();
-    setDragIndex(e.instanceId);
+    setDragIndex(e.instanceId ?? null);
   };
 
-  const handlePointerUp = (e: any) => {
+  const handlePointerUp = (e: ThreeEvent<PointerEvent>) => {
     e.stopPropagation();
     if (dragIndex === e.instanceId) select(objects[e.instanceId].id);
     setDragIndex(null);

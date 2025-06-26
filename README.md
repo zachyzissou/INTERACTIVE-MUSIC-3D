@@ -20,6 +20,7 @@ Spawn, select and sculpt floating shapes that generate notes, chords, beats or l
   - First click → initializes audio via `playNote('init')`.
   - Click shape → triggers its note/chord/beat/loop.
 - **Installable PWA** — add to home screen for offline access.
+- **Service Worker Caching** — basic offline support via `public/sw.js`.
 - **Startup Performance Selector** — choose Low/Balanced/High GPU mode.
 - **Audio-reactive Shaders** — shapes pulse and ripple in sync with FFT levels.
 - **Responsive Canvas** — camera and renderer resize with the window.
@@ -48,9 +49,10 @@ Spawn, select and sculpt floating shapes that generate notes, chords, beats or l
     npm ci
     npm install @motionone/react @react-three/drei tailwindcss
     ```
-2. **Environment**  
-   - Node.js **18.x** LTS  
-   - No extra `.env` required out of the box  
+2. **Environment**
+   - Node.js **18.x** LTS
+   - No extra `.env` required out of the box
+   - PWA manifest located in `public/manifest.json`
 3. **Local development**  
     ```bash
     npm run dev
@@ -63,6 +65,7 @@ Spawn, select and sculpt floating shapes that generate notes, chords, beats or l
     ```
 5. **Install as PWA**
     - Open the site and choose "Add to Home Screen" when prompted.
+    - Offline assets are cached via a service worker.
 
 ---
 
