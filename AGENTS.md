@@ -11,9 +11,12 @@
 4. [Module-Specific Prompt Examples](#module-specific-prompt-examples)
 
    * UI / Procedural Components
+   * UI Fusion
    * Audio / Visualizers
    * Physics / Interaction
    * Performance / Mobile
+   * PWA Support
+   * GPU Modes
    * CI/CD / Validation
 5. [Workflow & Branching Strategy](#workflow--branching-strategy)
 6. [File & Directory Conventions](#file--directory-conventions)
@@ -40,8 +43,9 @@ Our single AI agent serves as a **full-stack pair programmer**, capable of:
 * **Performance & Mobile**: Applying adaptive DPR, LOD, merging, conditional features for mobile.
 * **Progressive Enhancement**: Detect hardware and scale visuals accordingly.
 * **PWA Integration**: Handle offline manifest, install flow, localStorage.
+* **GPU Modes**: Manage shader complexity via startup performance selector.
 * **CI/CD & Validation**: Maintaining Dockerfile, GitHub Actions workflows, and build/test pipelines.
-* **Documentation**: Updating README, agent.md, and inline code comments.
+* **Documentation**: Updating README, AGENTS.md, and inline code comments.
 
 ---
 
@@ -56,7 +60,7 @@ You are my AI pair-programmer with full access to the `interactive-music-3d` cod
 Goal: [One-sentence description of the feature or improvement].
 
 Context:
-- Frameworks: Next.js, React Three Fiber, Tone.js, Rapier, GLSL
+- Frameworks: Next.js, React Three Fiber, Tone.js, Rapier, GLSL, Zustand
 - Constraints: No paid/licensed assets; code-driven geometry and shaders only.
 
 Tasks:
@@ -68,20 +72,18 @@ Delivery:
 - After implementation, output the full source of each updated or newly created file.
 - Ensure all components using hooks begin with `'use client'`.
 - Include any new shader, config, or style files.
-- Update README.md and inline comments to reflect changes.
+- Update README.md, agents.md, and inline comments to reflect changes.
 ```
 
 ### Task Decomposition Guidelines
 
-* Keep each numbered task self-contained and focused (e.g., “Implement ProceduralButton component” vs. “Revamp UI”).
+* Keep each numbered task self-contained and focused.
 * Order tasks logically: foundational elements (config, shaders) first, then components, then integration (physics, audio), then validation.
 * When tasks overlap on the same files, merge them into a single combined task to avoid merge conflicts.
 
 ---
 
 ## Module-Specific Prompt Examples
-
-Below are detailed examples you can copy-paste for common areas. Adjust file paths and details as needed.
 
 ### UI / Procedural Components
 
@@ -101,21 +103,25 @@ Task: Procedural 3D Button and HUD Panel
 ```
 
 ### UI Fusion
+
 ```
 Task: Shape spawn from button, morph-on-click
 ```
 
 ### Audio Shapes
+
 ```
 Task: Shape sound synthesis + visual attributes
 ```
 
 ### PWA Support
+
 ```
 Task: Manifest, meta, install logic
 ```
 
 ### GPU Modes
+
 ```
 Task: Startup selector for shader complexity
 ```
@@ -228,4 +234,4 @@ Task: CI/CD & Build Validation
 
 ---
 
-*Last updated: [DATE]*
+*Last updated: 2025-06-25*
