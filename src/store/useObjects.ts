@@ -24,9 +24,7 @@ interface ObjectState {
 }
 
 export const useObjects = create<ObjectState>((set, get) => ({
-  objects: typeof window !== 'undefined'
-    ? JSON.parse(localStorage.getItem('objects') || '[]')
-    : [],
+  objects: [],
   spawn: (type: ObjectType, position?: [number, number, number]) => {
     const id = Date.now().toString()
     const newObj: MusicalObject = {
@@ -49,3 +47,17 @@ export const useObjects = create<ObjectState>((set, get) => ({
     return id
   },
 }))
+
+export function loadObjectsFromStorage() {
+  if (typeof window === 'undefined') return
+  try {
+    const stored = localStorage.getItem('objects')
+    if (!stored) return
+    const list: MusicalObject[] = JSON.parse(stored)
+    useObjects.setState({ objects: list })
+    list.forEach((obj) => addBody(obj.id, obj.position))
+    ;(window as any).__objects__ = list
+  } catch (err) {
+    console.error('Failed to load objects from storage', err)
+  }
+}
