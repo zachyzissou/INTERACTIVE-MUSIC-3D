@@ -1,5 +1,5 @@
 'use client'
-import React from 'react'
+import React, { Suspense } from 'react'
 import { Canvas, useThree } from '@react-three/fiber'
 import { Physics } from '@react-three/rapier'
 import { PerspectiveCamera, AdaptiveDpr } from '@react-three/drei'
@@ -43,7 +43,9 @@ export default function CanvasScene() {
         <ambientLight intensity={0.4} />
         <directionalLight position={[5,10,5]} intensity={0.8} castShadow />
         <pointLight position={[0,5,-5]} intensity={0.5} />
-        <MusicalObject />
+        <Suspense fallback={null}>
+          <MusicalObject />
+        </Suspense>
       </Physics>
       <PlusButton3D />
     </Canvas>

@@ -4,6 +4,7 @@ import '../src/styles/globals.css'
 import ui from '../src/styles/ui.module.css'
 import React, { useEffect } from 'react'
 import { registerServiceWorker } from '@/lib/registerServiceWorker'
+import { loadObjectsFromStorage } from '@/store/useObjects'
 import PluginLoader from "./PluginLoader"
 import AudioSettingsPanel from '@/components/AudioSettingsPanel'
 import ErrorBoundary from '@/components/ErrorBoundary'
@@ -13,6 +14,7 @@ import { safeStringify } from '@/lib/safeStringify'
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     registerServiceWorker()
+    loadObjectsFromStorage()
     if (process.env.NODE_ENV !== 'production') {
       console.log('RootLayout mounted')
     }

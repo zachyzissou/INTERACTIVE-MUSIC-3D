@@ -237,3 +237,12 @@ Task: CI/CD & Build Validation
 ---
 
 *Last updated: 2025-06-25*
+
+## Agent: Audio Init & Render Safety Agent
+
+### Responsibilities:
+- Ensure Tone.js audio is initialized **only after user interaction**
+- Refactor any `AudioContext` or Tone.js logic out of SSR scope
+- Audit React hook usage for hydration safety (no conditional hooks or SSR-incompatible patterns)
+- Guarantee compatibility with both `npm run dev` and `npm run build`
+- Wrap all browser-dependent components with dynamic import or `"use client"` guard
