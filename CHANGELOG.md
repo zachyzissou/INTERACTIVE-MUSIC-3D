@@ -31,4 +31,12 @@
 ### Changed
 - Unified BottomDrawer as sole control surface
 
+## [Unreleased] – 2025-06-26
+
+### Added
+- WebGPU renderer with auto detection and WebGL fallback (MetalFX Canvas)
+- AR & VR support via WebXR buttons (SpaceCanvas XR)
+- Real-time multiplayer through WebRTC signaling (AirJam Sessions)
+- Magenta.js integration for AI generated melodies (Magic Melody)
+
 

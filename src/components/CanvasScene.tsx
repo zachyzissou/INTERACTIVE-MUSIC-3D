@@ -3,10 +3,14 @@ import React, { Suspense } from 'react'
 import { Canvas, useThree } from '@react-three/fiber'
 import { Physics } from '@react-three/rapier'
 import { PerspectiveCamera, AdaptiveDpr } from '@react-three/drei'
+import { getGPUTier } from 'detect-gpu'
+import WebGPURenderer from 'three/src/renderers/webgpu/WebGPURenderer.js'
 import * as THREE from 'three'
 import AnimatedGradient from './AnimatedGradient'
 import MusicalObject from './MusicalObject'
 import PlusButton3D from './PlusButton3D'
+import XRButtons from './XRButtons'
+import { usePerformanceSettings } from '../store/usePerformanceSettings'
 
 function ResizeHandler() {
   const { camera, gl } = useThree()
@@ -28,13 +32,23 @@ function ResizeHandler() {
 }
 
 export default function CanvasScene() {
+  const [renderer, setRenderer] = React.useState<THREE.WebGLRenderer | null>(null)
+  const setPerf = usePerformanceSettings(s => s.setLevel)
   React.useEffect(() => {
-    if (process.env.NODE_ENV !== 'production') {
-      console.log('CanvasScene mounted')
-    }
+    let cancelled = false
+    ;(async () => {
+      const gpu = await getGPUTier()
+      if (gpu && gpu.tier < 1) setPerf('low')
+      else if (gpu && gpu.tier < 3) setPerf('medium')
+      if (!cancelled && typeof navigator !== 'undefined' && (navigator as any).gpu) {
+        const r = new WebGPURenderer({ antialias: true })
+        setRenderer(r as unknown as THREE.WebGLRenderer)
+      }
+    })()
+    return () => { cancelled = true }
   }, [])
   return (
-    <Canvas className="w-full h-full" shadows>
+    <Canvas className="w-full h-full" shadows gl={renderer ?? undefined}>
       <AdaptiveDpr pixelated />
       <AnimatedGradient />
       <ResizeHandler />
@@ -48,6 +62,7 @@ export default function CanvasScene() {
         </Suspense>
       </Physics>
       <PlusButton3D />
+      <XRButtons />
     </Canvas>
   )
 }
