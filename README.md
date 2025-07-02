@@ -1,6 +1,6 @@
 # Interactive Music 3D
 
-A browser-based, procedural 3D music sandbox built with Next.js, React Three Fiber, Tone.js, Cannon-ES physics, and Zustand.  
+A browser-based, procedural 3D music studio built with Next.js, React Three Fiber, Tone.js and Rapier physics.
 Spawn, select and sculpt floating shapes that generate notes, chords, beats or loops — all in real time.
 
 ---
@@ -15,13 +15,13 @@ Spawn, select and sculpt floating shapes that generate notes, chords, beats or l
     - **Mode Tabs**: Note | Chord | Beat | Loop  
     - **Playback Controls**: Play ↔ Pause
     - **Effect Knobs**: Simple vs. Advanced chain
-    - **Performance Presets**: Low | Medium | High
+    - **Performance Presets**: Eco | Balanced | Pro
 - **Per-shape Audio**
   - First click → initializes audio via `playNote('init')`.
   - Click shape → triggers its note/chord/beat/loop.
 - **Installable PWA** — add to home screen for offline access.
 - **Service Worker Caching** — basic offline support via `public/sw.js`.
-- **Startup Performance Selector** — choose Low/Balanced/High GPU mode.
+- **Startup Performance Selector** — choose Eco/Balanced/Pro GPU mode.
 - **Audio-reactive Shaders** — shapes pulse and ripple in sync with FFT levels.
 - **Responsive Canvas** — camera and renderer resize with the window.
 - **Global Audio Engine**  
@@ -34,9 +34,16 @@ Spawn, select and sculpt floating shapes that generate notes, chords, beats or l
   - Next.js App Router (v15)  
   - TypeScript + ESLint + Prettier  
   - Tailwind CSS for styling  
-  - Motion One for smooth UI animations  
-  - `@react-three/drei` for gradient backdrops  
+  - Motion One for smooth UI animations
+  - `@react-three/drei` for gradient backdrops
   - GitHub Actions → Docker CI/CD → self-hosted runner
+
+## New Features
+
+- **MetalFX Canvas** — WebGPU renderer with WebGL fallback and auto performance detection
+- **AirJam Sessions** — real-time collaboration via WebRTC
+- **Magic Melody** — AI generated melodies powered by Magenta.js
+- **SpaceCanvas XR** — AR & VR modes through WebXR buttons
 
 ---
 

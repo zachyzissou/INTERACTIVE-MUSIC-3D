@@ -9,6 +9,8 @@ import { triggerSound } from '@/lib/soundTriggers'
 import Knob from './JSAudioKnobs'
 import { objectTypes, ObjectType } from '@/config/objectTypes'
 import { usePerformanceSettings, PerfLevel } from '@/store/usePerformanceSettings'
+import MagicMelodyButton from './MagicMelodyButton'
+import JamSessionButton from './JamSessionButton'
 
 export default function BottomDrawer() {
   const objects = useObjects(s => s.objects)
@@ -101,6 +103,8 @@ export default function BottomDrawer() {
                 <Knob label="Highpass" min={0} max={1000} step={10} value={params.highpass} onChange={(e) => setEffect(selected!, { highpass: parseFloat(e.target.value) })} />
               </div>
             )}
+            <MagicMelodyButton />
+            <JamSessionButton />
             <div className="flex gap-2">
               <button onClick={togglePlay} className="px-3 py-1 bg-green-500 rounded">
                 {playing ? 'Pause' : 'Play'}
