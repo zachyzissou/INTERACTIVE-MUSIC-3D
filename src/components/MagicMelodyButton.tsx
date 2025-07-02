@@ -1,6 +1,5 @@
 'use client'
 import React from 'react';
-import * as mm from '@magenta/music';
 import { generateMelody } from '../lib/ai';
 import { useObjects } from '../store/useObjects';
 import { playNote } from '../lib/audio';

@@ -1,7 +1,6 @@
 import { nanoid } from 'nanoid';
 import { create } from 'zustand';
 import Peer from 'simple-peer';
-import { io, Socket } from 'socket.io-client';
 
 interface JamState {
   id: string | null;
@@ -15,16 +14,18 @@ export const useJam = create<JamState>((set, get) => ({
   peers: {},
   start: () => {
     const id = nanoid(6);
-    const socket: Socket = io('ws://localhost:3030');
-    socket.emit('message', JSON.stringify({ type: 'join', id }));
-    socket.on('message', (msg: string) => {
-      const data = JSON.parse(msg);
+    const socket = new WebSocket('ws://localhost:3030');
+    socket.addEventListener('open', () => {
+      socket.send(JSON.stringify({ type: 'join', id }));
+    });
+    socket.addEventListener('message', (event) => {
+      const data = JSON.parse(event.data as string);
       if (data.type === 'signal' && data.from) {
         let peer = get().peers[data.from];
         if (!peer) {
           peer = new Peer({ initiator: false, trickle: false });
           peer.on('signal', (s: any) => {
-            socket.emit('message', JSON.stringify({ type: 'signal', id, to: data.from, payload: s }));
+            socket.send(JSON.stringify({ type: 'signal', id, to: data.from, payload: s }));
           });
           peer.on('data', (d: Uint8Array) => console.log('peer data', d.toString()));
           set({ peers: { ...get().peers, [data.from]: peer } });
@@ -33,7 +34,7 @@ export const useJam = create<JamState>((set, get) => ({
       } else if (data.type === 'signal-ready' && data.from) {
         const peer = new Peer({ initiator: true, trickle: false });
         peer.on('signal', (s: any) => {
-          socket.emit('message', JSON.stringify({ type: 'signal', id, to: data.from, payload: s }));
+          socket.send(JSON.stringify({ type: 'signal', id, to: data.from, payload: s }));
         });
         peer.on('data', (d: Uint8Array) => console.log('peer data', d.toString()));
         set({ peers: { ...get().peers, [data.from]: peer } });
