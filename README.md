@@ -49,28 +49,31 @@ Spawn, select and sculpt floating shapes that generate notes, chords, beats or l
 
 ## 🏗️ Getting Started
 
-1. **Clone & install**  
+1. **Clone & install**
     ```bash
     git clone https://github.com/zachyzissou/INTERACTIVE-MUSIC-3D.git
     cd INTERACTIVE-MUSIC-3D
     npm ci
     npm install @motionone/react @react-three/drei tailwindcss
     ```
-2. **Environment**
+2. **Download model**
+   - `curl -L https://storage.googleapis.com/magentadata/js/checkpoints/music_rnn/basic_rnn.tar?` -o basic_rnn.tar`
+   - `mkdir -p public/models/basic_rnn && tar -xf basic_rnn.tar -C public/models/basic_rnn`
+3. **Environment**
    - Node.js **18.x** LTS
    - No extra `.env` required out of the box
    - PWA manifest located in `public/manifest.json`
-3. **Local development**  
+4. **Local development**
     ```bash
     npm run dev
     # → http://localhost:3000
     ```
-4. **Production build**
+5. **Production build**
     ```bash
     npm run build
     npm run start
     ```
-5. **Install as PWA**
+6. **Install as PWA**
     - Open the site and choose "Add to Home Screen" when prompted.
     - Offline assets are cached via a service worker.
 
