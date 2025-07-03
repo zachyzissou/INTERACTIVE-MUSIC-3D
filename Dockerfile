@@ -1,11 +1,12 @@
 # syntax=docker/dockerfile:1.4
 # Optimized multi-stage Dockerfile for Next.js production build
 
-FROM node:18-alpine AS deps
+FROM node:18.20.8-alpine AS deps
 WORKDIR /app
 
 # Install system packages first to leverage caching
-RUN apk add --no-cache python3 make g++
+RUN apk add --no-cache python3 make g++ \
+    && npm install -g npm@10.8.2
 
 # Copy only package manifests to install dependencies
 COPY package.json package-lock.json .
@@ -14,7 +15,7 @@ RUN --mount=type=cache,target=/root/.npm \
     --mount=type=cache,target=/root/.cache \
     npm ci
 
-FROM node:18-alpine AS builder
+FROM node:18.20.8-alpine AS builder
 WORKDIR /app
 
 COPY --from=deps /app/node_modules ./node_modules
@@ -22,7 +23,7 @@ COPY . .
 
 RUN npm run build && npm prune --production
 
-FROM node:18-alpine AS runner
+FROM node:18.20.8-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 
