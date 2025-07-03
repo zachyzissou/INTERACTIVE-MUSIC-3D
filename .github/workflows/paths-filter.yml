@@ -1,0 +1,31 @@
+name: Path Filters
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Filter changes
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            frontend:
+              - 'frontend/**'
+            backend:
+              - 'backend/**'
+
+      - name: Echo matched filters
+        run: |
+          echo "Frontend changed: ${{ steps.filter.outputs.frontend }}"
+          echo "Backend changed: ${{ steps.filter.outputs.backend }}"
+
