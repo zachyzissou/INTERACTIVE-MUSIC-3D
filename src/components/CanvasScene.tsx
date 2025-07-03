@@ -46,7 +46,7 @@ export default function CanvasScene() {
       }
     })()
     return () => { cancelled = true }
-  }, [])
+  }, [setPerf])
   return (
     <Canvas className="w-full h-full" shadows gl={renderer ?? undefined}>
       <AdaptiveDpr pixelated />
