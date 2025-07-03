@@ -13,7 +13,7 @@ COPY package.json package-lock.json .
 
 RUN --mount=type=cache,target=/root/.npm \
     --mount=type=cache,target=/root/.cache \
-    npm ci
+    npm ci --legacy-peer-deps
 
 FROM node:18.20.8-alpine AS builder
 WORKDIR /app
