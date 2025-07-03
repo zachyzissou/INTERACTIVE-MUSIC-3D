@@ -19,6 +19,7 @@ import { useAudioSettings } from '../store/useAudioSettings'
 import { useEffectSettings, defaultEffectParams, EffectParams } from '../store/useEffectSettings'
 import { ObjectType } from '../store/useObjects'
 import { useLoops } from '../store/useLoops'
+import { logger } from './logger'
 
 import { beatBus } from "./events"
 import {
@@ -77,7 +78,7 @@ export async function startAudioContext() {
   enableAudioInit()
   await initAudioEngine()
   if (process.env.NODE_ENV !== 'production') {
-    console.log('Audio context started')
+    logger.debug('Audio context started')
   }
 }
 let masterVolumeNode: Volume
