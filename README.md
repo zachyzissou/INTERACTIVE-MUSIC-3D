@@ -166,8 +166,14 @@ appear in Unraid's Docker logs UI.
    docker run -d --name interactive-music-web \
      --restart unless-stopped \
      -p 31415:3000 \
-     interactive-music-web:<tag>
-   ```
+    interactive-music-web:<tag>
+  ```
+
+### Swap Limit Warning
+If Docker logs show `No swap limit support`, your host kernel does not enable
+swap accounting. You can enable it via your Docker daemon settings on newer
+kernels. Older distributions may not support this feature; the warning can be
+ignored in that case.
 
 ---
 

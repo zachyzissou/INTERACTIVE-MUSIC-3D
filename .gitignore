@@ -10,5 +10,6 @@ node_modules/
 
 # Lock files
 package-lock.json
-.buildcache/
+.buildcache/*
+!.buildcache/.gitkeep
 tsconfig.tsbuildinfo
