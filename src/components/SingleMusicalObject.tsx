@@ -2,7 +2,7 @@
 // src/components/MusicalObject.tsx
 import React, { useRef, useState, useMemo, useEffect, useCallback } from 'react'
 import { Object3D } from 'three'
-import { RigidBody, RigidBodyApi } from '@react-three/rapier'
+import { RigidBody, RapierRigidBody } from '@react-three/rapier'
 import { useFrame, useThree } from '@react-three/fiber'
 import { useSpring, a } from '@react-spring/three'
 import * as THREE from 'three'
@@ -24,7 +24,7 @@ interface MusicalObjectProps {
 
 export const SingleMusicalObject: React.FC<MusicalObjectProps> = ({ id, type, position }) => {
   // physics body using Rapier
-  const bodyRef = useRef<RigidBodyApi | null>(null)
+  const bodyRef = useRef<RapierRigidBody | null>(null)
   const meshRef = useRef<Object3D>(null)
 
   // dragging state
