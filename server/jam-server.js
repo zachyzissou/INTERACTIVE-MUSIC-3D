@@ -1,4 +1,5 @@
 const { WebSocketServer } = require('ws');
+const { logger } = require('./logger');
 const wss = new WebSocketServer({ port: 3030 });
 const sessions = new Map();
 function broadcast(sessionId, msg, except) {
@@ -18,7 +19,7 @@ wss.on('connection', (ws) => {
         broadcast(sessionId, data, ws);
       }
     } catch (err) {
-      console.error('ws error', err);
+      logger.error(`ws error ${err}`);
     }
   });
   ws.on('close', () => {
@@ -28,4 +29,4 @@ wss.on('connection', (ws) => {
     }
   });
 });
-console.log('Jam server running on 3030');
+logger.info('Jam server running on 3030');

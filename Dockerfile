@@ -28,6 +28,9 @@ RUN npm run build && npm prune --production
 FROM node:18.20.8-bullseye-slim AS runner
 WORKDIR /app
 ENV NODE_ENV=production
+ENV LOG_DIR=/app/logs
+
+RUN mkdir -p "$LOG_DIR"
 
 COPY --from=builder /app .
 

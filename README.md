@@ -120,8 +120,29 @@ src/
 
 ## 🔧 Deployment
 
-- **Dockerfile** — multi-stage build: dependencies, build, production runner.  
+- **Dockerfile** — multi-stage build: dependencies, build, production runner.
 - **GitHub Actions** — builds & pushes Docker image, deploys self-hosted container.
+- **Log Persistence** — mount `/app/logs` to `/mnt/user/appdata/interactive-music-3d/logs` so logs survive rebuilds.
+
+Example `docker-compose.yml` service block:
+
+```yaml
+  interactive-music-3d:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - LOG_DIR=/app/logs
+    volumes:
+      - /mnt/user/appdata/interactive-music-3d/logs:/app/logs
+      - /mnt/user/appdata/interactive-music-3d/uploads:/app/uploads
+      - /mnt/user/appdata/interactive-music-3d/config:/app/config
+      - /mnt/user/appdata/interactive-music-3d/playwright:/root/.cache/ms-playwright
+      - /mnt/user/appdata/interactive-music-3d/.next-cache:/app/.next/cache
+```
+Logs are written to `/app/logs/app.log` and also streamed to stdout so they
+appear in Unraid's Docker logs UI.
 
 ## 🔧 CI/CD Enhancements
 

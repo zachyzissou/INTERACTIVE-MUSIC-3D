@@ -6,13 +6,14 @@ export interface Plugin {
 }
 
 import { safeStringify } from '../lib/safeStringify'
+import { logger } from '../lib/logger'
 
 class PluginManager {
   private plugins: Plugin[] = []
   registerPlugin(plugin: Plugin) {
     this.plugins.push(plugin)
     plugin.init({})
-    console.log(`Plugin loaded: ${safeStringify(plugin)}`)
+    logger.info(`Plugin loaded: ${safeStringify(plugin)}`)
   }
 }
 

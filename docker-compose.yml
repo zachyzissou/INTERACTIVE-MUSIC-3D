@@ -7,6 +7,13 @@ services:
       - "3000:3000"
     environment:
       - NODE_ENV=production
+      - LOG_DIR=/app/logs
+    volumes:
+      - /mnt/user/appdata/interactive-music-3d/logs:/app/logs
+      - /mnt/user/appdata/interactive-music-3d/uploads:/app/uploads
+      - /mnt/user/appdata/interactive-music-3d/config:/app/config
+      - /mnt/user/appdata/interactive-music-3d/playwright:/root/.cache/ms-playwright
+      - /mnt/user/appdata/interactive-music-3d/.next-cache:/app/.next/cache
     restart: unless-stopped
     networks:
       - nginx-proxy
