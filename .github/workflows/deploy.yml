@@ -23,7 +23,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          single-branch: true
 
       - name: Determine changed paths
         id: changes
