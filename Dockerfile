@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1.4
 # Optimized multi-stage Dockerfile for Next.js production build
 
-FROM node:20.13.1-bullseye-slim AS deps
+FROM node:20.17.0-bullseye-slim AS deps
 WORKDIR /app
 
 # Install system packages first to leverage caching
@@ -17,7 +17,7 @@ RUN --mount=type=cache,target=/root/.npm \
     --mount=type=cache,target=/root/.cache \
     npm ci --legacy-peer-deps
 
-FROM node:20.13.1-bullseye-slim AS builder
+FROM node:20.17.0-bullseye-slim AS builder
 WORKDIR /app
 
 COPY --from=deps /app/node_modules ./node_modules
@@ -25,7 +25,7 @@ COPY . .
 
 RUN npm run build && npm prune --production
 
-FROM node:20.13.1-bullseye-slim AS runner
+FROM node:20.17.0-bullseye-slim AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 ENV LOG_DIR=/app/logs
