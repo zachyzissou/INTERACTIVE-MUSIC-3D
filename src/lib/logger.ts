@@ -1,23 +1,11 @@
-import fs from 'fs'
-import path from 'path'
+let logger: { info: (msg: string) => void; debug: (msg: string) => void; error: (msg: string) => void }
 
-const logDir = process.env.LOG_DIR || '/app/logs'
-const logFile = path.join(logDir, 'app.log')
-
-function write(level: string, message: string) {
-  const entry = `[${new Date().toISOString()}] [${level}] ${message}\n`
-  try {
-    fs.mkdirSync(logDir, { recursive: true })
-    fs.appendFileSync(logFile, entry)
-  } catch (err) {
-    console.error('Failed to write log file', err)
-  }
-  if (level === 'error') console.error(message)
-  else console.log(message)
+if (typeof window === 'undefined') {
+  // Node.js environment
+  logger = require('./logger.server').logger
+} else {
+  // Browser environment
+  logger = require('./logger.client').logger
 }
 
-export const logger = {
-  info: (msg: string) => write('INFO', msg),
-  debug: (msg: string) => write('DEBUG', msg),
-  error: (msg: string) => write('ERROR', msg),
-}
+export { logger }

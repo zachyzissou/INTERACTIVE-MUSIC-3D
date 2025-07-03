@@ -141,6 +141,8 @@ Example `docker-compose.yml` service block:
       - /mnt/user/appdata/interactive-music-3d/playwright:/root/.cache/ms-playwright
       - /mnt/user/appdata/interactive-music-3d/.next-cache:/app/.next/cache
 ```
+Logs are written to `/app/logs/app.log` and also streamed to stdout so they
+appear in Unraid's Docker logs UI.
 
 ## 🔧 CI/CD Enhancements
 

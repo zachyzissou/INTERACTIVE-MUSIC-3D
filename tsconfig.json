@@ -22,8 +22,12 @@
     "paths": {
       "@/*": [
         "src/*"
+      ],
+      "@lib/logger": [
+        "src/lib/logger.server.ts"
       ]
     },
+    "types": ["node"],
     "plugins": [
       {
         "name": "next"
