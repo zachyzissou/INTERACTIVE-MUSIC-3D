@@ -10,11 +10,11 @@ const CanvasScene = dynamic(() => import('../src/components/CanvasScene'), { ssr
 const DevCanvas = dynamic(() => import('../src/components/DevCanvas'), { ssr: false })
 
 export default function Home() {
-  const useDevCanvas =
-    typeof window !== 'undefined' &&
-    new URLSearchParams(window.location.search).get('devcanvas') === '1'
-
-  const Scene = useDevCanvas ? DevCanvas : CanvasScene
+  const [Scene, setScene] = React.useState(() => CanvasScene)
+  React.useEffect(() => {
+    const useDev = new URLSearchParams(window.location.search).get('devcanvas') === '1'
+    if (useDev) setScene(() => DevCanvas)
+  }, [])
 
   return (
     <>
