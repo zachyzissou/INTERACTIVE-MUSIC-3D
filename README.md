@@ -133,6 +133,23 @@ src/
 
 ---
 
+## 🚩 Troubleshooting
+
+### Rollback Steps
+1. Stop the running container:
+   ```bash
+   docker rm -f interactive-music-web || true
+   ```
+2. Start the previous image (replace `<tag>` with the desired version):
+   ```bash
+   docker run -d --name interactive-music-web \
+     --restart unless-stopped \
+     -p 31415:3000 \
+     interactive-music-web:<tag>
+   ```
+
+---
+
 ## 📈 Roadmap & Future
 
 - ➕ More shapes: torus knot, custom parametrics  
