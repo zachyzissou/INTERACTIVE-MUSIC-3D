@@ -1,12 +1,15 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from "framer-motion";
 import scenes from "@/config/exampleScenes.json";
 import { useObjects } from "@/store/useObjects";
 import type { ObjectType } from "@/store/useObjects";
 
 const ExampleModal: React.FC = () => {
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
+  useEffect(() => {
+    setOpen(true);
+  }, []);
   const spawn = useObjects((s) => s.spawn);
 
   const load = (scene: (typeof scenes)[0]) => {
