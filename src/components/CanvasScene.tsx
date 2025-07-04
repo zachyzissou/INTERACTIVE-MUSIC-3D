@@ -52,7 +52,7 @@ export default function CanvasScene() {
     }
   }, [setPerf])
   return (
-    <Canvas className="w-full h-full" shadows gl={rendererRef.current ?? undefined}>
+    <Canvas className="absolute inset-0" shadows gl={rendererRef.current ?? undefined}>
       <AdaptiveDpr pixelated />
       <AnimatedGradient />
       <ResizeHandler />

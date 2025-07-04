@@ -9,7 +9,7 @@ export default function DevCanvas() {
     }
   }, [])
   return (
-    <Canvas className="w-full h-full">
+    <Canvas className="absolute inset-0">
       <mesh>
         <boxGeometry args={[1,1,1]} />
         <meshBasicMaterial color="hotpink" />
