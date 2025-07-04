@@ -50,22 +50,22 @@ export const useAudioSettings = create<AudioSettingsState>((set) => ({
   setBpm: (bpm) => set({ bpm }),
   setChorusDepth: (v) => {
     set({ chorusDepth: v })
-    setChorusDepthAudio(v)
+    setChorusDepthAudio(v).catch(console.error)
   },
   setReverbWet: (v) => {
     set({ reverbWet: v })
-    setReverbWetAudio(v)
+    setReverbWetAudio(v).catch(console.error)
   },
   setDelayFeedback: (v) => {
     set({ delayFeedback: v })
-    setDelayFeedbackAudio(v)
+    setDelayFeedbackAudio(v).catch(console.error)
   },
   setBitcrusherBits: (v) => {
     set({ bitcrusherBits: v })
-    setBitcrusherBitsAudio(v)
+    setBitcrusherBitsAudio(v).catch(console.error)
   },
   setFilterFrequency: (v) => {
     set({ filterFrequency: v })
-    setFilterFrequencyAudio(v)
+    setFilterFrequencyAudio(v).catch(console.error)
   },
 }))

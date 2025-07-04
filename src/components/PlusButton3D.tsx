@@ -6,8 +6,8 @@ import * as THREE from 'three'
 import { useObjects } from '@/store/useObjects'
 import { useSelectedShape } from '@/store/useSelectedShape'
 import { startAudioContext } from '@/lib/audio'
-import vertex from '@/shaders/plusButton.vert.glsl?raw'
-import fragment from '@/shaders/plusButton.frag.glsl?raw'
+import vertex from '@/shaders/plusButton.vert'
+import fragment from '@/shaders/plusButton.frag'
 
 export default function PlusButton3D() {
   const { viewport } = useThree()

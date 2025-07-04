@@ -1,4 +1,4 @@
-precision highp float;
+const fragmentShader = `precision highp float;
 varying vec2 vUv;
 uniform float uDistort;
 uniform vec3 uColor;
@@ -13,4 +13,6 @@ void main(){
   float d=sdPlus(p,0.2,0.05-uDistort*0.05);
   float a=smoothstep(0.02,0.0,d);
   gl_FragColor=vec4(uColor,a);
-}
+}`;
+
+export default fragmentShader;
