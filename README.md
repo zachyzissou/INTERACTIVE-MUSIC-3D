@@ -60,7 +60,7 @@ Spawn, select and sculpt floating shapes that generate notes, chords, beats or l
    - `curl -L https://storage.googleapis.com/magentadata/js/checkpoints/music_rnn/basic_rnn.tar?` -o basic_rnn.tar`
    - `mkdir -p public/models/basic_rnn && tar -xf basic_rnn.tar -C public/models/basic_rnn`
 3. **Environment**
-   - Node.js **18.x** LTS
+   - Node.js **20.x** LTS
    - No extra `.env` required out of the box
    - PWA manifest located in `public/manifest.json`
 4. **Local development**

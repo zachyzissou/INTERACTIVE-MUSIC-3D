@@ -46,7 +46,7 @@ jobs:
         if: steps.changes.outputs.src == 'true'
         uses: actions/setup-node@v4
         with:
-          node-version: 18.20.8
+          node-version: 20
 
       - name: 📦 Cache npm
         if: steps.changes.outputs.src == 'true'
