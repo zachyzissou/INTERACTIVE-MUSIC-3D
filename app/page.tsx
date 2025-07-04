@@ -29,7 +29,7 @@ export default function Home() {
       {!started && <StartOverlay onFinish={handleStart} />}
       {started && (
         <>
-          <div className="h-screen w-screen relative">
+          <div className="relative h-full w-full">
             <Scene />
           </div>
           <ShapeEditorPanel />
