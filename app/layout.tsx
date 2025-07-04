@@ -40,8 +40,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   const pageProps = {}
   assertPrimitives(pageProps, 'pageProps')
   return (
-    <html lang="en">
-      <body className={ui.root}>
+    <html lang="en" className="h-full w-full">
+      <body className={`${ui.root} h-full w-full relative`}>
         <ErrorBoundary verbose>
           <AudioSettingsPanel />
           <PluginLoader />

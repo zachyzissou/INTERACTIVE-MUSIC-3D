@@ -5,7 +5,7 @@
   --accent2: #6af;
   background-color: var(--bg);
   color: var(--fg);
-  min-height: 100vh;
+  min-height: 100%;
 }
 
 .glass {
