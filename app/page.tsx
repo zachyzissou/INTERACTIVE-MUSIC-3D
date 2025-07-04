@@ -38,7 +38,7 @@ export default function Home() {
       <ExampleModal />
       <PerformanceSelector />
       <PwaInstallPrompt />
-      <BottomDrawer />
+      {started && <BottomDrawer />}
     </>
   )
 }

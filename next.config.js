@@ -24,10 +24,6 @@ module.exports = {
       test: /\.js\.map$/,
       use: 'null-loader'
     })
-    config.module.rules.push({
-      test: /\.glsl$/,
-      type: 'asset/source'
-    })
     return config;
   },
 };
