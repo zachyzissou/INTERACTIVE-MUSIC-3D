@@ -18,8 +18,9 @@ function ResizeHandler() {
     const onResize = () => {
       const w = window.innerWidth
       const h = window.innerHeight
-      if ('aspect' in camera) {
-        (camera as THREE.PerspectiveCamera).aspect = w / h
+      // Type guard for PerspectiveCamera
+      if (camera instanceof THREE.PerspectiveCamera) {
+        camera.aspect = w / h
         camera.updateProjectionMatrix()
       }
       gl.setSize(w, h)
@@ -35,18 +36,31 @@ export default function CanvasScene() {
   const rendererRef = React.useRef<THREE.WebGLRenderer | null>(null)
   const [ready, setReady] = React.useState(false)
   const setPerf = usePerformanceSettings((s) => s.setLevel)
+  
   React.useEffect(() => {
     let cancelled = false
     if (rendererRef.current) return
+    
     ;(async () => {
       const gpu = await getGPUTier()
       if (gpu && gpu.tier < 1) setPerf('low')
       else if (gpu && gpu.tier < 3) setPerf('medium')
-      if (!cancelled && typeof navigator !== 'undefined' && (navigator as any).gpu) {
-        rendererRef.current = new WebGPURenderer({ antialias: true }) as unknown as THREE.WebGLRenderer
-        setReady(true)
+      
+      // Type-safe WebGPU detection
+      const hasWebGPU = typeof navigator !== 'undefined' && 'gpu' in navigator
+      if (!cancelled && hasWebGPU) {
+        try {
+          // WebGPURenderer implements the same interface as WebGLRenderer for Three.js
+          const webgpuRenderer = new WebGPURenderer({ antialias: true })
+          // Type cast through unknown as WebGPU and WebGL renderers have compatible interfaces for Canvas
+          rendererRef.current = webgpuRenderer as unknown as THREE.WebGLRenderer
+          setReady(true)
+        } catch (error) {
+          console.warn('WebGPU renderer initialization failed:', error)
+        }
       }
     })()
+    
     return () => {
       cancelled = true
     }

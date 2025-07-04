@@ -1,52 +1,31 @@
-"use client";
-// app/layout.tsx
+import type { Metadata, Viewport } from 'next'
 import '../src/styles/globals.css'
 import ui from '../src/styles/ui.module.css'
-import React, { useEffect } from 'react'
-import { registerServiceWorker } from '@/lib/registerServiceWorker'
-import { loadObjectsFromStorage } from '@/store/useObjects'
-import PluginLoader from "./PluginLoader"
-import AudioSettingsPanel from '@/components/AudioSettingsPanel'
-import ErrorBoundary from '@/components/ErrorBoundary'
-import { assertPrimitives } from '@/lib/assertPrimitives'
-import { safeStringify } from '@/lib/safeStringify'
+import ClientLayout from './ClientLayout'
+
+export const metadata: Metadata = {
+  title: 'Interactive Music 3D',
+  description: 'Create music by interacting with 3D shapes in an immersive environment',
+  manifest: '/manifest.json',
+  icons: {
+    icon: '/favicon.svg',
+    apple: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+PHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiBmaWxsPSIlMjMxMTEiLz48cGF0aCBkPSJNMzIgMTZ2MzJNMTYgMzJoMzIiIHN0cm9rZT0iJTIzNGZhM2ZmIiBzdHJva2Utd2lkdGg9IjgiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPjwvc3ZnPgo=',
+  },
+}
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  themeColor: '#111111',
+}
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  useEffect(() => {
-    registerServiceWorker()
-    loadObjectsFromStorage()
-    if (process.env.NODE_ENV !== 'production') {
-      console.log('RootLayout mounted')
-    }
-    window.onerror = (_msg, _src, lineno, colno, error) => {
-      console.error(
-        'Global error:',
-        safeStringify({
-          lineno,
-          colno,
-          stack: (error as Error | undefined)?.stack,
-        })
-      )
-    }
-    window.addEventListener('unhandledrejection', (e) => {
-      console.error(
-        'Unhandled rejection:',
-        safeStringify({
-          stack: (e as PromiseRejectionEvent).reason?.stack,
-        })
-      )
-    })
-  }, [])
-  const pageProps = {}
-  assertPrimitives(pageProps, 'pageProps')
   return (
     <html lang="en" className="h-full w-full">
       <body className={`${ui.root} h-full w-full relative`}>
-        <ErrorBoundary verbose>
-          <AudioSettingsPanel />
-          <PluginLoader />
+        <ClientLayout>
           {children}
-        </ErrorBoundary>
+        </ClientLayout>
       </body>
     </html>
   )
