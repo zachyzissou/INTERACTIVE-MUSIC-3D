@@ -33,6 +33,7 @@
   background: rgba(255, 255, 255, 0.2);
   border-radius: 2px;
   outline: none;
+  caret-color: transparent;
 }
 
 .slider::-webkit-slider-thumb {
