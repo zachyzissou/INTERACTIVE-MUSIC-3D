@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { Canvas } from '@react-three/fiber';
 import React from 'react';
-import { startAudio, isAudioInitialized } from '../lib/audio';
+import { startAudioContext, isAudioInitialized } from '../lib/audio';
 import { useObjects } from '../store/useObjects';
 
 // Mock modules
@@ -104,7 +104,7 @@ describe('Audio System', () => {
   it('should initialize audio context on user gesture', async () => {
     expect(isAudioInitialized()).toBe(false);
     
-    await startAudio();
+    await startAudioContext();
     
     expect(isAudioInitialized()).toBe(true);
   });
@@ -114,9 +114,9 @@ describe('Audio System', () => {
     
     // Mock Tone.start to throw an error
     const mockTone = await import('tone');
-    vi.mocked(mockTone.default.start).mockRejectedValue(new Error('Audio context error'));
+    vi.mocked(mockTone.start).mockRejectedValue(new Error('Audio context error'));
     
-    await expect(startAudio()).rejects.toThrow('Audio context error');
+    await expect(startAudioContext()).rejects.toThrow('Audio context error');
     
     consoleSpy.mockRestore();
   });
