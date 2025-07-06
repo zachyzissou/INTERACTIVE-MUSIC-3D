@@ -20,6 +20,7 @@ import { useEffectSettings, defaultEffectParams, EffectParams } from '../store/u
 import { ObjectType } from '../store/useObjects'
 import { useLoops } from '../store/useLoops'
 import { logger } from './logger'
+import { audioNodePool } from './audioNodePool'
 
 import { beatBus } from "./events"
 import {
@@ -36,6 +37,9 @@ import {
 
 import type * as ToneType from 'tone'
 let Tone: typeof ToneType | null = null
+
+// Type aliases
+type AudioSynth = Synth | PolySynth | MembraneSynth
 
 async function ensureTone() {
   if (!Tone) {
@@ -108,7 +112,7 @@ async function initEffects() {
 }
 interface ObjectAudio {
   type: ObjectType
-  synth: Synth | PolySynth | MembraneSynth
+  synth: AudioSynth
   chain: EffectChain
   meter: Meter
   panner: PannerNode
@@ -185,16 +189,13 @@ function createChain(): EffectChain {
   return { hp, lp, delay, reverb }
 }
 
-function getObjectSynth(id: string, type: ObjectType) {
+async function getObjectSynth(id: string, type: ObjectType) {
   const Tone = getTone()!
   let os = objectSynths.get(id)
   if (!os) {
     const chain = createChain()
-  let synth: Synth | PolySynth | MembraneSynth
-  if (type === 'chord') synth = new Tone.PolySynth({ voice: Tone.Synth })
-  else if (type === 'beat') synth = new Tone.MembraneSynth()
-  else synth = new Tone.Synth()
-  const meter = new Tone.Meter({ normalRange: true, smoothing: 0.8 })
+    const synth = await getPooledSynth(type)
+    const meter = new Tone.Meter({ normalRange: true, smoothing: 0.8 })
     const ctx = Tone.getContext().rawContext
     const panner = ctx.createPanner()
     panner.panningModel = 'HRTF'
@@ -239,7 +240,7 @@ export async function playNote(id: string, note: string = 'C4') {
   if (!audioInitialized) return
   const { key } = useAudioSettings.getState()
   const finalNote = transpose(note, key)
-  const os = getObjectSynth(id, 'note')
+  const os = await getObjectSynth(id, 'note')
   const params = useEffectSettings.getState().getParams(id)
   applyParams(os.chain, params)
   const Tone = getTone()!
@@ -254,7 +255,7 @@ export async function playChord(id: string, notes: string[] = ['C4', 'E4', 'G4']
   if (!audioInitialized) return
   const { key } = useAudioSettings.getState()
   const final = notes.map((n) => transpose(n, key))
-  const os = getObjectSynth(id, 'chord')
+  const os = await getObjectSynth(id, 'chord')
   const params = useEffectSettings.getState().getParams(id)
   applyParams(os.chain, params)
   const Tone = getTone()!
@@ -270,7 +271,7 @@ export async function playBeat(id: string) {
   if (!audioInitialized) return
   const { key } = useAudioSettings.getState()
   const note = transpose('C2', key)
-  const os = getObjectSynth(id, 'beat')
+  const os = await getObjectSynth(id, 'beat')
   const params = useEffectSettings.getState().getParams(id)
   applyParams(os.chain, params)
   const Tone = getTone()!
@@ -387,4 +388,35 @@ export async function playSpawnSound() {
     }).connect(masterVolumeNode)
   }
   spawnSynth.triggerAttackRelease('C6', '16n', Tone.now())
+}
+
+// Audio node pool integration
+async function getPooledSynth(type: ObjectType): Promise<AudioSynth> {
+  const Tone = getTone()!
+  
+  return audioNodePool.acquire('synth', () => {
+    if (type === 'chord') {
+      return new Tone.PolySynth({ voice: Tone.Synth })
+    } else if (type === 'beat') {
+      return new Tone.MembraneSynth()
+    } else {
+      return new Tone.Synth()
+    }
+  })
+}
+
+function returnSynthToPool(synth: AudioSynth) {
+  try {
+    // Stop all notes and reset
+    if ('releaseAll' in synth) {
+      synth.releaseAll()
+    } else if ('triggerRelease' in synth) {
+      synth.triggerRelease()
+    }
+    
+    // Return to pool
+    audioNodePool.release('synth', synth)
+  } catch (error) {
+    logger.error('Failed to return synth to pool: ' + String(error))
+  }
 }

@@ -50,33 +50,65 @@ Spawn, select and sculpt floating shapes that generate notes, chords, beats or l
 
 ## 🏗️ Getting Started
 
-1. **Clone & install**
+### **Prerequisites**
+- Node.js **20.x** LTS (recommended: 20.11.0+)
+- npm **10.x** or yarn **4.x**
+- Modern browser with WebGL 2.0 support
+- For WebGPU features: Chrome 113+, Firefox 121+, or Safari 18+
+
+### **Installation**
+
+1. **Clone & install dependencies**
     ```bash
     git clone https://github.com/zachyzissou/INTERACTIVE-MUSIC-3D.git
     cd INTERACTIVE-MUSIC-3D
-    npm ci
-    npm install @motionone/react @react-three/drei tailwindcss
+    npm ci --legacy-peer-deps
     ```
-2. **Download model**
-   - `curl -L https://storage.googleapis.com/magentadata/js/checkpoints/music_rnn/basic_rnn.tar?` -o basic_rnn.tar`
-   - `mkdir -p public/models/basic_rnn && tar -xf basic_rnn.tar -C public/models/basic_rnn`
-3. **Environment**
-   - Node.js **20.x** LTS
-   - No extra `.env` required out of the box
-   - PWA manifest located in `public/manifest.json`
-4. **Local development**
+
+2. **Security audit & fixes**
+    ```bash
+    npm audit fix
+    # Review and apply security patches
+    ```
+
+3. **Download AI model (optional)**
+   ```bash
+   curl -L "https://storage.googleapis.com/magentadata/js/checkpoints/music_rnn/basic_rnn.tar" -o basic_rnn.tar
+   mkdir -p public/models/basic_rnn && tar -xf basic_rnn.tar -C public/models/basic_rnn
+   ```
+
+### **Development**
+
+4. **Local development server**
     ```bash
     npm run dev
     # → http://localhost:3000
+    # Hot reload enabled with TypeScript checking
     ```
-5. **Production build**
+
+5. **Production build & test**
     ```bash
     npm run build
     npm run start
+    # → http://localhost:3000 (production mode)
     ```
-6. **Install as PWA**
-    - Open the site and choose "Add to Home Screen" when prompted.
-    - Offline assets are cached via a service worker.
+
+6. **Testing & validation**
+    ```bash
+    npm run lint          # ESLint + Prettier
+    npm run test:unit     # Vitest unit tests  
+    npm run test:cypress  # E2E integration tests
+    ```
+
+### **PWA Installation**
+- Desktop: Look for "Install" button in address bar
+- Mobile: Use "Add to Home Screen" from browser menu
+- Offline mode: Basic caching via service worker
+
+### **Environment Configuration**
+- No `.env` required for basic functionality
+- Optional: Set `LOG_DIR` for custom logging directory
+- Docker: See `docker-compose.yml` for container deployment
 
 ---
 
