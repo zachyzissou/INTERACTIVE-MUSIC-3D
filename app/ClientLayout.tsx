@@ -4,7 +4,7 @@ import { registerServiceWorker } from '@/lib/registerServiceWorker'
 import { loadObjectsFromStorage } from '@/store/useObjects'
 import PluginLoader from "./PluginLoader"
 import AudioSettingsPanel from '@/components/AudioSettingsPanel'
-import ErrorBoundary from '@/components/ErrorBoundary'
+import ErrorBoundary from '@/components/EnhancedErrorBoundary'
 import { assertPrimitives } from '@/lib/assertPrimitives'
 import { safeStringify } from '@/lib/safeStringify'
 
@@ -39,7 +39,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
   assertPrimitives(pageProps, 'pageProps')
   
   return (
-    <ErrorBoundary verbose>
+    <ErrorBoundary context="ClientLayout" verbose>
       <AudioSettingsPanel />
       <PluginLoader />
       {children}

@@ -1,20 +1,14 @@
 "use client";
-import React, { useState, useCallback } from "react";
+import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import Particles from "react-tsparticles";
-import type { Engine } from "tsparticles-engine";
-import { loadFull } from "tsparticles";
+import Particles from "@tsparticles/react";
 
 interface StartOverlayProps {
-  onFinish: () => void;
+  readonly onFinish: () => void;
 }
 
 export default function StartOverlay({ onFinish }: StartOverlayProps) {
   const [exiting, setExiting] = useState(false);
-
-  const particlesInit = useCallback(async (engine: Engine) => {
-    await loadFull(engine);
-  }, []);
 
   const particlesOptions = {
     background: { color: { value: "transparent" } },
@@ -48,7 +42,6 @@ export default function StartOverlay({ onFinish }: StartOverlayProps) {
         >
           <Particles
             id="start-particles"
-            init={particlesInit}
             options={particlesOptions}
             className="absolute inset-0"
           />
