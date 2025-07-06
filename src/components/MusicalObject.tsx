@@ -11,6 +11,7 @@ import * as THREE from 'three'
 import SingleMusicalObject from './SingleMusicalObject'
 import { usePerformanceSettings } from '../store/usePerformanceSettings'
 import { triggerSound } from '../lib/soundTriggers'
+import { logger } from '../lib/logger'
 
 // Group objects by type for instanced rendering
 function groupByType(objects: Obj[]) {
@@ -57,7 +58,7 @@ const MusicalObjectInstances: React.FC = () => {
                   onClick={async (e) => {
                     e.stopPropagation()
                     if (process.env.NODE_ENV !== 'production') {
-                      console.log('Clicked object', obj.id)
+                      logger.info('Clicked object ' + obj.id)
                     }
                     select(obj.id)
                     await triggerSound(obj.type, obj.id)

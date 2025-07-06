@@ -4,7 +4,7 @@ import { Canvas, useThree } from '@react-three/fiber'
 import { Physics } from '@react-three/rapier'
 import { PerspectiveCamera, AdaptiveDpr } from '@react-three/drei'
 import { getGPUTier } from 'detect-gpu'
-import WebGPURenderer from 'three/src/renderers/webgpu/WebGPURenderer.js'
+import { advancedRenderer } from '../lib/renderer'
 import * as THREE from 'three'
 import AnimatedGradient from './AnimatedGradient'
 import MusicalObject from './MusicalObject'
@@ -34,7 +34,6 @@ function ResizeHandler() {
 
 export default function CanvasScene() {
   const rendererRef = React.useRef<THREE.WebGLRenderer | null>(null)
-  const [ready, setReady] = React.useState(false)
   const setPerf = usePerformanceSettings((s) => s.setLevel)
   
   React.useEffect(() => {
@@ -46,17 +45,14 @@ export default function CanvasScene() {
       if (gpu && gpu.tier < 1) setPerf('low')
       else if (gpu && gpu.tier < 3) setPerf('medium')
       
-      // Type-safe WebGPU detection
-      const hasWebGPU = typeof navigator !== 'undefined' && 'gpu' in navigator
-      if (!cancelled && hasWebGPU) {
+      if (!cancelled) {
         try {
-          // WebGPURenderer implements the same interface as WebGLRenderer for Three.js
-          const webgpuRenderer = new WebGPURenderer({ antialias: true })
-          // Type cast through unknown as WebGPU and WebGL renderers have compatible interfaces for Canvas
-          rendererRef.current = webgpuRenderer as unknown as THREE.WebGLRenderer
-          setReady(true)
+          // Use the advanced renderer from lib/renderer.ts
+          const canvas = document.createElement('canvas')
+          const renderer = await advancedRenderer.initializeRenderer(canvas)
+          rendererRef.current = renderer
         } catch (error) {
-          console.warn('WebGPU renderer initialization failed:', error)
+          console.warn('Advanced renderer initialization failed:', error)
         }
       }
     })()

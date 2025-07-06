@@ -1,5 +1,6 @@
 // src/lib/renderer.ts
 import * as THREE from 'three'
+import { logger } from './logger'
 
 export class AdvancedRenderer {
   private renderer: THREE.WebGLRenderer | null = null
@@ -13,10 +14,11 @@ export class AdvancedRenderer {
   private async checkWebGPUSupport() {
     if (typeof navigator !== 'undefined' && 'gpu' in navigator) {
       try {
-        const adapter = await navigator.gpu.requestAdapter()
+        const gpu = (navigator as any).gpu
+        const adapter = await gpu.requestAdapter()
         this.isWebGPUSupported = !!adapter
       } catch (error) {
-        console.warn('WebGPU not supported:', error)
+        logger.error('WebGPU not supported: ' + String(error))
         this.isWebGPUSupported = false
       }
     }
@@ -41,7 +43,7 @@ export class AdvancedRenderer {
     this.renderer.shadowMap.enabled = true
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap
 
-    console.log('WebGL renderer initialized with optimizations')
+    logger.info('WebGL renderer initialized with optimizations')
     return this.renderer
   }
 

@@ -1,6 +1,7 @@
-import { nanoid } from 'nanoid';
-import { create } from 'zustand';
-import Peer from 'simple-peer';
+import { create } from 'zustand'
+import Peer from 'simple-peer'
+import { logger } from './logger'
+import { nanoid } from 'nanoid'
 
 interface JamState {
   id: string | null;
@@ -27,7 +28,7 @@ export const useJam = create<JamState>((set, get) => ({
           peer.on('signal', (s: any) => {
             socket.send(JSON.stringify({ type: 'signal', id, to: data.from, payload: s }));
           });
-          peer.on('data', (d: Uint8Array) => console.log('peer data', d.toString()));
+          peer.on('data', (d: Uint8Array) => logger.info('peer data: ' + d.toString()));
           set({ peers: { ...get().peers, [data.from]: peer } });
         }
         peer.signal(data.payload);
@@ -36,7 +37,7 @@ export const useJam = create<JamState>((set, get) => ({
         peer.on('signal', (s: any) => {
           socket.send(JSON.stringify({ type: 'signal', id, to: data.from, payload: s }));
         });
-        peer.on('data', (d: Uint8Array) => console.log('peer data', d.toString()));
+        peer.on('data', (d: Uint8Array) => logger.info('peer data: ' + d.toString()));
         set({ peers: { ...get().peers, [data.from]: peer } });
         peer.signal(data.payload);
       }

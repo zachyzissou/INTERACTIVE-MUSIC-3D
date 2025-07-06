@@ -1,11 +1,12 @@
 'use client'
 import React from 'react'
 import { Canvas } from '@react-three/fiber'
+import { logger } from '@/lib/logger'
 
 export default function DevCanvas() {
   React.useEffect(() => {
     if (process.env.NODE_ENV !== 'production') {
-      console.log('DevCanvas mounted')
+      logger.info('DevCanvas mounted')
     }
   }, [])
   return (

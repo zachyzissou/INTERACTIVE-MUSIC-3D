@@ -7,29 +7,28 @@ import AudioSettingsPanel from '@/components/AudioSettingsPanel'
 import ErrorBoundary from '@/components/EnhancedErrorBoundary'
 import { assertPrimitives } from '@/lib/assertPrimitives'
 import { safeStringify } from '@/lib/safeStringify'
+import { logger } from '@/lib/logger'
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     registerServiceWorker()
     loadObjectsFromStorage()
     if (process.env.NODE_ENV !== 'production') {
-      console.log('ClientLayout mounted')
+      logger.info('ClientLayout mounted')
     }
     window.onerror = (_msg, _src, lineno, colno, error) => {
-      console.error(
-        'Global error:',
-        safeStringify({
+      logger.error(
+        'Global error: ' + safeStringify({
           lineno,
           colno,
-          stack: (error as Error | undefined)?.stack,
+          stack: error?.stack,
         })
       )
     }
     window.addEventListener('unhandledrejection', (e) => {
-      console.error(
-        'Unhandled rejection:',
-        safeStringify({
-          stack: (e as PromiseRejectionEvent).reason?.stack,
+      logger.error(
+        'Unhandled rejection: ' + safeStringify({
+          stack: e.reason?.stack,
         })
       )
     })
