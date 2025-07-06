@@ -46,6 +46,7 @@
     "zustand": "^5.0.6"
   },
   "devDependencies": {
+    "@next/bundle-analyzer": "^15.3.5",
     "@tailwindcss/postcss": "^4.1.11",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",
