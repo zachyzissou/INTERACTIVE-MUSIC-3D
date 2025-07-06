@@ -246,3 +246,4 @@ Task: CI/CD & Build Validation
 - Audit React hook usage for hydration safety (no conditional hooks or SSR-incompatible patterns)
 - Guarantee compatibility with both `npm run dev` and `npm run build`
 - Wrap all browser-dependent components with dynamic import or `"use client"` guard
+- Delay Three.js renderer and other side-effects until a user gesture dismisses `StartOverlay`

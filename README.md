@@ -22,6 +22,7 @@ Spawn, select and sculpt floating shapes that generate notes, chords, beats or l
 - **Installable PWA** — add to home screen for offline access.
 - **Service Worker Caching** — basic offline support via `public/sw.js`.
 - **Startup Performance Selector** — choose Eco/Balanced/Pro GPU mode.
+- **Hydration Safe Start** — WebGL and audio wait for a click via `StartOverlay` ([guide](docs/hydration-safety.md)).
 - **Audio-reactive Shaders** — shapes pulse and ripple in sync with FFT levels.
 - **Responsive Canvas** — camera and renderer resize with the window.
 - **Global Audio Engine**  
@@ -177,6 +178,11 @@ If Docker logs show `No swap limit support`, your host kernel does not enable
 swap accounting. You can enable it via your Docker daemon settings on newer
 kernels. Older distributions may not support this feature; the warning can be
 ignored in that case.
+
+### Hydration Errors
+If you see React hydration warnings on first load, make sure audio and WebGL
+setup only run after the `StartOverlay` is dismissed. See
+[`docs/hydration-safety.md`](docs/hydration-safety.md) for details.
 
 ---
 

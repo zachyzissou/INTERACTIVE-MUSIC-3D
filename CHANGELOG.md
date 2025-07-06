@@ -38,5 +38,6 @@
 - AR & VR support via WebXR buttons (SpaceCanvas XR)
 - Real-time multiplayer through WebRTC signaling (AirJam Sessions)
 - Magenta.js integration for AI generated melodies (Magic Melody)
+- Hydration safety guide and `InteractionGate` component template
 
 
