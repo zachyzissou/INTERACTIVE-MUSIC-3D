@@ -4,7 +4,7 @@ import React, { useRef, useEffect } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import { OrthographicCamera } from '@react-three/drei'
 import * as THREE from 'three'
-import { getAnalyser, getFrequencyDataArray, getFrequencyTexture, getAnalyserBands } from '../lib/analyser'
+import { getAnalyser, getFrequencyTexture, getAnalyserBands } from '../lib/analyser'
 
 const AudioVisualizer: React.FC = () => {
   const { viewport } = useThree()

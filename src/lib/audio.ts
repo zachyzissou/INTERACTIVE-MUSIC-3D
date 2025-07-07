@@ -346,7 +346,8 @@ export function getLoopProgress(id: string): number {
   const info = loops.get(id)
   if (!info) return 0
   const Tone = getTone()!
-  const now = Tone.Transport.seconds
+  const transport = Tone.getTransport()
+  const now = transport.seconds
   const elapsed = (now - info.start) % info.duration
   return elapsed / info.duration
 }
@@ -357,14 +358,15 @@ export async function startLoop(id: string, interval: string = '1m') {
   if (loops.has(id)) return
   const bpm = useAudioSettings.getState().bpm
   const Tone = getTone()!
-  Tone.Transport.bpm.value = bpm
+  const transport = Tone.getTransport()
+  transport.bpm.value = bpm
   const dur = Tone.Time(interval).toSeconds()
-  const start = Tone.Transport.seconds
+  const start = transport.seconds
   const loop = new Tone.Loop(() => {
     playBeat(id)
   }, interval).start(0)
   loops.set(id, { loop, start, duration: dur })
-  if (Tone.Transport.state !== 'started') Tone.Transport.start()
+  if (transport.state !== 'started') transport.start()
   useLoops.getState().start(id)
 }
 

@@ -16,9 +16,9 @@ import { useSelectedShape } from '../store/useSelectedShape'
 
 // Props interface for MusicalObject component
 interface MusicalObjectProps {
-  id: string
-  type: ObjectType
-  position: [number, number, number]
+  readonly id: string
+  readonly type: ObjectType
+  readonly position: readonly [number, number, number]
 }
 
 
