@@ -5,10 +5,13 @@ import React, { useRef, useEffect, useState } from 'react'
 import { Canvas, useThree } from '@react-three/fiber'
 import { WebGLRenderer } from 'three'
 import { usePerformanceSettings } from '../store/usePerformanceSettings'
+import { useSystemPerformance } from '../store/useSystemPerformance'
 
 interface WebGPURendererProps {
   children: React.ReactNode
   className?: string
+  enableWebGPU?: boolean
+  fallbackToWebGL?: boolean
 }
 
 interface RendererCapabilities {
@@ -17,9 +20,15 @@ interface RendererCapabilities {
   webgl: boolean
   preferredRenderer: 'webgpu' | 'webgl2' | 'webgl'
   features: string[]
+  gpuTier?: number
+  memoryInfo?: {
+    totalJSHeapSize?: number
+    usedJSHeapSize?: number
+    jsHeapSizeLimit?: number
+  }
 }
 
-// GPU capability detection (simplified)
+// GPU capability detection with enhanced metrics
 async function detectGPUCapabilities(): Promise<RendererCapabilities> {
   const capabilities: RendererCapabilities = {
     webgpu: false,
@@ -29,14 +38,24 @@ async function detectGPUCapabilities(): Promise<RendererCapabilities> {
     features: []
   }
 
-  // Check WebGPU support
+  // Collect memory information if available
+  if (typeof performance !== 'undefined' && 'memory' in performance) {
+    const memory = (performance as any).memory
+    capabilities.memoryInfo = {
+      totalJSHeapSize: memory.totalJSHeapSize,
+      usedJSHeapSize: memory.usedJSHeapSize,
+      jsHeapSizeLimit: memory.jsHeapSizeLimit
+    }
+  }
+
+  // Check WebGPU support with enhanced detection
   if (await checkWebGPUSupport()) {
     capabilities.webgpu = true
     capabilities.preferredRenderer = 'webgpu'
     capabilities.features.push('WebGPU')
   }
 
-  // Check WebGL support
+  // Check WebGL support with feature detection
   checkWebGLSupport(capabilities)
 
   return capabilities
@@ -50,8 +69,17 @@ async function checkWebGPUSupport(): Promise<boolean> {
     if (!gpu || typeof gpu.requestAdapter !== 'function') return false
     
     const adapter = await gpu.requestAdapter()
-    return !!adapter
-  } catch {
+    if (!adapter) return false
+
+    // Test basic device creation
+    const device = await adapter.requestDevice()
+    if (!device) return false
+
+    // Clean up device
+    device.destroy()
+    return true
+  } catch (error) {
+    console.warn('WebGPU detection failed:', error)
     return false
   }
 }
@@ -83,6 +111,7 @@ function checkWebGLSupport(capabilities: RendererCapabilities) {
 function RendererManager({ children }: Readonly<{ children: React.ReactNode }>) {
   const { gl, scene, camera } = useThree()
   const { level } = usePerformanceSettings()
+  const systemPerf = useSystemPerformance()
   
   useEffect(() => {
     if (!gl) return
@@ -116,26 +145,54 @@ function RendererManager({ children }: Readonly<{ children: React.ReactNode }>) 
       // Enable performance optimizations
       gl.info.autoReset = false
       gl.setPixelRatio(Math.min(window.devicePixelRatio, level === 'high' ? 2 : 1))
+
+      // Update system performance metrics
+      const info = gl.info
+      systemPerf.updateMetrics({
+        webglContexts: 1,
+        geometryCount: info.memory.geometries,
+        textureMemory: info.memory.textures * 4 // Rough estimate in MB
+      })
     }
-  }, [gl, level, scene, camera])
+  }, [gl, level, scene, camera, systemPerf])
 
   return <>{children}</>
 }
 
-export default function WebGPURenderer({ children, className = '' }: Readonly<WebGPURendererProps>) {
+export default function WebGPURenderer({ 
+  children, 
+  className = '',
+  enableWebGPU = true,
+  fallbackToWebGL = true
+}: Readonly<WebGPURendererProps>) {
   const [capabilities, setCapabilities] = useState<RendererCapabilities | null>(null)
   const [renderingMode, setRenderingMode] = useState<'detecting' | 'webgpu' | 'webgl2' | 'webgl'>('detecting')
   const { level } = usePerformanceSettings()
+  const systemPerf = useSystemPerformance()
 
   useEffect(() => {
     detectGPUCapabilities().then((caps) => {
       setCapabilities(caps)
-      setRenderingMode(caps.preferredRenderer)
+      
+      // Determine best renderer based on preferences and capabilities
+      let preferredMode = caps.preferredRenderer
+      if (!enableWebGPU && preferredMode === 'webgpu') {
+        preferredMode = caps.webgl2 ? 'webgl2' : 'webgl'
+      }
+      
+      setRenderingMode(preferredMode)
+      
+      // Update system performance with GPU info
+      systemPerf.updateMetrics({
+        webglContexts: 0, // Will be updated by RendererManager
+      })
+      
       if (process.env.NODE_ENV === 'development') {
-        console.log('🎮 GPU capabilities detected:', caps)
+        console.warn('🎮 GPU capabilities detected:', caps)
+        console.warn('🔧 Renderer mode selected:', preferredMode)
       }
     })
-  }, [])
+  }, [enableWebGPU, systemPerf])
 
   const getCanvasProps = () => {
     const baseProps = {
@@ -164,6 +221,19 @@ export default function WebGPURenderer({ children, className = '' }: Readonly<We
       }
     }
 
+    // WebGPU-specific optimizations
+    if (renderingMode === 'webgpu' && capabilities?.webgpu) {
+      return {
+        ...baseProps,
+        // WebGPU specific props would go here when R3F supports it
+        gl: {
+          ...baseProps.gl,
+          // Enhanced WebGPU settings
+          powerPreference: 'high-performance' as const,
+        }
+      }
+    }
+
     return baseProps
   }
 
@@ -180,12 +250,24 @@ export default function WebGPURenderer({ children, className = '' }: Readonly<We
 
   return (
     <div className="relative w-full h-full">
-      {/* Renderer Info HUD */}
+      {/* Enhanced Renderer Info HUD */}
       {capabilities && (
         <div className="absolute top-2 left-2 z-10 px-3 py-1 bg-black/60 rounded text-white text-xs">
           🎮 {capabilities.preferredRenderer.toUpperCase()} | 
           ⚡ {level.toUpperCase()} | 
           ✨ {capabilities.features.join(', ')}
+          {capabilities.memoryInfo && (
+            <span className="ml-2">
+              💾 {Math.round((capabilities.memoryInfo.usedJSHeapSize || 0) / 1024 / 1024)}MB
+            </span>
+          )}
+        </div>
+      )}
+
+      {/* WebGPU status indicator */}
+      {renderingMode === 'webgpu' && (
+        <div className="absolute top-2 right-2 z-10 px-2 py-1 bg-green-600/80 rounded text-white text-xs">
+          ⚡ WebGPU Active
         </div>
       )}
 
