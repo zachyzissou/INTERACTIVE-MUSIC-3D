@@ -7,6 +7,13 @@ import { BlendFunction, GlitchMode } from 'postprocessing'
 import * as THREE from 'three'
 import { getAnalyserBands } from '../lib/analyser'
 
+// Type augmentation for error tracking
+declare global {
+  interface Window {
+    __postProcessErrorCount?: number
+  }
+}
+
 // Custom audio-reactive effect
 class AudioReactiveEffect extends THREE.ShaderMaterial {
   constructor() {
@@ -178,13 +185,29 @@ export function AudioReactivePostProcess({
       const { bass, mid, treble: high } = getAnalyserBands()
       const time = clock.getElapsedTime()
       
-      updateAudioEffect(time, bass, mid, high)
-      updateBloomEffect(bass, mid, high)
-      updateGlitchEffect(bass)
-      updateChromaticEffect(mid, time)
+      // Use safe updates with additional error handling
+      if (audioEffectRef.current) {
+        updateAudioEffect(time, bass, mid, high)
+      }
+      if (enableBloom && bloomRef.current) {
+        updateBloomEffect(bass, mid, high)
+      }
+      if (enableGlitch && glitchRef.current) {
+        updateGlitchEffect(bass)
+      }
+      if (enableChromatic && chromaticRef.current) {
+        updateChromaticEffect(mid, time)
+      }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error'
-      console.warn('Post-processing frame error:', errorMessage);
+      // Reduce console noise, only warn on first few errors
+      if (window.__postProcessErrorCount === undefined) {
+        window.__postProcessErrorCount = 0
+      }
+      if (window.__postProcessErrorCount < 3) {
+        console.warn('Post-processing frame error:', errorMessage);
+        window.__postProcessErrorCount++
+      }
     }
   })
 

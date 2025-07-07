@@ -1,5 +1,7 @@
 'use client'
 import React, { useEffect, useState, useCallback } from 'react'
+import { useSystemPerformance } from '../store/useSystemPerformance'
+import { advancedRenderer } from '../lib/renderer'
 
 interface PerformanceStats {
   fps: number
@@ -8,18 +10,24 @@ interface PerformanceStats {
   draws: number
   frameTime: number
   renderCalls: number
+  gpuMemory?: number
+  webglCalls?: number
+  geometries?: number
+  textures?: number
 }
 
 interface PerformanceThreshold {
   fps: { good: number; warning: number }
   memory: { good: number; warning: number }
   frameTime: { good: number; warning: number }
+  gpuMemory: { good: number; warning: number }
 }
 
 const THRESHOLDS: PerformanceThreshold = {
   fps: { good: 50, warning: 30 },
   memory: { good: 50, warning: 100 }, // MB
-  frameTime: { good: 16, warning: 33 } // ms
+  frameTime: { good: 16, warning: 33 }, // ms
+  gpuMemory: { good: 200, warning: 500 } // MB
 }
 
 export function PerformanceMonitor() {
@@ -29,10 +37,16 @@ export function PerformanceMonitor() {
     objects: 0,
     draws: 0,
     frameTime: 0,
-    renderCalls: 0
+    renderCalls: 0,
+    gpuMemory: 0,
+    webglCalls: 0,
+    geometries: 0,
+    textures: 0
   })
   const [visible, setVisible] = useState(false)
+  const systemPerf = useSystemPerformance()
 
+  // Enhanced performance tracking with GPU metrics
   useEffect(() => {
     let frameCount = 0
     let lastTime = performance.now()
@@ -54,13 +68,46 @@ export function PerformanceMonitor() {
           : 0
         const avgFrameTime = frameTimes.reduce((sum, time) => sum + time, 0) / frameTimes.length
 
-        setStats(prev => ({
-          ...prev,
+        // Get GPU metrics from renderer
+        const renderer = advancedRenderer.getRenderer()
+        let gpuStats = {
+          gpuMemory: 0,
+          webglCalls: 0,
+          geometries: 0,
+          textures: 0
+        }
+
+        if (renderer?.info) {
+          const info = renderer.info
+          gpuStats = {
+            gpuMemory: (info.memory?.geometries || 0) + (info.memory?.textures || 0),
+            webglCalls: info.render?.calls || 0,
+            geometries: info.memory?.geometries || 0,
+            textures: info.memory?.textures || 0
+          }
+        }
+
+        const newStats = {
           fps,
           memory,
           frameTime: Math.round(avgFrameTime * 100) / 100,
-          renderCalls: prev.renderCalls + frameCount
-        }))
+          renderCalls: frameCount,
+          objects: gpuStats.geometries,
+          draws: gpuStats.webglCalls,
+          ...gpuStats
+        }
+
+        setStats(newStats)
+
+        // Update system performance store
+        systemPerf.updateMetrics({
+          fps,
+          frameTime: avgFrameTime,
+          memoryUsage: memory,
+          webglContexts: renderer ? 1 : 0,
+          geometryCount: gpuStats.geometries,
+          textureMemory: gpuStats.textures
+        })
 
         frameCount = 0
         lastTime = now
@@ -77,7 +124,7 @@ export function PerformanceMonitor() {
         cancelAnimationFrame(animationId)
       }
     }
-  }, [])
+  }, [systemPerf])
 
   // Toggle with Ctrl+Shift+P
   useEffect(() => {
@@ -85,7 +132,7 @@ export function PerformanceMonitor() {
       if (e.ctrlKey && e.shiftKey && e.key === 'P') {
         setVisible(prev => !prev)
         if (process.env.NODE_ENV === 'development') {
-          console.log('Performance monitor toggled')
+          console.warn('Performance monitor toggled')
         }
       }
     }
@@ -98,31 +145,51 @@ export function PerformanceMonitor() {
     const threshold = THRESHOLDS[type]
     
     let isGood: boolean
-    let isWarning: boolean
-    
-    if (type === 'frameTime' || type === 'memory') {
-      // Lower is better for frameTime and memory
-      isGood = value <= threshold.good
-      isWarning = value <= threshold.warning
-    } else {
-      // Higher is better for FPS
-      isGood = value >= threshold.good
-      isWarning = value >= threshold.warning
+    switch (type) {
+      case 'fps':
+        isGood = value >= threshold.good
+        break
+      case 'frameTime':
+        isGood = value <= threshold.good
+        break
+      case 'memory':
+      case 'gpuMemory':
+        isGood = value <= threshold.good
+        break
+      default:
+        isGood = true
     }
     
     if (isGood) return 'text-green-400'
-    if (isWarning) return 'text-yellow-400'
-    return 'text-red-400'
+    
+    let isWarning: boolean
+    switch (type) {
+      case 'fps':
+        isWarning = value >= threshold.warning
+        break
+      case 'frameTime':
+        isWarning = value <= threshold.warning
+        break  
+      case 'memory':
+      case 'gpuMemory':
+        isWarning = value <= threshold.warning
+        break
+      default:
+        isWarning = true
+    }
+    
+    return isWarning ? 'text-yellow-400' : 'text-red-400'
   }
 
   const getPerformanceGrade = (): { grade: string; color: string } => {
     const fpsGood = stats.fps >= THRESHOLDS.fps.good
     const memoryGood = stats.memory <= THRESHOLDS.memory.good
     const frameTimeGood = stats.frameTime <= THRESHOLDS.frameTime.good
+    const gpuMemoryGood = (stats.gpuMemory || 0) <= THRESHOLDS.gpuMemory.good
     
-    const goodCount = [fpsGood, memoryGood, frameTimeGood].filter(Boolean).length
+    const goodCount = [fpsGood, memoryGood, frameTimeGood, gpuMemoryGood].filter(Boolean).length
     
-    if (goodCount === 3) return { grade: 'A', color: 'text-green-400' }
+    if (goodCount >= 3) return { grade: 'A', color: 'text-green-400' }
     if (goodCount === 2) return { grade: 'B', color: 'text-yellow-400' }
     if (goodCount === 1) return { grade: 'C', color: 'text-orange-400' }
     return { grade: 'D', color: 'text-red-400' }
@@ -161,9 +228,23 @@ export function PerformanceMonitor() {
               <span>Memory:</span>
               <span className={getStatusColor(stats.memory, 'memory')}>{stats.memory}MB</span>
             </div>
+            {stats.gpuMemory && stats.gpuMemory > 0 && (
+              <div className="flex justify-between">
+                <span>GPU Memory:</span>
+                <span className={getStatusColor(stats.gpuMemory, 'gpuMemory')}>{stats.gpuMemory}MB</span>
+              </div>
+            )}
             <div className="flex justify-between">
-              <span>Render Calls:</span>
-              <span className="text-gray-300">{stats.renderCalls.toLocaleString()}</span>
+              <span>Geometries:</span>
+              <span className="text-gray-300">{stats.geometries || 0}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Textures:</span>
+              <span className="text-gray-300">{stats.textures || 0}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Draw Calls:</span>
+              <span className="text-gray-300">{stats.draws || 0}</span>
             </div>
           </div>
           

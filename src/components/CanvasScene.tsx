@@ -11,9 +11,8 @@ import MusicalObject from './MusicalObject'
 import PlusButton3D from './PlusButton3D'
 import XRButtons from './XRButtons'
 import AudioReactiveOrb3D from './AudioReactiveOrb3D'
-// TODO: Re-enable post-processing after fixing WebKit compatibility
-// import AudioReactivePostProcess from './AudioReactivePostProcess'
-// import PostProcessErrorBoundary from './PostProcessErrorBoundary'
+import AudioReactivePostProcess from './AudioReactivePostProcess'
+import PostProcessErrorBoundary from './PostProcessErrorBoundary'
 import { usePerformanceSettings } from '../store/usePerformanceSettings'
 import { useAudioSettings } from '../store/useAudioSettings'
 
@@ -193,10 +192,18 @@ export default function CanvasScene() {
       <PlusButton3D />
       <XRButtons />
       
-      {/* Post-processing effects - temporarily disabled due to WebKit compatibility issues */}
-      {/* <PostProcessErrorBoundary>
-        <AudioReactivePostProcess />
-      </PostProcessErrorBoundary> */}
+      {/* Post-processing effects - enhanced with error boundaries for WebKit compatibility */}
+      {perfLevel !== 'low' && (
+        <PostProcessErrorBoundary>
+          <AudioReactivePostProcess 
+            intensity={volume}
+            enableGlitch={perfLevel === 'high'}
+            enableBloom={true}
+            enableChromatic={perfLevel === 'high'}
+            performanceLevel={perfLevel}
+          />
+        </PostProcessErrorBoundary>
+      )}
     </Canvas>
   )
 }
