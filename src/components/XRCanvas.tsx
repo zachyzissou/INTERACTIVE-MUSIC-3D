@@ -53,7 +53,11 @@ export default function XRCanvas({ enableVR = true, enableAR = true, className =
             {enableVR && (
               <button
                 className="px-4 py-2 bg-black/80 border border-white/20 rounded-lg text-white cursor-pointer hover:bg-white/10 transition-colors"
-                onClick={() => console.log('VR mode - Coming soon!')}
+                onClick={() => {
+                  if (process.env.NODE_ENV === 'development') {
+                    console.log('VR mode - Coming soon!')
+                  }
+                }}
               >
                 🥽 VR
               </button>
@@ -61,7 +65,11 @@ export default function XRCanvas({ enableVR = true, enableAR = true, className =
             {enableAR && (
               <button
                 className="px-4 py-2 bg-black/80 border border-white/20 rounded-lg text-white cursor-pointer hover:bg-white/10 transition-colors"
-                onClick={() => console.log('AR mode - Coming soon!')}
+                onClick={() => {
+                  if (process.env.NODE_ENV === 'development') {
+                    console.log('AR mode - Coming soon!')
+                  }
+                }}
               >
                 📱 AR
               </button>

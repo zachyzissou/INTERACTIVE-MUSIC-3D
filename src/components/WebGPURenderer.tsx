@@ -131,7 +131,9 @@ export default function WebGPURenderer({ children, className = '' }: Readonly<We
     detectGPUCapabilities().then((caps) => {
       setCapabilities(caps)
       setRenderingMode(caps.preferredRenderer)
-      console.log('🎮 GPU capabilities detected:', caps)
+      if (process.env.NODE_ENV === 'development') {
+        console.log('🎮 GPU capabilities detected:', caps)
+      }
     })
   }, [])
 

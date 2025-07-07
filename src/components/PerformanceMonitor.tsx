@@ -84,7 +84,9 @@ export function PerformanceMonitor() {
     const handleKeyPress = (e: KeyboardEvent) => {
       if (e.ctrlKey && e.shiftKey && e.key === 'P') {
         setVisible(prev => !prev)
-        console.log('Performance monitor toggled')
+        if (process.env.NODE_ENV === 'development') {
+          console.log('Performance monitor toggled')
+        }
       }
     }
 

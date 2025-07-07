@@ -1,0 +1,47 @@
+/* FloatingPanel.module.css */
+
+.neonGlow {
+  background: radial-gradient(circle at 50% 50%, rgba(0, 255, 255, 0.1), transparent 70%);
+  filter: blur(20px);
+}
+
+.liquidBorder {
+  background: linear-gradient(45deg, rgba(157, 0, 255, 0.2), rgba(0, 255, 255, 0.2));
+  filter: blur(1px);
+}
+
+.panel {
+  border-radius: 16px;
+}
+
+.glassPanel {
+  background: rgba(16, 16, 32, 0.4);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.neonPanel {
+  background: rgba(0, 5, 17, 0.6);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(0, 255, 255, 0.3);
+  box-shadow: 0 0 20px rgba(0, 255, 255, 0.2), inset 0 0 20px rgba(0, 255, 255, 0.1);
+}
+
+.cyberPanel {
+  background: linear-gradient(135deg, rgba(26, 26, 46, 0.7), rgba(22, 33, 62, 0.5));
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(157, 0, 255, 0.4);
+  box-shadow: 0 8px 40px rgba(157, 0, 255, 0.2);
+}
+
+.minimalPanel {
+  background: rgba(255, 255, 255, 0.05);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
