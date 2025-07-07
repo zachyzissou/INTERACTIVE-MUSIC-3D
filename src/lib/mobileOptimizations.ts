@@ -104,9 +104,12 @@ export class MobileOptimizer {
 
       // Swipe gesture
       if (timeDiff < 500 && distance > 50) {
-        const direction = Math.abs(distX) > Math.abs(distY) 
-          ? (distX > 0 ? 'right' : 'left')
-          : (distY > 0 ? 'down' : 'up')
+        let direction: string
+        if (Math.abs(distX) > Math.abs(distY)) {
+          direction = distX > 0 ? 'right' : 'left'
+        } else {
+          direction = distY > 0 ? 'down' : 'up'
+        }
         
         element.dispatchEvent(new CustomEvent('mobile-swipe', {
           detail: { direction, distance }
@@ -184,8 +187,8 @@ export class MobileOptimizer {
   getConnectionInfo() {
     if (typeof navigator === 'undefined') return null
 
-    const connection = (navigator as any).connection || 
-                      (navigator as any).mozConnection || 
+    const connection = (navigator as any).connection ?? 
+                      (navigator as any).mozConnection ?? 
                       (navigator as any).webkitConnection
 
     if (!connection) return null

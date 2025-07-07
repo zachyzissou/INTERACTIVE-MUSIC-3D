@@ -56,6 +56,22 @@ const AudioSettingsPanel = () => {
           onChange={handleVolume}
         />
       </div>
+      <div className={styles.row}>
+        <label htmlFor="synth-preset">Synth Preset</label>
+        <select
+          id="synth-preset"
+          className={styles.select}
+          value="lead"
+          onChange={() => {}}
+          aria-label="Synthesizer preset"
+          title="Select synthesizer preset"
+        >
+          <option value="lead">Lead</option>
+          <option value="pad">Pad</option>
+          <option value="bass">Bass</option>
+          <option value="pluck">Pluck</option>
+        </select>
+      </div>
     </motion.div>
   )
 }

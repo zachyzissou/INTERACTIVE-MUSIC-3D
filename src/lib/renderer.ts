@@ -7,8 +7,8 @@ export class AdvancedRenderer {
   private webgpuRenderer: any = null // Will be GPURenderer when available
   private isWebGPUSupported = false
 
-  constructor() {
-    this.checkWebGPUSupport()
+  async initialize() {
+    await this.checkWebGPUSupport()
   }
 
   private async checkWebGPUSupport() {

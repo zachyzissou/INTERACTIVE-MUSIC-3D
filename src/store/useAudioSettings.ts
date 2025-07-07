@@ -14,12 +14,14 @@ import {
  */
 
 export type ScaleType = 'major' | 'minor'
+export type SynthPreset = 'lead' | 'pad' | 'bass' | 'pluck'
 
 interface AudioSettingsState {
   key: string
   scale: ScaleType
   volume: number
   bpm: number
+  synthPreset: SynthPreset
   chorusDepth: number
   reverbWet: number
   delayFeedback: number
@@ -28,6 +30,7 @@ interface AudioSettingsState {
   setScale: (key: string, scale: ScaleType) => void
   setVolume: (volume: number) => void
   setBpm: (bpm: number) => void
+  setSynthPreset: (preset: SynthPreset) => void
   setChorusDepth: (v: number) => void
   setReverbWet: (v: number) => void
   setDelayFeedback: (v: number) => void
@@ -40,6 +43,7 @@ export const useAudioSettings = create<AudioSettingsState>((set) => ({
   scale: 'major',
   volume: 0.8,
   bpm: 120,
+  synthPreset: 'lead',
   chorusDepth: 0.7,
   reverbWet: 0.5,
   delayFeedback: 0.4,
@@ -48,6 +52,7 @@ export const useAudioSettings = create<AudioSettingsState>((set) => ({
   setScale: (key, scale) => set({ key, scale }),
   setVolume: (volume) => set({ volume }),
   setBpm: (bpm) => set({ bpm }),
+  setSynthPreset: (preset) => set({ synthPreset: preset }),
   setChorusDepth: (v) => {
     set({ chorusDepth: v })
     setChorusDepthAudio(v).catch(console.error)

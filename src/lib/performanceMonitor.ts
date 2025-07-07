@@ -1,7 +1,7 @@
 // src/lib/performance.ts
 export class PerformanceMonitor {
-  private metrics: Map<string, number[]> = new Map()
-  private observers: Map<string, PerformanceObserver> = new Map()
+  private readonly metrics: Map<string, number[]> = new Map()
+  private readonly observers: Map<string, PerformanceObserver> = new Map()
 
   constructor() {
     this.initializeObservers()
@@ -145,7 +145,7 @@ export class FPSMonitor {
   private lastTime = 0
   private frameCount = 0
   private fps = 0
-  private fpsArray: number[] = []
+  private readonly fpsArray: number[] = []
 
   update() {
     const now = performance.now()
