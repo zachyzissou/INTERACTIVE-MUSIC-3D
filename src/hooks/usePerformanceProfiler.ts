@@ -165,7 +165,7 @@ export const usePerformanceProfiler = (
   }
 }
 
-function generateRecommendations(metrics: PerformanceMetrics, grade: string): Recommendation[] {
+function generateRecommendations(metrics: PerformanceMetrics): Recommendation[] {
   const recommendations: Recommendation[] = []
 
   if (metrics.fps < 30) {
