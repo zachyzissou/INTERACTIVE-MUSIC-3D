@@ -4,6 +4,10 @@ module.exports = {
     extend: {
       colors: {
         primary: '#2563eb',
+        'neon-cyan': '#00ffff',
+        'neon-pink': '#ff00ff',
+        'neon-purple': '#8b5cf6',
+        'neon-orange': '#ff8500',
       },
     },
   },

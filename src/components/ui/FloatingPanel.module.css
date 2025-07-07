@@ -1,0 +1,53 @@
+/* FloatingPanel.module.css */
+.panel {
+  backdrop-filter: blur(20px);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glassPanel {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.neonPanel {
+  background: linear-gradient(135deg, rgba(0, 255, 255, 0.1), rgba(255, 0, 255, 0.1));
+  border: 1px solid rgba(0, 255, 255, 0.3);
+  box-shadow: 
+    0 0 20px rgba(0, 255, 255, 0.2),
+    inset 0 0 20px rgba(0, 255, 255, 0.1);
+}
+
+.cyberPanel {
+  background: linear-gradient(135deg, rgba(0, 255, 127, 0.1), rgba(255, 215, 0, 0.1));
+  border: 1px solid rgba(0, 255, 127, 0.3);
+  position: relative;
+}
+
+.minimalPanel {
+  background: rgba(0, 0, 0, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.neonGlow {
+  background: radial-gradient(circle at 50% 50%, rgba(0, 255, 255, 0.1), transparent 70%);
+  border-radius: 12px;
+}
+
+.liquidBorder {
+  background: linear-gradient(45deg, transparent, rgba(0, 255, 127, 0.3), transparent);
+  border-radius: 12px;
+}
+
+@keyframes liquid {
+  0%, 100% { transform: rotate(0deg) scale(1); }
+  25% { transform: rotate(1deg) scale(1.02); }
+  50% { transform: rotate(0deg) scale(1); }
+  75% { transform: rotate(-1deg) scale(1.02); }
+}
+
+.animate-liquid {
+  animation: liquid 3s ease-in-out infinite;
+}
