@@ -58,7 +58,7 @@ function EffectCard({ name, description, icon: Icon, isActive, onClick, color }:
 }
 
 export function ModernEffectsPanel() {
-  const { registerPanel, unregisterPanel, visiblePanels } = useUIManager()
+  const { registerPanel, unregisterPanel, visiblePanels, hidePanel } = useUIManager()
   const { setEffect, getParams } = useEffectSettings()
   const [activeEffect, setActiveEffect] = useState<string | null>(null)
 
@@ -161,7 +161,6 @@ export function ModernEffectsPanel() {
       isVisible={isVisible}
       onVisibilityChange={(visible) => {
         if (!visible) {
-          const { hidePanel } = useUIManager();
           hidePanel('effectsPanel');
         }
       }}
