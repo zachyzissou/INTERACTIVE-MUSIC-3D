@@ -5,10 +5,10 @@ import { Sphere, MeshDistortMaterial } from '@react-three/drei'
 import * as THREE from 'three'
 
 interface AudioReactiveOrb3DProps {
-  position?: [number, number, number]
-  frequency?: number
-  color?: string
-  intensity?: number
+  readonly position?: readonly [number, number, number]
+  readonly frequency?: number
+  readonly color?: string
+  readonly intensity?: number
 }
 
 export default function AudioReactiveOrb3D({ 
@@ -64,7 +64,7 @@ export default function AudioReactiveOrb3D({
           simulateAudio()
         }
       } catch (error) {
-        console.warn('Audio visualization fallback mode')
+        console.warn('Audio visualization fallback mode:', error)
         // Artistic fallback animation
         const simulateAudio = () => {
           const time = Date.now() * 0.001

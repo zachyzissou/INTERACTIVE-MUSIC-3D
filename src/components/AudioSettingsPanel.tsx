@@ -24,10 +24,14 @@ const AudioSettingsPanel = () => {
       className={styles.panel}
     >
       <div className={styles.row}>
+        <label htmlFor="key-select">Key</label>
         <select
+          id="key-select"
           className={styles.select}
           value={key}
           onChange={(e) => setScale(e.target.value, scale)}
+          aria-label="Musical key"
+          title="Select musical key"
         >
           {KEYS.map((k) => (
             <option key={k} value={k}>
@@ -35,18 +39,23 @@ const AudioSettingsPanel = () => {
             </option>
           ))}
         </select>
+        <label htmlFor="scale-select">Scale</label>
         <select
+          id="scale-select"
           className={styles.select}
           value={scale}
           onChange={(e) => setScale(key, e.target.value as ScaleType)}
+          aria-label="Musical scale"
+          title="Select musical scale"
         >
           <option value="major">Major</option>
           <option value="minor">Minor</option>
         </select>
       </div>
       <div className={styles.row}>
-        <label>Volume</label>
+        <label htmlFor="volume-slider">Volume</label>
         <input
+          id="volume-slider"
           className={styles.slider}
           type="range"
           min={0}
@@ -54,6 +63,8 @@ const AudioSettingsPanel = () => {
           step={0.01}
           value={volume}
           onChange={handleVolume}
+          aria-label="Audio volume"
+          title={`Volume: ${Math.round(volume * 100)}%`}
         />
       </div>
       <div className={styles.row}>

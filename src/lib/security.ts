@@ -61,7 +61,7 @@ export class SecurityManager {
   // Sanitize user input
   sanitizeString(input: string): string {
     if (typeof input !== 'string') return ''
-    
+
     return input
       .replace(/[<>]/g, '') // Remove angle brackets
       .replace(/javascript:/gi, '') // Remove javascript: protocol
@@ -83,22 +83,20 @@ export class SecurityManager {
   // Rate limiting for functions
   createRateLimiter(maxCalls: number, windowMs: number) {
     const calls: number[] = []
-    
+
     return function rateLimitedFunction<T extends (...args: any[]) => any>(fn: T): T {
       return ((...args: Parameters<T>) => {
         const now = Date.now()
-        
+
         // Remove old calls outside the window
-        while (calls.length > 0 && calls[0] <= now - windowMs) {
-          calls.shift()
-        }
-        
+        calls.splice(0, calls.findIndex(call => call > now - windowMs))
+
         // Check if we've exceeded the limit
         if (calls.length >= maxCalls) {
           console.warn('Rate limit exceeded')
           return
         }
-        
+
         calls.push(now)
         return fn(...args)
       }) as T
@@ -115,36 +113,43 @@ export class SecurityManager {
   // Validate and sanitize object data
   sanitizeObjectData(data: any): any {
     if (!data || typeof data !== 'object') return {}
-    
+
     const sanitized: any = {}
     const allowedKeys = ['type', 'position', 'rotation', 'scale', 'color', 'name']
-    
-    for (const key of allowedKeys) {
-      if (key in data) {
-        switch (key) {
-          case 'type':
-            sanitized[key] = ['note', 'chord', 'beat'].includes(data[key]) ? data[key] : 'note'
-            break
-          case 'position':
-          case 'rotation':
-          case 'scale':
-            if (Array.isArray(data[key]) && data[key].length === 3) {
-              sanitized[key] = data[key].map((v: any) => this.validateAudioParam(v, -100, 100))
-            }
-            break
-          case 'color':
-            if (typeof data[key] === 'string' && /^#[0-9A-F]{6}$/i.test(data[key])) {
-              sanitized[key] = data[key]
-            }
-            break
-          case 'name':
-            sanitized[key] = this.sanitizeString(data[key])
-            break
-        }
-      }
-    }
-    
+
+    allowedKeys.forEach(key => {
+      if (!(key in data)) return
+      sanitized[key] = this.sanitizeKey(key, data[key])
+    })
+
     return sanitized
+  }
+
+  private sanitizeKey(key: string, value: any): any {
+    switch (key) {
+      case 'type':
+        return ['note', 'chord', 'beat'].includes(value) ? value : 'note'
+      case 'position':
+      case 'rotation':
+      case 'scale':
+        return this.sanitizeArray(value)
+      case 'color':
+        return this.sanitizeColor(value)
+      case 'name':
+        return this.sanitizeString(value)
+      default:
+        return undefined
+    }
+  }
+
+  private sanitizeArray(array: any): number[] | undefined {
+    return Array.isArray(array) && array.length === 3
+      ? array.map((v: any) => this.validateAudioParam(v, -100, 100))
+      : undefined
+  }
+
+  private sanitizeColor(color: any): string | undefined {
+    return typeof color === 'string' && /^#[0-9A-F]{6}$/i.test(color) ? color : undefined
   }
 
   // Monitor for suspicious activity
@@ -152,6 +157,16 @@ export class SecurityManager {
     if (typeof window === 'undefined') return
 
     // Monitor for console manipulation
+    this.monitorConsoleManipulation()
+
+    // Monitor for excessive localStorage usage
+    this.monitorLocalStorageUsage()
+
+    // Monitor WebGL context loss
+    this.monitorWebGLContextLoss()
+  }
+
+  private monitorConsoleManipulation() {
     const originalConsole = { ...console }
     Object.keys(console).forEach(key => {
       if (typeof (console as any)[key] === 'function') {
@@ -163,8 +178,9 @@ export class SecurityManager {
         }
       }
     })
+  }
 
-    // Monitor for excessive localStorage usage
+  private monitorLocalStorageUsage() {
     const originalSetItem = localStorage.setItem
     localStorage.setItem = function(key: string, value: string) {
       if (value.length > 1024 * 1024) { // 1MB limit
@@ -173,8 +189,9 @@ export class SecurityManager {
       }
       return originalSetItem.call(this, key, value)
     }
+  }
 
-    // Monitor WebGL context loss
+  private monitorWebGLContextLoss() {
     const canvas = document.querySelector('canvas')
     if (canvas) {
       canvas.addEventListener('webglcontextlost', (e) => {

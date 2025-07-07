@@ -45,10 +45,13 @@ export default function CanvasScene() {
     let cancelled = false
     if (rendererRef.current) return
     
-    ;(async () => {
+    const initializeGPU = async () => {
       const gpu = await getGPUTier()
-      if (gpu && gpu.tier < 1) setPerf('low')
-      else if (gpu && gpu.tier < 3) setPerf('medium')
+      if (gpu && gpu.tier < 1) {
+        setPerf('low')
+      } else if (gpu && gpu.tier < 3) {
+        setPerf('medium')
+      }
       
       if (!cancelled) {
         try {
@@ -60,7 +63,9 @@ export default function CanvasScene() {
           console.warn('Advanced renderer initialization failed:', error)
         }
       }
-    })()
+    }
+    
+    initializeGPU()
     
     return () => {
       cancelled = true

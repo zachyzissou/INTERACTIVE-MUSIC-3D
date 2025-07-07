@@ -1,3 +1,4 @@
+
 # Deployment & DevOps Guide
 
 ## Immediate Deployment Steps
@@ -5,14 +6,20 @@
 ### 1. Security Patches (CRITICAL - Deploy Immediately)
 
 ```bash
-# Fix critical security vulnerabilities
+
+## Fix critical security vulnerabilities
+
 npm audit fix
 npm audit fix --force
 
-# Verify fixes
+
+## Verify fixes
+
 npm audit --audit-level=moderate
 
-# Test functionality after updates
+
+## Test functionality after updates
+
 npm run dev
 npm run build
 npm run test
@@ -21,26 +28,45 @@ npm run test
 ### 2. Environment Configuration
 
 ```bash
-# Verify production environment settings
+
+## Verify production environment settings
+
 grep -r "NODE_ENV" package.json  # Should show "production"
+
 grep -r "productionBrowserSourceMaps" next.config.js  # Should be true
 
-# Test production build
+
+## Test production build
+
 npm run build
 npm run start  # Now correctly uses NODE_ENV=production
+
 ```
 
 ### 3. Security Headers Verification
 
 ```bash
-# Test security headers locally
+
+## Test security headers locally
+
 curl -I http://localhost:3000
 
-# Should see headers:
-# X-Frame-Options: DENY
-# X-Content-Type-Options: nosniff
-# Referrer-Policy: origin-when-cross-origin
-# Permissions-Policy: camera=(), microphone=(), geolocation=()
+
+## Should see headers
+
+
+## X-Frame-Options: DENY
+
+
+## X-Content-Type-Options: nosniff
+
+
+## Referrer-Policy: origin-when-cross-origin
+
+
+## Permissions-Policy: camera=(), microphone=(), geolocation=()
+
+
 ```
 
 ## Docker Deployment (Recommended)
@@ -48,29 +74,40 @@ curl -I http://localhost:3000
 ### Updated Dockerfile
 
 ```dockerfile
-# Use multi-stage build for optimization
-FROM node:20-alpine AS deps
+
+## Use multi-stage build for optimization
+
+FROM node:20-
+
 WORKDIR /app
-COPY package*.json ./
+COPY package*
+
 RUN npm ci --only=production --legacy-peer-deps
 
-FROM node:20-alpine AS builder
+FROM node:20-
+
 WORKDIR /app
-COPY package*.json ./
-RUN npm ci --legacy-peer-deps
+COPY package*
+
+RUN npm ci -
+
 COPY . .
 RUN npm run build
 
-FROM node:20-alpine AS runner
+FROM node:20-
+
 WORKDIR /app
 ENV NODE_ENV=production
 ENV LOG_DIR=/app/logs
 
-RUN addgroup --system --gid 1001 nodejs
+RUN addgroup -
+
 RUN adduser --system --uid 1001 nextjs
 
-COPY --from=builder /app/public ./public
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY -
+
+COPY -
+
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
 USER nextjs
@@ -84,20 +121,22 @@ CMD ["node", "server.js"]
 ### Docker Compose Configuration
 
 ```yaml
-# docker-compose.yml
+
+## docker-compose.yml
+
 version: '3.8'
 
 services:
   interactive-music-3d:
     build: .
     ports:
-      - "3000:3000"
+      * "3000:3000"
     environment:
-      - NODE_ENV=production
-      - LOG_DIR=/app/logs
+      * NODE_ENV=production
+      * LOG_DIR=/app/logs
     volumes:
-      - ./logs:/app/logs
-      - ./uploads:/app/uploads
+      * ./logs:/app/logs
+      * ./uploads:/app/uploads
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
@@ -108,7 +147,8 @@ services:
       resources:
         limits:
           memory: 512M
-          cpus: '0.5'
+          cpus: '0.
+
 ```
 
 ## GitHub Actions CI/CD
@@ -116,7 +156,9 @@ services:
 ### Workflow Configuration
 
 ```yaml
-# .github/workflows/deploy.yml
+
+## .github/workflows/deploy.yml
+
 name: Build and Deploy
 
 on:
@@ -129,32 +171,32 @@ jobs:
   security-scan:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      * uses: actions/checkout@v4
+      * uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
-      
-      - run: npm ci --legacy-peer-deps
-      - run: npm audit --audit-level=moderate
-      - run: npx eslint . --max-warnings=0
+
+      * run: npm ci --legacy-peer-deps
+      * run: npm audit --audit-level=moderate
+      * run: npx eslint . --max-warnings=0
 
   test:
     needs: security-scan
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      * uses: actions/checkout@v4
+      * uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
-      
-      - run: npm ci --legacy-peer-deps
-      - run: npm run test:unit
-      - run: npm run build
-      
+
+      * run: npm ci --legacy-peer-deps
+      * run: npm run test:unit
+      * run: npm run build
+
       # Upload build artifacts
-      - uses: actions/upload-artifact@v4
+      * uses: actions/upload-artifact@v4
         with:
           name: build-files
           path: .next/
@@ -164,16 +206,16 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
     steps:
-      - uses: actions/checkout@v4
-      
-      - name: Build and push Docker image
+      * uses: actions/checkout@v4
+
+      * name: Build and push Docker image
         env:
           DOCKER_BUILDKIT: 1
         run: |
           docker build -t interactive-music-3d:latest .
           # Push to your registry here
-      
-      - name: Deploy to production
+
+      * name: Deploy to production
         run: |
           # Your deployment commands here
           echo "Deploying to production..."
@@ -186,6 +228,7 @@ jobs:
 Create `pages/api/health.ts`:
 
 ```typescript
+
 import type { NextApiRequest, NextApiResponse } from 'next';
 
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -206,6 +249,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
 Update `src/lib/logger.server.ts`:
 
 ```typescript
+
 import fs from 'fs';
 import path from 'path';
 
@@ -219,7 +263,8 @@ interface LogEntry {
   metadata?: Record<string, any>;
 }
 
-function writeLog(level: string, message: string, metadata?: Record<string, any>) {
+function writeLog(level: string, message: string, metadata?: Record<string,
+any>) {
   const entry: LogEntry = {
     timestamp: new Date().toISOString(),
     level,
@@ -240,9 +285,10 @@ function writeLog(level: string, message: string, metadata?: Record<string, any>
 }
 
 export const logger = {
-  info: (msg: string, meta?: Record<string, any>) => writeLog('info', msg, meta),
-  warn: (msg: string, meta?: Record<string, any>) => writeLog('warn', msg, meta),
-  error: (msg: string, meta?: Record<string, any>) => writeLog('error', msg, meta),
+info: (msg: string, meta?: Record<string, any>) => writeLog('info', msg, meta),
+warn: (msg: string, meta?: Record<string, any>) => writeLog('warn', msg, meta),
+error: (msg: string, meta?: Record<string, any>) => writeLog('error', msg,
+meta),
   debug: (msg: string, meta?: Record<string, any>) => {
     if (process.env.NODE_ENV !== 'production') {
       writeLog('debug', msg, meta);
@@ -258,6 +304,7 @@ export const logger = {
 Add to `app/layout.tsx`:
 
 ```typescript
+
 'use client';
 import { useReportWebVitals } from 'next/web-vitals';
 
@@ -266,12 +313,12 @@ export function WebVitalsReporter() {
     // Send to analytics service
     if (typeof window !== 'undefined' && window.gtag) {
       window.gtag('event', metric.name, {
-        value: Math.round(metric.name === 'CLS' ? metric.value * 1000 : metric.value),
+value: Math.round(metric.name === 'CLS' ? metric.value * 1000 : metric.value),
         event_label: metric.id,
         non_interaction: true,
       });
     }
-    
+
     // Log to console in development
     if (process.env.NODE_ENV === 'development') {
       console.log('Web Vital:', metric);
@@ -287,8 +334,11 @@ export function WebVitalsReporter() {
 ### Automated Rollback
 
 ```bash
+
 #!/bin/bash
-# rollback.sh
+
+## rollback.sh
+
 
 set -e
 
@@ -296,11 +346,16 @@ PREVIOUS_VERSION=${1:-"latest-stable"}
 
 echo "Rolling back to version: $PREVIOUS_VERSION"
 
-# Stop current container
-docker stop interactive-music-3d || true
+
+## Stop current container
+
+docker stop interactive-
+
 docker rm interactive-music-3d || true
 
-# Start previous version
+
+## Start previous version
+
 docker run -d \
   --name interactive-music-3d \
   --restart unless-stopped \
@@ -316,21 +371,31 @@ echo "Rollback completed successfully"
 ### Manual Rollback
 
 ```bash
-# 1. Identify current deployment
+
+## 1. Identify current deployment
+
 docker ps | grep interactive-music-3d
 
-# 2. Stop current version
-docker stop interactive-music-3d
+
+## 2. Stop current version
+
+docker stop interactive-
+
 docker rm interactive-music-3d
 
-# 3. Start previous version
+
+## 3. Start previous version
+
 docker run -d --name interactive-music-3d \
   --restart unless-stopped \
   -p 3000:3000 \
   interactive-music-3d:previous-tag
 
-# 4. Verify deployment
-curl -f http://localhost:3000/api/health
+
+## 4. Verify deployment
+
+curl -
+
 ```
 
 ## Disaster Recovery
@@ -338,40 +403,59 @@ curl -f http://localhost:3000/api/health
 ### Backup Strategy
 
 ```bash
-# Daily backup script
+
+## Daily backup script
+
 #!/bin/bash
-DATE=$(date +%Y%m%d)
+
+DATE=$(date +
+
 BACKUP_DIR="/backups/interactive-music-3d"
 
-# Create backup directory
+
+## Create backup directory
+
 mkdir -p $BACKUP_DIR
 
-# Backup application data
+
+## Backup application data
+
 tar -czf "$BACKUP_DIR/app-data-$DATE.tar.gz" \
   /app/logs \
   /app/uploads \
   /app/config
 
-# Backup database (if applicable)
-# pg_dump $DATABASE_URL > "$BACKUP_DIR/database-$DATE.sql"
 
-# Cleanup old backups (keep 30 days)
-find $BACKUP_DIR -name "*.tar.gz" -mtime +30 -delete
+## Backup database (if applicable)
+
+
+## pg_dump $DATABASE_URL > "$BACKUP_DIR/database-$DATE.sql"
+
+
+
+## Cleanup old backups (keep 30 days)
+
+find $BACKUP_DIR -
+
 ```
 
 ### Recovery Procedures
 
 1. **Application Recovery**
+
    ```bash
+
    # Restore from backup
    tar -xzf /backups/interactive-music-3d/app-data-YYYYMMDD.tar.gz -C /
-   
+
    # Restart services
    docker-compose up -d
    ```
 
-2. **Database Recovery** (if applicable)
+1. **Database Recovery** (if applicable)
+
    ```bash
+
    # Restore database
    psql $DATABASE_URL < /backups/interactive-music-3d/database-YYYYMMDD.sql
    ```
@@ -380,30 +464,45 @@ find $BACKUP_DIR -name "*.tar.gz" -mtime +30 -delete
 
 ### Production Security Checklist
 
-- [ ] Security vulnerabilities fixed (npm audit)
-- [ ] Security headers configured
-- [ ] HTTPS enabled (Let's Encrypt or CloudFlare)
-- [ ] Firewall configured (only ports 80, 443, 22)
-- [ ] Log monitoring enabled
-- [ ] Intrusion detection configured
-- [ ] Regular security updates scheduled
-- [ ] Backup and recovery tested
+* [ ] Security vulnerabilities fixed (npm audit)
+* [ ] Security headers configured
+* [ ] HTTPS enabled (Let's Encrypt or CloudFlare)
+* [ ] Firewall configured (only ports 80, 443, 22)
+* [ ] Log monitoring enabled
+* [ ] Intrusion detection configured
+* [ ] Regular security updates scheduled
+* [ ] Backup and recovery tested
 
 ### Ongoing Maintenance
 
 ```bash
-# Weekly security check
+
+## Weekly security check
+
 npm audit
 docker image prune
 docker system prune
 
-# Monthly dependency updates
+
+## Monthly dependency updates
+
 npm update
 npm audit fix
 
-# Quarterly security review
-# - Review access logs
-# - Update SSL certificates
-# - Review firewall rules
-# - Test backup/recovery procedures
+
+## Quarterly security review
+
+
+## - Review access logs
+
+
+## - Update SSL certificates
+
+
+## - Review firewall rules
+
+
+## - Test backup/recovery procedures
+
+
 ```

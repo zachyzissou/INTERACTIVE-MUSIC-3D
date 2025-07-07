@@ -1,9 +1,12 @@
+
 # AI Agent Guide for Interactive Music 3D
 
 ## Table of Contents
 
 1. [Project Overview](#project-overview)
+
 2. [Agent Responsibilities](#agent-responsibilities)
+
 3. [Prompt Engineering](#prompt-engineering)
 
    * Master Prompt Template
@@ -19,16 +22,24 @@
    * GPU Modes
    * CI/CD / Validation
 5. [Workflow & Branching Strategy](#workflow--branching-strategy)
+
 6. [File & Directory Conventions](#file--directory-conventions)
+
 7. [Testing & QA](#testing--qa)
+
 8. [Extending / Adding New Tasks](#extending--adding-new-tasks)
+
 9. [Document Versioning & Updates](#document-versioning--updates)
 
 ---
 
 ## Project Overview
 
-**Interactive Music 3D** is a Next.js and React Three Fiber application where users compose music by interacting with 3D shapes. It integrates Tone.js for audio synthesis, Rapier for physics-based interactions, and custom GLSL shaders for a fluid, audio-reactive interface. The platform targets high performance and mobile compatibility without relying on paid assets.
+**Interactive Music 3D** is a Next.js and React Three Fiber application where
+users compose music by interacting with 3D shapes. It integrates Tone.js for
+audio synthesis, Rapier for physics-based interactions, and custom GLSL shaders
+for a fluid, audio-reactive interface. The platform targets high performance and
+mobile compatibility without relying on paid assets.
 
 ---
 
@@ -53,26 +64,30 @@ Our single AI agent serves as a **full-stack pair programmer**, capable of:
 
 ### Master Prompt Template
 
-Use this boilerplate to engage the AI agent. Fill in the bracketed sections as needed.
+Use this boilerplate to engage the AI agent. Fill in the bracketed sections as
+needed.
 
-```
-You are my AI pair-programmer with full access to the `interactive-music-3d` codebase.
+```text
+
+You are my AI pair-
+
 Goal: [One-sentence description of the feature or improvement].
 
 Context:
-- Frameworks: Next.js, React Three Fiber, Tone.js, Rapier, GLSL, Zustand
-- Constraints: No paid/licensed assets; code-driven geometry and shaders only.
+* Frameworks: Next.js, React Three Fiber, Tone.js, Rapier, GLSL, Zustand
+* Constraints: No paid/licensed assets; code-driven geometry and shaders only.
 
 Tasks:
 1. **[Module 1 Title]**: [Brief description of work]
-2. **[Module 2 Title]**: [Brief description]
+2.
+
 ... etc.
 
 Delivery:
-- After implementation, output the full source of each updated or newly created file.
-- Ensure all components using hooks begin with `'use client'`.
-- Include any new shader, config, or style files.
-- Update README.md, agents.md, and inline comments to reflect changes.
+* After implementation, output the full source of each updated or newly created file.
+* Ensure all components using hooks begin with `'use client'`.
+* Include any new shader, config, or style files.
+* 
 ```
 
 ### Task Decomposition Guidelines
@@ -87,97 +102,98 @@ Delivery:
 
 ### UI / Procedural Components
 
-```
+```text
 Task: Procedural 3D Button and HUD Panel
 
 1. Create `src/components/ProceduralButton.tsx`:
-   - SDF-based fragment shader for custom shape.
-   - Uniforms: uTime, uHover, uActive, uColor, uPulse.
-   - Hover and click animations via uniform transitions.
+   * SDF-based fragment shader for custom shape.
+   * Uniforms: uTime, uHover, uActive, uColor, uPulse.
+   * Hover and click animations via uniform transitions.
 
-2. Build HUD in `src/components/HUD.tsx`:
-   - OrthographicCamera for pixel-perfect UI.
-   - Use `<Html>` from drei for sliders and selectors.
+1. Build HUD in `src/components/HUD.tsx`:
+   * OrthographicCamera for pixel-perfect UI.
+   * Use `<Html>` from drei for sliders and selectors.
 
-3. Update `src/styles/hud.module.css` with minimalist glassmorphic styling.
+3.
 ```
 
 ### UI Fusion
 
-```
-Task: Shape spawn from button, morph-on-click
+```text
+Task: Shape spawn from button, morph-
 ```
 
 ### Audio Shapes
 
-```
-Task: Shape sound synthesis + visual attributes
+```text
+Task: Shape sound synthesis +
 ```
 
 ### PWA Support
 
-```
+```text
 Task: Manifest, meta, install logic
 ```
+
 Service worker registration lives in `src/lib/registerServiceWorker.ts` and the
 worker script is `public/sw.js` for offline caching.
 
 ### GPU Modes
 
-```
+```text
 Task: Startup selector for shader complexity
 ```
 
 ### Audio / Visualizers
 
-```
+```text
 Task: Audio-Driven Visual Effects
 
 1. Setup audio analyser in `src/lib/audio.ts`:
-   - Connect Tone.js FFT and Waveform to master output.
-   - Export functions to retrieve low/mid/high values.
+   * Connect Tone.js FFT and Waveform to master output.
+   * Export functions to retrieve low/mid/high values.
 
-2. Create `ProceduralShape.tsx`:
-   - Raymarch SDF shader for different ObjectTypes.
-   - Pass audio values as uniforms each frame.
+1. Create `ProceduralShape.tsx`:
+   * Raymarch SDF shader for different ObjectTypes.
+   * Pass audio values as uniforms each frame.
 
-3. Implement `ParticleBurst.tsx`:
-   - GPU-based offscreen simulation.
-   - Trigger bursts on beat detection.
+1. Implement `ParticleBurst.tsx`:
+   * GPU-based offscreen simulation.
+   * Trigger bursts on beat detection.
 
-4. Add postprocessing in `app/page.tsx`:
-   - `<EffectComposer>` with `<Bloom>` intensity bound to bass.
+1. Add postprocessing in `app/page.tsx`:
+   *
 ```
 
 ### Physics / Interaction
 
-```
+```text
 Task: Physics & Spatial Audio
 
 1. Initialize Rapier in `src/lib/physics.ts` and wrap `<Canvas>` with `<Physics>`.
 2. Convert musical shapes to `<RigidBody>` with mass and damping.
 3. Attach spring joints for UI elements in `HUD.tsx` and `ProceduralButton.tsx`.
-4. Link mesh position to Tone.js PannerNode for 3D panning.
+4.
 ```
 
 ### Performance / Mobile
 
-```
+```text
 Task: Performance Optimization
 
 1. Add `<AdaptiveDpr pixelated/>` to `app/page.tsx` canvas.
 2. Use `<Detailed>` or merge static meshes in `src/components/Scene.tsx`.
-3. Detect mobile devices (via UA or `detect-gpu`) and toggle heavy effects off.
+3.
 ```
 
 ### CI/CD / Validation
 
-```
+```text
 Task: CI/CD & Build Validation
 
 1. Update Dockerfile to pin npm and Node versions.
 2. Add GitHub Actions step: `npx tsc --noEmit && npm run lint && npm run build`.
-3. Document rollback steps in README under “Troubleshooting”.
+3.
 ```
 
 ---
@@ -236,14 +252,15 @@ Task: CI/CD & Build Validation
 
 ---
 
-*Last updated: 2025-06-25*
+## Last updated: 2025-06-25
 
 ## Agent: Audio Init & Render Safety Agent
 
-### Responsibilities:
-- Ensure Tone.js audio is initialized **only after user interaction**
-- Refactor any `AudioContext` or Tone.js logic out of SSR scope
-- Audit React hook usage for hydration safety (no conditional hooks or SSR-incompatible patterns)
-- Guarantee compatibility with both `npm run dev` and `npm run build`
-- Wrap all browser-dependent components with dynamic import or `"use client"` guard
-- Delay Three.js renderer and other side-effects until a user gesture dismisses `StartOverlay`
+### Responsibilities
+
+* Ensure Tone.js audio is initialized **only after user interaction**
+* Refactor any `AudioContext` or Tone.js logic out of SSR scope
+* Audit React hook usage for hydration safety (no conditional hooks or SSR-incompatible patterns)
+* Guarantee compatibility with both `npm run dev` and `npm run build`
+* Wrap all browser-dependent components with dynamic import or `"use client"` guard
+* Delay Three.js renderer and other side-effects until a user gesture dismisses `StartOverlay`

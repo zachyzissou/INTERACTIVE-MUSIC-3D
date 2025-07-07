@@ -1,6 +1,9 @@
+
 # Hydration Safety Guide
 
-A prior bug caused React hydration errors because Tone.js and Three.js initialized during server-side render. The DOM generated on the server did not match what the client produced, triggering the infamous React error #185.
+A prior bug caused React hydration errors because Tone.js and Three.js
+initialized during server-side render. The DOM generated on the server did not
+match what the client produced, triggering the infamous React error #185.
 
 ## Prevention Checklist
 
@@ -10,4 +13,5 @@ A prior bug caused React hydration errors because Tone.js and Three.js initializ
 4. Ensure all components with hooks include the `"use client"` directive.
 5. Delay creation of AudioContexts until `startAudio()` is invoked by a click or tap.
 
-Following these steps keeps the server-rendered HTML in sync with the client and prevents hydration mismatches.
+Following these steps keeps the server-rendered HTML in sync with the client and
+prevents hydration mismatches.
