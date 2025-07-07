@@ -14,29 +14,35 @@ import MagicMelodyButton from './MagicMelodyButton'
 import JamSessionButton from './JamSessionButton'
 
 export default function BottomDrawer() {
-  const objects = useObjects(s => s.objects)
-  const { selected, selectShape } = useSelectedShape(s => ({
-    selected: s.selected,
-    selectShape: s.selectShape,
-  }))
+  // Use stable selectors to prevent infinite re-renders
+  const objects = useObjects(useCallback(s => s.objects, []))
+  const selected = useSelectedShape(useCallback(s => s.selected, []))
+  const selectShape = useSelectedShape(useCallback(s => s.selectShape, []))
+  
   const obj = useMemo(() => objects.find(o => o.id === selected), [objects, selected])
   const [mode, setMode] = useState<ObjectType>('note')
   const [playing, setPlaying] = useState(false)
   const [advanced, setAdvanced] = useState(false)
-  const perfLevel = usePerformanceSettings(s => s.level)
-  const setPerfLevel = usePerformanceSettings(s => s.setLevel)
+  
+  const perfLevel = usePerformanceSettings(useCallback(s => s.level, []))
+  const setPerfLevel = usePerformanceSettings(useCallback(s => s.setLevel, []))
 
-  const {
-    volume, setVolume,
-    chorusDepth, setChorusDepth,
-    delayFeedback, setDelayFeedback,
-    reverbWet, setReverbWet,
-    bitcrusherBits, setBitcrusherBits,
-    filterFrequency, setFilterFrequency,
-  } = useAudioSettings()
+  const volume = useAudioSettings(useCallback(s => s.volume, []))
+  const setVolume = useAudioSettings(useCallback(s => s.setVolume, []))
+  const chorusDepth = useAudioSettings(useCallback(s => s.chorusDepth, []))
+  const setChorusDepth = useAudioSettings(useCallback(s => s.setChorusDepth, []))
+  const delayFeedback = useAudioSettings(useCallback(s => s.delayFeedback, []))
+  const setDelayFeedback = useAudioSettings(useCallback(s => s.setDelayFeedback, []))
+  const reverbWet = useAudioSettings(useCallback(s => s.reverbWet, []))
+  const setReverbWet = useAudioSettings(useCallback(s => s.setReverbWet, []))
+  const bitcrusherBits = useAudioSettings(useCallback(s => s.bitcrusherBits, []))
+  const setBitcrusherBits = useAudioSettings(useCallback(s => s.setBitcrusherBits, []))
+  const filterFrequency = useAudioSettings(useCallback(s => s.filterFrequency, []))
+  const setFilterFrequency = useAudioSettings(useCallback(s => s.setFilterFrequency, []))
 
-  const { setEffect, getParams } = useEffectSettings()
-  const params = selected ? getParams(selected) : null
+  const setEffect = useEffectSettings(useCallback(s => s.setEffect, []))
+  const getParams = useEffectSettings(useCallback(s => s.getParams, []))
+  const params = useMemo(() => selected ? getParams(selected) : null, [selected, getParams])
 
 
   const togglePlay = useCallback(async () => {

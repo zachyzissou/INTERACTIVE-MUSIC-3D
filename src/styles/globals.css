@@ -2,6 +2,88 @@
 @tailwind components;
 @tailwind utilities;
 
+/* CSS Custom Properties for accessibility */
+:root {
+  --motion-duration: 0.3s;
+  --motion-easing: ease-in-out;
+  --focus-ring: 0 0 0 2px #3b82f6;
+  --focus-ring-offset: 2px;
+}
+
+/* Accessibility-aware motion */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-duration: 0.01ms;
+  }
+  
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  :root {
+    --bg-primary: #000000;
+    --text-primary: #ffffff;
+    --border-color: #ffffff;
+  }
+}
+
+/* Focus management */
+.keyboard-nav *:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+.mouse-nav *:focus {
+  outline: none;
+}
+
+/* Skip to content link */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 6px;
+  background: #000;
+  color: #fff;
+  padding: 8px;
+  z-index: 1000;
+  text-decoration: none;
+  border-radius: 4px;
+}
+
+.skip-link:focus {
+  top: 6px;
+}
+
+/* Screen reader only content */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Large text support */
+.text-large {
+  font-size: 120% !important;
+  line-height: 1.6 !important;
+}
+
+.text-large button, .text-large input, .text-large select {
+  min-height: 44px !important;
+  font-size: inherit !important;
+}
+
 html,
 body,
 #__next {
@@ -19,7 +101,64 @@ body {
 }
 
 canvas {
-  display: block;
+  display: block !important;
   position: absolute;
   inset: 0;
+  width: 100% !important;
+  height: 100% !important;
+  min-width: 320px;
+  min-height: 240px;
+}
+
+/* Improved button accessibility */
+button {
+  cursor: pointer;
+  min-height: 44px;
+  min-width: 44px;
+  position: relative;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+button:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Reduced motion alternatives */
+.motion-reduce .animate-spin {
+  animation: none;
+}
+
+.motion-reduce .animate-pulse {
+  animation: none;
+}
+
+.motion-reduce .animate-bounce {
+  animation: none;
+}
+
+/* High contrast improvements */
+.contrast-high {
+  filter: contrast(1.5) brightness(1.2);
+}
+
+.contrast-high button {
+  border: 2px solid currentColor;
+}
+
+.contrast-high input, .contrast-high select, .contrast-high textarea {
+  border: 2px solid currentColor;
+  background: transparent;
+}
+
+/* Touch target improvements for mobile */
+@media (hover: none) and (pointer: coarse) {
+  button, a, input, select, textarea {
+    min-height: 48px !important;
+    min-width: 48px !important;
+  }
 }

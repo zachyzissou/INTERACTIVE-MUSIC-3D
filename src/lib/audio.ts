@@ -100,16 +100,25 @@ export function getMasterChain(): ToneAudioNode {
 async function initEffects() {
   if (chorus) return
   const Tone = await ensureTone()
-  chorus = new Tone.Chorus({ frequency: 1.5, delayTime: 3.5, depth: 0.7, feedback: 0.2 }).toDestination()
-  delay = new Tone.FeedbackDelay({ delayTime: '8n', feedback: 0.4, wet: 0.5 }).connect(chorus)
-  reverb = new Tone.Reverb({ decay: 3, preDelay: 0.01, wet: 0.5 }).connect(delay)
-  filter = new Tone.AutoFilter({ frequency: 0.5, depth: 0.7, baseFrequency: 200, octaves: 2 }).connect(reverb)
-  distortion = new Tone.Distortion({ distortion: 0.4, wet: 0.3 }).connect(filter)
-  bitcrusher = new Tone.BitCrusher(4).connect(distortion)
-  bitcrusher.wet.value = 0.3
-  masterChain = bitcrusher
-  if (typeof window !== 'undefined') {
-    ;(window as any).__toneNodes__ = { chorus, delay, reverb, bitcrusher }
+  
+  try {
+    // Create effects with minimal configuration to avoid parameter errors
+    chorus = new Tone.Chorus().toDestination()
+    delay = new Tone.FeedbackDelay().connect(chorus)
+    reverb = new Tone.Reverb().connect(delay)
+    filter = new Tone.AutoFilter().connect(reverb)
+    distortion = new Tone.Distortion().connect(filter)
+    bitcrusher = new Tone.BitCrusher(4).connect(distortion)
+    bitcrusher.wet.value = 0.3
+    
+    masterChain = bitcrusher
+    if (typeof window !== 'undefined') {
+      ;(window as any).__toneNodes__ = { chorus, delay, reverb, bitcrusher }
+    }
+  } catch (error) {
+    console.error('Failed to initialize audio effects:', error)
+    // Fallback: create a simple passthrough chain
+    masterChain = new Tone.Gain(1).toDestination()
   }
 }
 interface ObjectAudio {

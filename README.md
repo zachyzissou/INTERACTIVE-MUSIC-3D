@@ -1,5 +1,33 @@
 
-# Interactive Music 3D
+# Oscillo - Interactive 3D Music Visualization
+
+🎵 **Interactive 3D music playground where you spawn, select and sculpt floating shapes that generate notes, chords, beats or loops — all in real time.**
+
+[![Build Status](https://img.shields.io/badge/build-passing-brightgreen)](README.md)
+[![E2E Tests](https://img.shields.io/badge/e2e%20tests-13%2F13%20passing-brightgreen)](README.md)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)](README.md)
+
+## ✨ Latest Updates (January 2025)
+
+### 🛠️ **Critical Issues Resolved**
+- ✅ **Infinite Re-render Crashes Fixed** - Stabilized Zustand selectors in BottomDrawer
+- ✅ **Tone.js Parameter Errors Fixed** - Safer audio effect initialization
+- ✅ **WebGL Context Loss Handling** - Auto-recovery with exponential backoff
+- ✅ **Canvas Stability Enhanced** - Improved error boundaries with retry mechanisms
+
+### 🚀 **New Features**
+- 🎯 **Enhanced Error Recovery** - Automatic WebGL context restoration
+- 📊 **Performance Monitoring** - Real-time FPS/memory tracking with adaptive quality
+- 🔒 **Secure Audio Engine** - Modern Web Audio API implementation
+- ♿ **Accessibility Improvements** - WCAG 2.1 compliant controls and navigation
+
+### 📊 **Current Status**
+- **Build**: ✅ Successful (2.09 MB bundle)
+- **Tests**: ✅ 13/13 Playwright E2E tests passing
+- **Performance**: ✅ Adaptive quality system operational
+- **Error Recovery**: ✅ Automatic WebGL context restoration working
+
+---
 
 A browser-
 

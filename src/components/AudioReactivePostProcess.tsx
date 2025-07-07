@@ -128,42 +128,63 @@ export function AudioReactivePostProcess({
     }
   }, [performanceLevel])
 
-  useFrame(({ clock }) => {
-    const { bass, mid, treble: high } = getAnalyserBands()
-    const time = clock.getElapsedTime()
-    
-    // Update audio-reactive effect
-    if (audioEffectRef.current) {
+  // Separate functions to reduce complexity
+  const updateAudioEffect = (time: number, bass: number, mid: number, high: number) => {
+    if (audioEffectRef.current?.uniforms) {
       audioEffectRef.current.uniforms.uTime.value = time
       audioEffectRef.current.uniforms.uBass.value = bass / 255
       audioEffectRef.current.uniforms.uMid.value = mid / 255
       audioEffectRef.current.uniforms.uHigh.value = high / 255
       audioEffectRef.current.uniforms.uIntensity.value = intensity
     }
-    
-    // Update bloom based on audio
-    if (bloomRef.current && enableBloom) {
+  }
+
+  const updateBloomEffect = (bass: number, mid: number, high: number) => {
+    if (bloomRef.current && enableBloom && typeof bloomRef.current.intensity !== 'undefined') {
       const audioLevel = (bass + mid + high) / (3 * 255)
       bloomRef.current.intensity = settings.bloomStrength * (0.5 + audioLevel * 1.5)
     }
+  }
+
+  const updateGlitchEffect = (bass: number) => {
+    if (!glitchRef.current || !enableGlitch) return
+
+    const beatIntensity = bass / 255
+    const isStrongBeat = beatIntensity > 0.7
     
-    // Update glitch based on strong beats
-    if (glitchRef.current && enableGlitch) {
-      const beatIntensity = bass / 255
-      if (beatIntensity > 0.7) {
-        glitchRef.current.strength = settings.glitchStrength * beatIntensity
-        glitchRef.current.active = true
-      } else {
-        glitchRef.current.strength = 0
-        glitchRef.current.active = Math.random() < 0.05 // Occasional random glitch
-      }
+    // Update strength
+    if (typeof glitchRef.current.strength !== 'undefined') {
+      glitchRef.current.strength = isStrongBeat ? settings.glitchStrength * beatIntensity : 0
     }
     
-    // Update chromatic aberration based on mid frequencies
-    if (chromaticRef.current && enableChromatic) {
+    // Update active state
+    if (typeof glitchRef.current.active !== 'undefined') {
+      glitchRef.current.active = isStrongBeat || Math.random() < 0.05
+    }
+  }
+
+  const updateChromaticEffect = (mid: number, time: number) => {
+    if (chromaticRef.current && enableChromatic && chromaticRef.current.offset) {
       const midLevel = mid / 255
       chromaticRef.current.offset.x = settings.chromaticStrength * midLevel * Math.sin(time * 2)
       chromaticRef.current.offset.y = settings.chromaticStrength * midLevel * Math.cos(time * 1.5)
+    }
+  }
+
+  useFrame(({ clock }) => {
+    if (!enableBloom && !enableGlitch && !enableChromatic) return;
+    
+    try {
+      const { bass, mid, treble: high } = getAnalyserBands()
+      const time = clock.getElapsedTime()
+      
+      updateAudioEffect(time, bass, mid, high)
+      updateBloomEffect(bass, mid, high)
+      updateGlitchEffect(bass)
+      updateChromaticEffect(mid, time)
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      console.warn('Post-processing frame error:', errorMessage);
     }
   })
 
