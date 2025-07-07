@@ -210,7 +210,7 @@ export class AccessibilityManager {
   // Keyboard event handlers
   private handleEscape() {
     // Close modals, panels, etc.
-    const activeModal = document.querySelector('[role="dialog"]:not([aria-hidden="true"])')
+    const activeModal = document.querySelector('dialog[open], [role="dialog"]:not([aria-hidden="true"])')
     if (activeModal) {
       this.announceToUser('Dialog closed')
     }

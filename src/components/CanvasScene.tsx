@@ -11,8 +11,9 @@ import MusicalObject from './MusicalObject'
 import PlusButton3D from './PlusButton3D'
 import XRButtons from './XRButtons'
 import AudioReactiveOrb3D from './AudioReactiveOrb3D'
-import AudioReactivePostProcess from './AudioReactivePostProcess'
-import PostProcessErrorBoundary from './PostProcessErrorBoundary'
+// TODO: Re-enable post-processing after fixing WebKit compatibility
+// import AudioReactivePostProcess from './AudioReactivePostProcess'
+// import PostProcessErrorBoundary from './PostProcessErrorBoundary'
 import { usePerformanceSettings } from '../store/usePerformanceSettings'
 import { useAudioSettings } from '../store/useAudioSettings'
 
@@ -93,7 +94,7 @@ export default function CanvasScene() {
           
           const contextRestoreHandler = () => {
             contextLostRef.current = false
-            console.log('WebGL context restored')
+            console.warn('WebGL context restored')
           }
           
           canvas.addEventListener('webglcontextlost', contextLossHandler, false)
@@ -134,7 +135,7 @@ export default function CanvasScene() {
       debounce: 200,
     },
     frameloop: contextLostRef.current ? 'never' as const : 'always' as const,
-  }), [perfLevel, contextLostRef.current])
+  }), [perfLevel]) // Remove contextLostRef.current dependency as it's a mutable ref
 
   return (
     <Canvas {...canvasProps}>
@@ -191,6 +192,11 @@ export default function CanvasScene() {
       
       <PlusButton3D />
       <XRButtons />
+      
+      {/* Post-processing effects - temporarily disabled due to WebKit compatibility issues */}
+      {/* <PostProcessErrorBoundary>
+        <AudioReactivePostProcess />
+      </PostProcessErrorBoundary> */}
     </Canvas>
   )
 }

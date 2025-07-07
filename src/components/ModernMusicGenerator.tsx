@@ -77,7 +77,7 @@ export function ModernMusicGenerator({
     if (isPlaying && currentSequence) {
       playSequence()
     }
-  }, [isPlaying, currentSequence])
+  }, [isPlaying, currentSequence, playSequence])
 
   return (
     <div className={`modern-music-generator ${className}`}>

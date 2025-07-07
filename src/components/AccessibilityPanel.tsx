@@ -18,7 +18,7 @@ export function AccessibilityPanel() {
       <button
         onClick={togglePanel}
         aria-label="Open accessibility settings"
-        aria-expanded={isOpen ? "true" : "false"}
+        aria-expanded={isOpen}
         className="p-3 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg transition-colors
                    focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
       >
@@ -38,9 +38,9 @@ export function AccessibilityPanel() {
       </button>
 
       {isOpen && (
-        <div 
+        <dialog 
+          open
           className="absolute bottom-16 right-0 w-80 bg-white dark:bg-gray-800 shadow-xl rounded-lg border border-gray-200 dark:border-gray-700 p-4"
-          role="dialog"
           aria-label="Accessibility Settings"
         >
           <div className="flex justify-between items-center mb-4">
@@ -71,7 +71,7 @@ export function AccessibilityPanel() {
                 id="reduce-motion"
                 onClick={() => handleToggle('reduceMotion')}
                 role="switch"
-                aria-checked={preferences.reduceMotion ? "true" : "false"}
+                aria-checked={preferences.reduceMotion}
                 className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
                   preferences.reduceMotion ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-600'
                 }`}
@@ -99,7 +99,7 @@ export function AccessibilityPanel() {
                 id="high-contrast"
                 onClick={() => handleToggle('highContrast')}
                 role="switch"
-                aria-checked={preferences.highContrast ? "true" : "false"}
+                aria-checked={preferences.highContrast}
                 className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
                   preferences.highContrast ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-600'
                 }`}
@@ -127,7 +127,7 @@ export function AccessibilityPanel() {
                 id="large-text"
                 onClick={() => handleToggle('largeText')}
                 role="switch"
-                aria-checked={preferences.largeText ? "true" : "false"}
+                aria-checked={preferences.largeText}
                 className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
                   preferences.largeText ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-600'
                 }`}
@@ -167,7 +167,7 @@ export function AccessibilityPanel() {
               Settings are saved automatically and sync across browser sessions.
             </p>
           </div>
-        </div>
+        </dialog>
       )}
     </div>
   )

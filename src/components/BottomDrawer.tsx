@@ -12,6 +12,7 @@ import { objectTypes, ObjectType } from '@/config/objectTypes'
 import { usePerformanceSettings, PerfLevel } from '@/store/usePerformanceSettings'
 import MagicMelodyButton from './MagicMelodyButton'
 import JamSessionButton from './JamSessionButton'
+import GenerativeMusicEngine from './GenerativeMusicEngine'
 
 export default function BottomDrawer() {
   // Use stable selectors to prevent infinite re-renders
@@ -23,6 +24,7 @@ export default function BottomDrawer() {
   const [mode, setMode] = useState<ObjectType>('note')
   const [playing, setPlaying] = useState(false)
   const [advanced, setAdvanced] = useState(false)
+  const [showGenerative, setShowGenerative] = useState(false)
   
   const perfLevel = usePerformanceSettings(useCallback(s => s.level, []))
   const setPerfLevel = usePerformanceSettings(useCallback(s => s.setLevel, []))
@@ -100,18 +102,31 @@ export default function BottomDrawer() {
               </LiquidButton>
             </div>
 
-            {/* Settings Row */}
+            {/* Enhanced Feature Toggle Row */}
             <div className="flex items-center justify-between py-2">
-              <label className="flex items-center gap-2 text-sm">
-                <input 
-                  type="checkbox" 
-                  checked={advanced} 
-                  onChange={() => setAdvanced(a => !a)}
-                  className="w-4 h-4 rounded border-2 border-purple-500 bg-transparent checked:bg-purple-500"
-                  title="Advanced Controls"
-                />
-                <span className="text-purple-200">Advanced</span>
-              </label>
+              <div className="flex items-center gap-4">
+                <label className="flex items-center gap-2 text-sm">
+                  <input 
+                    type="checkbox" 
+                    checked={advanced} 
+                    onChange={() => setAdvanced(a => !a)}
+                    className="w-4 h-4 rounded border-2 border-purple-500 bg-transparent checked:bg-purple-500"
+                    title="Advanced Controls"
+                  />
+                  <span className="text-purple-200">Advanced</span>
+                </label>
+                
+                <label className="flex items-center gap-2 text-sm">
+                  <input 
+                    type="checkbox" 
+                    checked={showGenerative} 
+                    onChange={() => setShowGenerative(g => !g)}
+                    className="w-4 h-4 rounded border-2 border-blue-500 bg-transparent checked:bg-blue-500"
+                    title="AI Generative Music"
+                  />
+                  <span className="text-blue-200">🎼 AI Music</span>
+                </label>
+              </div>
               
               <select 
                 value={perfLevel} 
@@ -144,6 +159,14 @@ export default function BottomDrawer() {
                 <Knob label="Highpass" min={0} max={1000} step={10} value={params.highpass} onChange={(e) => setEffect(selected, { highpass: parseFloat(e.target.value) })} />
               </div>
             )}
+            
+            {/* Generative Music Engine */}
+            {showGenerative && (
+              <div className="mt-4">
+                <GenerativeMusicEngine isPlaying={playing} />
+              </div>
+            )}
+            
             <MagicMelodyButton />
             <JamSessionButton />
             <div className="flex gap-2">
