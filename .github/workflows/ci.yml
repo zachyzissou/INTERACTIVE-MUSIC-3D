@@ -24,5 +24,20 @@ jobs:
       - run: npx tsc --noEmit
       - run: npm run lint
       - run: npm run build
-      - run: npx playwright install
-      - run: npm test
+      - name: Install Playwright browsers and system dependencies
+        run: npx playwright install --with-deps
+      - name: Start Next.js server and run Playwright tests
+        run: |
+          # Install wait-on for server readiness check
+          npm install -g wait-on
+          # Start the Next.js server in the background
+          npm start &
+          SERVER_PID=$!
+          # Wait for the server to be ready
+          wait-on http://localhost:3000 --timeout 60000
+          # Run the Playwright tests
+          npm test
+          # Clean up: kill the server process
+          kill $SERVER_PID || true
+        env:
+          CI: true

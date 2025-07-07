@@ -6,9 +6,10 @@ import PwaInstallPrompt from "@/components/PwaInstallPrompt";
 import ShapeEditorPanel from "@/components/ShapeEditorPanel";
 import ExampleModal from "@/components/ExampleModal";
 import StartOverlay from "@/components/StartOverlay";
-import CanvasErrorBoundary from "@/components/CanvasErrorBoundary";
+import { CanvasErrorBoundary } from "@/components/CanvasErrorBoundary";
 import AudioErrorBoundary from "@/components/AudioErrorBoundary";
 import PerformanceMonitor from "@/components/PerformanceMonitor";
+import AccessibilityPanel from "@/components/AccessibilityPanel";
 import { startAudio } from "@/lib/engine";
 
 // Dynamic imports for code splitting
@@ -55,14 +56,17 @@ export default function Home() {
 
   return (
     <>
+      <a href="#main-content" className="skip-link">
+        Skip to main content
+      </a>
       {!started && <StartOverlay onFinish={handleStart} />}
       {started && (
         <>
-          <div className="relative h-full w-full">
+          <main id="main-content" className="relative h-full w-full">
             <CanvasErrorBoundary>
               <Scene />
             </CanvasErrorBoundary>
-          </div>
+          </main>
           <ShapeEditorPanel />
         </>
       )}
@@ -70,6 +74,7 @@ export default function Home() {
       <PerformanceSelector />
       <PwaInstallPrompt />
       <PerformanceMonitor />
+      <AccessibilityPanel />
       {showAnalytics && <PerformanceAnalytics />}
       {started && (
         <AudioErrorBoundary>
