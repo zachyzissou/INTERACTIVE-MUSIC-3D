@@ -123,7 +123,7 @@ function MiniChart({ data, color, height = 60 }: ChartProps) {
 }
 
 export function LivePerformancePanel() {
-  const { registerPanel, unregisterPanel, visiblePanels } = useUIManager()
+  const { registerPanel, unregisterPanel, visiblePanels, hidePanel } = useUIManager()
   const [metrics, setMetrics] = useState({
     fps: 60,
     frameTime: 16.7,
@@ -185,7 +185,7 @@ export function LivePerformancePanel() {
       isVisible={isVisible}
       onVisibilityChange={(visible) => {
         if (!visible) {
-          // Handle panel close through UI manager
+          hidePanel('performancePanel');
         }
       }}
     >

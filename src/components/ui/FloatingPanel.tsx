@@ -102,7 +102,12 @@ export function FloatingPanel({
         drag={isDraggable}
         dragMomentum={false}
         dragElastic={0}
-        dragConstraints={dragConstraints}
+        dragConstraints={{
+          left: 0,
+          right: typeof window !== 'undefined' ? window.innerWidth - size.width : 1000,
+          top: 0,
+          bottom: typeof window !== 'undefined' ? window.innerHeight - size.height : 1000,
+        }}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
         className={`

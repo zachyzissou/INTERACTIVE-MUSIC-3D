@@ -70,7 +70,7 @@ function ModernSlider({
 }
 
 export function ModernAudioPanel() {
-  const { registerPanel, unregisterPanel, visiblePanels } = useUIManager()
+  const { registerPanel, unregisterPanel, visiblePanels, hidePanel } = useUIManager()
   const {
     volume,
     setVolume,
