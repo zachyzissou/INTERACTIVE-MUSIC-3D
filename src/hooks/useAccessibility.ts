@@ -24,7 +24,7 @@ export function useAccessibility() {
     const mediaQueries = {
       reduceMotion: window.matchMedia('(prefers-reduced-motion: reduce)'),
       highContrast: window.matchMedia('(prefers-contrast: high)'),
-      largeText: window.matchMedia('(prefers-font-size: large)')
+      largeText: Boolean(localStorage.getItem('largeText') === 'true')
     }
 
     // Check for screen reader
