@@ -13,7 +13,7 @@ function write(level: string, message: string) {
     console.error('Failed to write log file', err)
   }
   if (level === 'error') console.error(message)
-  else console.log(message)
+  else console.warn(`[${level}] ${message}`)
 }
 
 export const logger = {

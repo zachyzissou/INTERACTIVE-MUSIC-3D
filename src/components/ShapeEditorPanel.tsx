@@ -14,10 +14,28 @@ export default function ShapeEditorPanel() {
     <Html position={[0,0,0]} transform>
       <a.div style={{ transform: springs.y.to(y => `translateY(${y}px)`) as any }} className="bg-white bg-opacity-70 p-2 rounded pointer-events-auto text-xs">
         <div className="flex flex-col gap-1">
-          <label>Reverb</label>
-          <input type="range" min={0} max={1} step={0.01} value={params.reverb} onChange={e=>setEffect(selected,{reverb: parseFloat(e.target.value)})} />
-          <label>Delay</label>
-          <input type="range" min={0} max={1} step={0.01} value={params.delay} onChange={e=>setEffect(selected,{delay: parseFloat(e.target.value)})} />
+          <label htmlFor="reverb-slider">Reverb</label>
+          <input 
+            id="reverb-slider"
+            type="range" 
+            min={0} 
+            max={1} 
+            step={0.01} 
+            value={params.reverb} 
+            onChange={e=>setEffect(selected,{reverb: parseFloat(e.target.value)})}
+            aria-label="Reverb level"
+          />
+          <label htmlFor="delay-slider">Delay</label>
+          <input 
+            id="delay-slider"
+            type="range" 
+            min={0} 
+            max={1} 
+            step={0.01} 
+            value={params.delay} 
+            onChange={e=>setEffect(selected,{delay: parseFloat(e.target.value)})}
+            aria-label="Delay level"
+          />
         </div>
       </a.div>
     </Html>

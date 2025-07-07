@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import { Canvas } from '@react-three/fiber';
 import React from 'react';
 import { startAudioContext, isAudioInitialized } from '../lib/audio';
@@ -146,7 +146,7 @@ describe('Objects Store', () => {
   it('should generate random positions when none provided', () => {
     const { spawn } = useObjects.getState();
     
-    const id = spawn('chord');
+    spawn('chord');
     const objects = useObjects.getState().objects;
     
     expect(objects[0].position).toHaveLength(3);
@@ -206,7 +206,7 @@ describe('Performance', () => {
   it('should handle rapid object creation without memory leaks', async () => {
     const { spawn } = useObjects.getState();
     
-    const startMemory = (performance as any).memory?.usedJSHeapSize || 0;
+    const startMemory = (performance as any).memory?.usedJSHeapSize ?? 0;
     
     // Rapidly create and remove objects
     for (let i = 0; i < 50; i++) {
@@ -223,7 +223,7 @@ describe('Performance', () => {
     
     await new Promise(resolve => setTimeout(resolve, 100));
     
-    const endMemory = (performance as any).memory?.usedJSHeapSize || 0;
+    const endMemory = (performance as any).memory?.usedJSHeapSize ?? 0;
     const memoryIncrease = endMemory - startMemory;
     
     // Memory increase should be reasonable (less than 10MB)

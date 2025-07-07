@@ -7,6 +7,7 @@ import { useEffectSettings } from '@/store/useEffectSettings'
 import { useSelectedShape } from '@/store/useSelectedShape'
 import { triggerSound } from '@/lib/soundTriggers'
 import Knob from './JSAudioKnobs'
+import LiquidButton from './LiquidButton'
 import { objectTypes, ObjectType } from '@/config/objectTypes'
 import { usePerformanceSettings, PerfLevel } from '@/store/usePerformanceSettings'
 import MagicMelodyButton from './MagicMelodyButton'
@@ -59,28 +60,62 @@ export default function BottomDrawer() {
         initial={{ y: drawerClosedY }}
         animate={{ y: selected ? 0 : drawerClosedY }}
         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-        className="fixed bottom-0 left-0 w-full bg-gray-900 bg-opacity-80 p-4 pointer-events-auto"
+        className="fixed bottom-0 left-0 w-full pointer-events-auto"
       >
+        {/* Liquid background with glassmorphism */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-purple-900/50 to-transparent backdrop-blur-lg">
+          <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 via-pink-500/20 to-blue-500/20 animate-pulse" />
+        </div>
+        
         {selected && obj && (
-          <div className="flex flex-col gap-2 text-white">
-            <div className="flex gap-2">
+          <div className="relative z-10 flex flex-col gap-4 p-6 text-white">
+            {/* Mode Selection with Liquid Buttons */}
+            <div className="flex gap-3 justify-center">
               {objectTypes.map((t) => (
-                <button
+                <LiquidButton
                   key={t}
                   onClick={() => setMode(t)}
-                  className={`px-2 py-1 rounded ${mode === t ? 'bg-blue-500' : 'bg-gray-700'}`}
+                  variant={mode === t ? 'primary' : 'secondary'}
+                  className={`px-4 py-2 text-sm ${mode === t ? 'ring-2 ring-white/50' : ''}`}
                 >
-                  {t}
-                </button>
+                  {t.toUpperCase()}
+                </LiquidButton>
               ))}
             </div>
-            <div className="flex items-center gap-2 py-1">
-              <label className="text-xs">Advanced</label>
-              <input type="checkbox" checked={advanced} onChange={() => setAdvanced(a => !a)} />
-              <select value={perfLevel} onChange={e => setPerfLevel(e.target.value as PerfLevel)} className="text-black rounded ml-auto text-xs">
-                <option value="low">Low</option>
-                <option value="medium">Medium</option>
-                <option value="high">High</option>
+
+            {/* Play/Pause Button */}
+            <div className="flex justify-center">
+              <LiquidButton
+                onClick={togglePlay}
+                variant="accent"
+                className="px-8 py-3 text-lg font-bold"
+              >
+                {playing ? '⏸️ PAUSE' : '▶️ PLAY'}
+              </LiquidButton>
+            </div>
+
+            {/* Settings Row */}
+            <div className="flex items-center justify-between py-2">
+              <label className="flex items-center gap-2 text-sm">
+                <input 
+                  type="checkbox" 
+                  checked={advanced} 
+                  onChange={() => setAdvanced(a => !a)}
+                  className="w-4 h-4 rounded border-2 border-purple-500 bg-transparent checked:bg-purple-500"
+                  title="Advanced Controls"
+                />
+                <span className="text-purple-200">Advanced</span>
+              </label>
+              
+              <select 
+                value={perfLevel} 
+                onChange={e => setPerfLevel(e.target.value as PerfLevel)} 
+                className="text-black rounded px-2 py-1 text-xs bg-white/90"
+                title="Performance Level"
+              >
+                <option value="low">Eco Mode</option>
+                <option value="medium">Balanced</option>
+                <option value="high">Performance</option>
               </select>
             </div>
             <div className="flex gap-4 overflow-x-auto py-2">
@@ -95,12 +130,12 @@ export default function BottomDrawer() {
               <Knob label="Reverb" min={0} max={1} step={0.01} value={reverbWet} onChange={(e) => setReverbWet(parseFloat(e.target.value))} />
               <Knob label="Filter" min={20} max={1000} step={10} value={filterFrequency} onChange={(e) => setFilterFrequency(parseFloat(e.target.value))} />
             </div>
-            {params && (
+            {params && selected && (
               <div className="flex gap-4 overflow-x-auto pb-2">
-                <Knob label="Reverb" min={0} max={1} step={0.01} value={params.reverb} onChange={(e) => setEffect(selected!, { reverb: parseFloat(e.target.value) })} />
-                <Knob label="Delay" min={0} max={1} step={0.01} value={params.delay} onChange={(e) => setEffect(selected!, { delay: parseFloat(e.target.value) })} />
-                <Knob label="Lowpass" min={100} max={20000} step={100} value={params.lowpass} onChange={(e) => setEffect(selected!, { lowpass: parseFloat(e.target.value) })} />
-                <Knob label="Highpass" min={0} max={1000} step={10} value={params.highpass} onChange={(e) => setEffect(selected!, { highpass: parseFloat(e.target.value) })} />
+                <Knob label="Reverb" min={0} max={1} step={0.01} value={params.reverb} onChange={(e) => setEffect(selected, { reverb: parseFloat(e.target.value) })} />
+                <Knob label="Delay" min={0} max={1} step={0.01} value={params.delay} onChange={(e) => setEffect(selected, { delay: parseFloat(e.target.value) })} />
+                <Knob label="Lowpass" min={100} max={20000} step={100} value={params.lowpass} onChange={(e) => setEffect(selected, { lowpass: parseFloat(e.target.value) })} />
+                <Knob label="Highpass" min={0} max={1000} step={10} value={params.highpass} onChange={(e) => setEffect(selected, { highpass: parseFloat(e.target.value) })} />
               </div>
             )}
             <MagicMelodyButton />

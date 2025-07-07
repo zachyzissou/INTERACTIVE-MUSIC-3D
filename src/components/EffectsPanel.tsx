@@ -72,7 +72,14 @@ export function EffectsPanel() {
       <Knob aria-label="Bit Depth" className="w-20 h-20" valueRaw={bitcrusherBits} valueMin={1} valueMax={16} dragSensitivity={0.005} valueRawRoundFn={(v)=>v} valueRawDisplayFn={(v)=>v.toFixed(0)} onValueRawChange={(v:number)=>setBitcrusherBits(v)} />
       <Knob aria-label="Filter Freq" className="w-20 h-20" valueRaw={filterFrequency} valueMin={20} valueMax={1000} dragSensitivity={0.005} valueRawRoundFn={(v)=>v} valueRawDisplayFn={(v)=>v.toFixed(0)} onValueRawChange={(v:number)=>setFilterFrequency(v)} />
       <div className="flex flex-col items-center gap-2">
-        <select onChange={e => applyPreset(e.target.value as keyof typeof presets)} className="text-black rounded px-1 py-0.5">
+        <label htmlFor="preset-select" className="sr-only">Audio Presets</label>
+        <select 
+          id="preset-select"
+          onChange={e => applyPreset(e.target.value as keyof typeof presets)} 
+          className="text-black rounded px-1 py-0.5"
+          aria-label="Select audio preset"
+          title="Choose an audio preset"
+        >
           <option value="">Preset</option>
           {Object.keys(presets).map((p) => (
             <option key={p} value={p}>{p}</option>

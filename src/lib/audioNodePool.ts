@@ -1,5 +1,5 @@
 // src/lib/audioNodePool.ts
-import type * as ToneType from 'tone'
+// Removed unused ToneType import
 
 interface PooledAudioNode {
   node: any
@@ -8,9 +8,9 @@ interface PooledAudioNode {
 }
 
 class AudioNodePool {
-  private pools: Map<string, PooledAudioNode[]> = new Map()
-  private maxPoolSize = 10
-  private maxAge = 300000 // 5 minutes
+  private readonly pools: Map<string, PooledAudioNode[]> = new Map()
+  private readonly maxPoolSize = 10
+  private readonly maxAge = 300000 // 5 minutes
 
   constructor() {
     // Cleanup old nodes periodically

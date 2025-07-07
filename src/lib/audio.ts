@@ -16,11 +16,12 @@ import type {
   Loop,
 } from 'tone'
 import { useAudioSettings } from '../store/useAudioSettings'
-import { useEffectSettings, defaultEffectParams, EffectParams } from '../store/useEffectSettings'
+import { useEffectSettings, EffectParams } from '../store/useEffectSettings'
 import { ObjectType } from '../store/useObjects'
 import { useLoops } from '../store/useLoops'
 import { logger } from './logger'
 import { audioNodePool } from './audioNodePool'
+import { presetConfigs } from './enhancedAudio'
 
 import { beatBus } from "./events"
 import {
@@ -35,17 +36,14 @@ import {
   BEAT_RELEASE,
 } from '../config/constants'
 
-import type * as ToneType from 'tone'
-let Tone: typeof ToneType | null = null
+let Tone: typeof import('tone') | null = null
 
 // Type aliases
 type AudioSynth = Synth | PolySynth | MembraneSynth
 
 async function ensureTone() {
-  if (!Tone) {
-    Tone = await import('tone')
-  }
-  return Tone!
+  Tone ??= await import('tone')
+  return Tone
 }
 
 export function getTone() {
@@ -93,7 +91,11 @@ let reverb: Reverb
 let filter: AutoFilter
 let distortion: Distortion
 let bitcrusher: BitCrusher
-export let masterChain: ToneAudioNode
+let masterChain: ToneAudioNode
+
+export function getMasterChain(): ToneAudioNode {
+  return masterChain
+}
 
 async function initEffects() {
   if (chorus) return
@@ -194,7 +196,8 @@ async function getObjectSynth(id: string, type: ObjectType) {
   let os = objectSynths.get(id)
   if (!os) {
     const chain = createChain()
-    const synth = await getPooledSynth(type)
+    const { synthPreset } = useAudioSettings.getState()
+    const synth = await getPooledSynth(type, synthPreset)
     const meter = new Tone.Meter({ normalRange: true, smoothing: 0.8 })
     const ctx = Tone.getContext().rawContext
     const panner = ctx.createPanner()
@@ -368,7 +371,6 @@ export async function startLoop(id: string, interval: string = '1m') {
 export function stopLoop(id: string) {
   const info = loops.get(id)
   if (info) {
-    const Tone = getTone()!
     info.loop.stop()
     info.loop.dispose()
     loops.delete(id)
@@ -381,26 +383,45 @@ export async function playSpawnSound() {
   await initAudioEngine()
   if (!audioInitialized) return
   const Tone = getTone()!
-  if (!spawnSynth) {
-    spawnSynth = new Tone.Synth({
-      oscillator: { type: 'sine' },
-      envelope: { attack: 0.01, decay: 0.2, sustain: 0, release: 0.3 }
-    }).connect(masterVolumeNode)
-  }
+  spawnSynth ??= new Tone.Synth({
+    oscillator: { type: 'sine' },
+    envelope: { attack: 0.01, decay: 0.2, sustain: 0, release: 0.3 }
+  }).connect(masterVolumeNode)
   spawnSynth.triggerAttackRelease('C6', '16n', Tone.now())
 }
 
 // Audio node pool integration
-async function getPooledSynth(type: ObjectType): Promise<AudioSynth> {
+async function getPooledSynth(type: ObjectType, preset?: keyof typeof presetConfigs): Promise<AudioSynth> {
   const Tone = getTone()!
   
   return audioNodePool.acquire('synth', () => {
     if (type === 'chord') {
-      return new Tone.PolySynth({ voice: Tone.Synth })
+      const config = preset ? presetConfigs[preset] : presetConfigs.pad
+      // For chords, create a PolySynth with enhanced voice
+      return new Tone.PolySynth({ 
+        voice: class extends Tone.Synth {
+          constructor() {
+            super()
+            // Apply enhanced config to this synth
+            this.oscillator.type = config.waveform
+            this.envelope.attack = config.attack
+            this.envelope.decay = config.decay
+            this.envelope.sustain = config.sustain
+            this.envelope.release = config.release
+          }
+        }
+      })
     } else if (type === 'beat') {
       return new Tone.MembraneSynth()
     } else {
-      return new Tone.Synth()
+      const config = preset ? presetConfigs[preset] : presetConfigs.lead
+      const synth = new Tone.Synth()
+      synth.oscillator.type = config.waveform
+      synth.envelope.attack = config.attack
+      synth.envelope.decay = config.decay
+      synth.envelope.sustain = config.sustain
+      synth.envelope.release = config.release
+      return synth
     }
   })
 }

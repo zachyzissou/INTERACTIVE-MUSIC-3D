@@ -31,12 +31,21 @@ const BottomDrawer = dynamic(() => import("@/components/BottomDrawer"), {
   loading: () => <div className="fixed bottom-0 left-0 right-0 h-20 bg-gray-900 bg-opacity-80" />
 });
 
+const PerformanceAnalytics = dynamic(() => import("@/components/PerformanceAnalytics"), {
+  ssr: false,
+  loading: () => null
+});
+
 export default function Home() {
   const [Scene, setScene] = React.useState(() => CanvasScene)
   const [started, setStarted] = React.useState(false)
+  const [showAnalytics, setShowAnalytics] = React.useState(false)
+  
   React.useEffect(() => {
     const useDev = new URLSearchParams(window.location.search).get('devcanvas') === '1'
+    const showAnalytics = new URLSearchParams(window.location.search).get('analytics') === '1'
     if (useDev) setScene(() => DevCanvas)
+    if (showAnalytics) setShowAnalytics(true)
   }, [])
 
   const handleStart = React.useCallback(async () => {
@@ -61,6 +70,7 @@ export default function Home() {
       <PerformanceSelector />
       <PwaInstallPrompt />
       <PerformanceMonitor />
+      {showAnalytics && <PerformanceAnalytics />}
       {started && (
         <AudioErrorBoundary>
           <BottomDrawer />

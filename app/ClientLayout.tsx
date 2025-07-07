@@ -9,7 +9,7 @@ import { assertPrimitives } from '@/lib/assertPrimitives'
 import { safeStringify } from '@/lib/safeStringify'
 import { logger } from '@/lib/logger'
 
-export default function ClientLayout({ children }: { children: React.ReactNode }) {
+export default function ClientLayout({ children }: { readonly children: React.ReactNode }) {
   useEffect(() => {
     registerServiceWorker()
     loadObjectsFromStorage()
