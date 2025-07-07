@@ -1,6 +1,6 @@
 // src/components/ModernMusicGenerator.tsx
 'use client'
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { secureAudioEngine, AudioSequence } from '../lib/audio-engine'
 
 interface ModernMusicGeneratorProps {
@@ -51,7 +51,7 @@ export function ModernMusicGenerator({
     }
   }
 
-  const playSequence = async () => {
+  const playSequence = useCallback(async () => {
     if (!currentSequence || !isInitialized) return
 
     try {
@@ -59,7 +59,7 @@ export function ModernMusicGenerator({
     } catch (error) {
       console.error('Failed to play sequence:', error)
     }
-  }
+  }, [currentSequence, isInitialized])
 
   const generateMelodyFromFrequency = (frequency: number) => {
     if (!isInitialized) return

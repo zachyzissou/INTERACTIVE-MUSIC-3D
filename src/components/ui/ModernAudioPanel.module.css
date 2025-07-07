@@ -1,0 +1,75 @@
+/* ModernAudioPanel.module.css */
+
+.slider {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: linear-gradient(45deg, rgb(0, 255, 255), rgb(59, 130, 246));
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 255, 255, 0.3);
+}
+
+.slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: linear-gradient(45deg, rgb(0, 255, 255), rgb(59, 130, 246));
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 255, 255, 0.3);
+}
+
+.sliderTrack {
+  width: 100%;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  position: relative;
+}
+
+.sliderProgress {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  border-radius: 4px;
+  opacity: 0.8;
+}
+
+.sliderThumb {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  transition: transform 0.1s ease;
+  pointer-events: none;
+}
+
+.sliderThumb:hover {
+  transform: translateY(-50%) scale(1.1);
+}
+
+/* Dynamic width classes for progress */
+.progress0 { width: 0%; }
+.progress10 { width: 10%; }
+.progress20 { width: 20%; }
+.progress30 { width: 30%; }
+.progress40 { width: 40%; }
+.progress50 { width: 50%; }
+.progress60 { width: 60%; }
+.progress70 { width: 70%; }
+.progress80 { width: 80%; }
+.progress90 { width: 90%; }
+.progress100 { width: 100%; }

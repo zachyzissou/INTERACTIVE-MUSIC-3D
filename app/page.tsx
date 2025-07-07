@@ -12,6 +12,12 @@ import PerformanceMonitor from "@/components/PerformanceMonitor";
 import AccessibilityPanel from "@/components/AccessibilityPanel";
 import { startAudio } from "@/lib/engine";
 
+// Modern UI Components
+import { UIManagerProvider } from "@/components/ui/UIManager";
+import ModernControlBar from "@/components/ui/ModernControlBar";
+import ModernAudioPanel from "@/components/ui/ModernAudioPanel";
+import ModernEffectsPanel from "@/components/ui/ModernEffectsPanel";
+
 // Dynamic imports for code splitting
 const CanvasScene = dynamic(() => import('../src/components/CanvasScene'), { 
   ssr: false,
@@ -55,7 +61,7 @@ export default function Home() {
   }, [])
 
   return (
-    <>
+    <UIManagerProvider>
       <a href="#main-content" className="skip-link">
         Skip to main content
       </a>
@@ -68,6 +74,10 @@ export default function Home() {
             </CanvasErrorBoundary>
           </main>
           <ShapeEditorPanel />
+          {/* Modern floating UI */}
+          <ModernControlBar variant="neon" />
+          <ModernAudioPanel />
+          <ModernEffectsPanel />
         </>
       )}
       <ExampleModal />
@@ -81,6 +91,6 @@ export default function Home() {
           <BottomDrawer />
         </AudioErrorBoundary>
       )}
-    </>
+    </UIManagerProvider>
   )
 }

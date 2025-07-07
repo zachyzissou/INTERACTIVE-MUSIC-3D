@@ -26,7 +26,9 @@ export default function XRButtons() {
         className="px-3 py-2 bg-purple-600 text-white rounded-lg text-sm hover:bg-purple-700 transition-colors"
         onClick={() => {
           // XR functionality can be added later when properly configured
-          console.log('XR feature coming soon!');
+          if (process.env.NODE_ENV === 'development') {
+            console.log('XR feature coming soon!')
+          }
         }}
       >
         VR
@@ -35,7 +37,9 @@ export default function XRButtons() {
         className="px-3 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition-colors"
         onClick={() => {
           // XR functionality can be added later when properly configured
-          console.log('AR feature coming soon!');
+          if (process.env.NODE_ENV === 'development') {
+            console.log('AR feature coming soon!')
+          }
         }}
       >
         AR
