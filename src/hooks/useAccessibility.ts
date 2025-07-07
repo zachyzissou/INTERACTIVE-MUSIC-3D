@@ -21,11 +21,9 @@ export function useAccessibility() {
 
   useEffect(() => {
     // Detect system preferences
-    const mediaQueries = {
-      reduceMotion: window.matchMedia('(prefers-reduced-motion: reduce)'),
-      highContrast: window.matchMedia('(prefers-contrast: high)'),
-      largeText: Boolean(localStorage.getItem('largeText') === 'true')
-    }
+    const reduceMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
+    const highContrastQuery = window.matchMedia('(prefers-contrast: high)')
+    const largeTextStored = localStorage.getItem('largeText') === 'true'
 
     // Check for screen reader
     const hasScreenReader = Boolean(
@@ -37,9 +35,9 @@ export function useAccessibility() {
 
     const updatePreferences = () => {
       setPreferences({
-        reduceMotion: mediaQueries.reduceMotion.matches,
-        highContrast: mediaQueries.highContrast.matches,
-        largeText: mediaQueries.largeText.matches,
+        reduceMotion: reduceMotionQuery.matches,
+        highContrast: highContrastQuery.matches,
+        largeText: largeTextStored,
         screenReader: hasScreenReader,
         keyboardNavigation: false // Will be set on first tab key
       })
@@ -49,9 +47,8 @@ export function useAccessibility() {
     updatePreferences()
 
     // Listen for changes
-    Object.values(mediaQueries).forEach(mq => {
-      mq.addEventListener('change', updatePreferences)
-    })
+    reduceMotionQuery.addEventListener('change', updatePreferences)
+    highContrastQuery.addEventListener('change', updatePreferences)
 
     // Detect keyboard navigation
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -68,9 +65,8 @@ export function useAccessibility() {
     document.addEventListener('mousedown', handleMouseDown)
 
     return () => {
-      Object.values(mediaQueries).forEach(mq => {
-        mq.removeEventListener('change', updatePreferences)
-      })
+      reduceMotionQuery.removeEventListener('change', updatePreferences)
+      highContrastQuery.removeEventListener('change', updatePreferences)
       document.removeEventListener('keydown', handleKeyDown)
       document.removeEventListener('mousedown', handleMouseDown)
     }
@@ -91,12 +87,14 @@ export function useAccessibility() {
 
   // Load stored preferences
   useEffect(() => {
-    Object.keys(preferences).forEach(key => {
+    const keys = Object.keys(preferences) as Array<keyof AccessibilityPreferences>
+    keys.forEach(key => {
       const stored = localStorage.getItem(`a11y-${key}`)
       if (stored !== null) {
-        updatePreference(key as keyof AccessibilityPreferences, stored === 'true')
+        updatePreference(key, stored === 'true')
       }
     })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return {
