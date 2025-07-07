@@ -109,39 +109,27 @@ export class WebGPURenderer {
   }
 
   createShaderModule(code: string): any {
-    if (!this.device) return null
-
-    try {
-      return this.device.createShaderModule({
+    return this.executeWithDevice(
+      () => this.device.createShaderModule({
         code,
         label: 'Custom Shader Module'
-      })
-    } catch (error) {
-      console.error('Failed to create shader module:', error)
-      return null
-    }
+      }),
+      'Failed to create shader module:'
+    );
   }
 
   createRenderPipeline(descriptor: any): any {
-    if (!this.device) return null
-
-    try {
-      return this.device.createRenderPipeline(descriptor)
-    } catch (error) {
-      console.error('Failed to create render pipeline:', error)
-      return null
-    }
+    return this.executeWithDevice(
+      () => this.device.createRenderPipeline(descriptor),
+      'Failed to create render pipeline:'
+    );
   }
 
   createBuffer(descriptor: any): any {
-    if (!this.device) return null
-
-    try {
-      return this.device.createBuffer(descriptor)
-    } catch (error) {
-      console.error('Failed to create buffer:', error)
-      return null
-    }
+    return this.executeWithDevice(
+      () => this.device.createBuffer(descriptor),
+      'Failed to create buffer:'
+    );
   }
 
   createTexture(descriptor: any): any {
