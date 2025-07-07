@@ -24,11 +24,8 @@ jobs:
       - run: npx tsc --noEmit
       - run: npm run lint
       - run: npm run build
-      - name: Install system dependencies for WebKit
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libwoff1 libopus0 libwebp6 libwebpdemux2 libenchant-2-2 libgudev-1.0-0 libsecret-1-0 libhyphen0 libgdk-pixbuf2.0-0 libegl1 libnotify4 libxss1 libasound2
-      - run: npx playwright install
+      - name: Install Playwright browsers and system dependencies
+        run: npx playwright install --with-deps
       - name: Start Next.js server and run Playwright tests
         run: |
           # Install wait-on for server readiness check
