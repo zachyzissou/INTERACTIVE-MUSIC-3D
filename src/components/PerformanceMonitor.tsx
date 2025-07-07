@@ -1,5 +1,6 @@
 'use client'
 import React, { useEffect, useState, useCallback } from 'react'
+import { logger } from '@/lib/logger'
 
 interface PerformanceStats {
   fps: number
@@ -85,7 +86,7 @@ export function PerformanceMonitor() {
       if (e.ctrlKey && e.shiftKey && e.key === 'P') {
         setVisible(prev => !prev)
         if (process.env.NODE_ENV === 'development') {
-          console.log('Performance monitor toggled')
+          logger.info('Performance monitor toggled')
         }
       }
     }

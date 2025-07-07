@@ -5,6 +5,7 @@ import React, { useRef, useEffect, useState } from 'react'
 import { Canvas, useThree } from '@react-three/fiber'
 import { WebGLRenderer } from 'three'
 import { usePerformanceSettings } from '../store/usePerformanceSettings'
+import { logger } from '@/lib/logger'
 
 interface WebGPURendererProps {
   children: React.ReactNode
@@ -132,7 +133,7 @@ export default function WebGPURenderer({ children, className = '' }: Readonly<We
       setCapabilities(caps)
       setRenderingMode(caps.preferredRenderer)
       if (process.env.NODE_ENV === 'development') {
-        console.log('🎮 GPU capabilities detected:', caps)
+        logger.info(`🎮 GPU capabilities detected: ${JSON.stringify(caps)}`)
       }
     })
   }, [])

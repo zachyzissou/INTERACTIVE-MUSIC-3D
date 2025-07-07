@@ -4,6 +4,8 @@
  * Next-generation GPU rendering for enhanced performance
  */
 
+import { logger } from './logger'
+
 // WebGPU type declarations (until @webgpu/types is available)
 declare global {
   interface Navigator {
@@ -93,7 +95,7 @@ export class WebGPURenderer {
           ) : {}
       }
 
-      console.log('WebGPU renderer initialized successfully', this.capabilities)
+      logger.info(`WebGPU renderer initialized successfully: ${JSON.stringify(this.capabilities)}`)
       return true
 
     } catch (error) {

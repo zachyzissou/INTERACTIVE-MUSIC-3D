@@ -64,7 +64,7 @@ async function applyFixes() {
       const content = await fs.readFile(filePath, 'utf8');
       
       if (content.includes(fix.find)) {
-        const updatedContent = content.replace(new RegExp(fix.find, 'g'), fix.replace);
+        const updatedContent = content.replace(fix.find, fix.replace);
         await fs.writeFile(filePath, updatedContent);
         console.log(`✅ ${fix.file}: ${fix.description}`);
       } else {
