@@ -161,7 +161,8 @@ export function ModernEffectsPanel() {
       isVisible={isVisible}
       onVisibilityChange={(visible) => {
         if (!visible) {
-          // Handle panel close through UI manager
+          const { hidePanel } = useUIManager();
+          hidePanel('effectsPanel');
         }
       }}
     >
