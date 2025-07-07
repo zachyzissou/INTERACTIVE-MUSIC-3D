@@ -2,6 +2,7 @@
 import React, { useEffect, useState, useCallback } from 'react'
 import { useSystemPerformance } from '../store/useSystemPerformance'
 import { advancedRenderer } from '../lib/renderer'
+import { logger } from '@/lib/logger'
 
 interface PerformanceStats {
   fps: number
@@ -132,7 +133,7 @@ export function PerformanceMonitor() {
       if (e.ctrlKey && e.shiftKey && e.key === 'P') {
         setVisible(prev => !prev)
         if (process.env.NODE_ENV === 'development') {
-          console.warn('Performance monitor toggled')
+          logger.info('Performance monitor toggled')
         }
       }
     }
