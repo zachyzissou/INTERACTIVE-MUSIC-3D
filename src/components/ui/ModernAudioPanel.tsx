@@ -114,7 +114,7 @@ export function ModernAudioPanel() {
       isVisible={isVisible}
       onVisibilityChange={(visible) => {
         if (!visible) {
-          // Handle panel close through UI manager
+          hidePanel('audioSettings');
         }
       }}
     >
