@@ -7,6 +7,7 @@ import { OrbitControls, Environment, ContactShadows } from '@react-three/drei'
 import { usePerformanceSettings } from '../store/usePerformanceSettings'
 import CanvasScene from './CanvasScene'
 import ErrorBoundary from './ErrorBoundary'
+import { logger } from '@/lib/logger'
 
 interface XRCanvasProps {
   enableVR?: boolean
@@ -55,7 +56,7 @@ export default function XRCanvas({ enableVR = true, enableAR = true, className =
                 className="px-4 py-2 bg-black/80 border border-white/20 rounded-lg text-white cursor-pointer hover:bg-white/10 transition-colors"
                 onClick={() => {
                   if (process.env.NODE_ENV === 'development') {
-                    console.log('VR mode - Coming soon!')
+                    logger.info('VR mode - Coming soon!')
                   }
                 }}
               >
@@ -67,7 +68,7 @@ export default function XRCanvas({ enableVR = true, enableAR = true, className =
                 className="px-4 py-2 bg-black/80 border border-white/20 rounded-lg text-white cursor-pointer hover:bg-white/10 transition-colors"
                 onClick={() => {
                   if (process.env.NODE_ENV === 'development') {
-                    console.log('AR mode - Coming soon!')
+                    logger.info('AR mode - Coming soon!')
                   }
                 }}
               >

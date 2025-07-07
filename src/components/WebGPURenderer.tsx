@@ -6,6 +6,7 @@ import { Canvas, useThree } from '@react-three/fiber'
 import { WebGLRenderer } from 'three'
 import { usePerformanceSettings } from '../store/usePerformanceSettings'
 import { useSystemPerformance } from '../store/useSystemPerformance'
+import { logger } from '@/lib/logger'
 
 interface WebGPURendererProps {
   children: React.ReactNode
@@ -188,8 +189,8 @@ export default function WebGPURenderer({
       })
       
       if (process.env.NODE_ENV === 'development') {
-        console.warn('🎮 GPU capabilities detected:', caps)
-        console.warn('🔧 Renderer mode selected:', preferredMode)
+        logger.info(`🎮 GPU capabilities detected: ${JSON.stringify(caps)}`)
+        logger.info(`🔧 Renderer mode selected: ${preferredMode}`)
       }
     })
   }, [enableWebGPU, systemPerf])
