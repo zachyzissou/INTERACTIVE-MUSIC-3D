@@ -39,7 +39,7 @@ test.describe('Debug Canvas Issue', () => {
       for (let i = 0; i < allCanvases.length; i++) {
         const canvas = allCanvases[i];
         const bbox = await canvas.boundingBox();
-        const styles = await canvas.evaluate(el => ({
+        const styles = await canvas.evaluate((el: HTMLCanvasElement) => ({
           display: window.getComputedStyle(el).display,
           visibility: window.getComputedStyle(el).visibility,
           width: el.width,
