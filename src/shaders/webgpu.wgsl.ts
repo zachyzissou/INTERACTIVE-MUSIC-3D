@@ -7,7 +7,12 @@ struct VertexOutput {
 
 struct Uniforms {
     time: f32,
-    bass_level: f32,
+    bass_lev            // WebGPU initialization successful
+            return true;
+        } catch (error) {
+            console.error('WebGPU initialization failed:', error);
+            return false;
+        }2,
     mid_level: f32,
     high_level: f32,
     resolution: vec2<f32>,
@@ -244,7 +249,7 @@ export class WebGPUShaderManager {
 
             this.createPipeline(format);
             
-            console.log('WebGPU initialized successfully');
+            // WebGPU initialized successfully
             return true;
         } catch (error) {
             console.warn('WebGPU initialization failed:', error);
@@ -307,9 +312,12 @@ export class WebGPUShaderManager {
     }
 }
 
-export default {
+// Define the WebGPU exports
+const webgpuExports = {
     webgpuMetaballShader,
     webgpuComputeShader,
     webgpuVertexShader,
     WebGPUShaderManager
 };
+
+export default webgpuExports;
