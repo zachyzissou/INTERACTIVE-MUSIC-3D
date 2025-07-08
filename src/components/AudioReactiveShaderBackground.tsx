@@ -8,7 +8,7 @@ interface AudioReactiveBackgroundProps {
   readonly bassLevel: number
   readonly midLevel: number
   readonly highLevel: number
-  readonly activeShader: string
+  readonly activeShader: 'metaball' | 'noise' | 'water'
   readonly glitchIntensity: number
   readonly enabled: boolean
   readonly audioSensitivity: {
@@ -16,6 +16,8 @@ interface AudioReactiveBackgroundProps {
     readonly mid: number
     readonly high: number
   }
+  readonly position?: number[]
+  readonly scale?: number[]
 }
 
 // Enhanced metaball fragment shader
@@ -241,7 +243,9 @@ export function AudioReactiveShaderBackground({
   activeShader = 'metaball',
   glitchIntensity = 0,
   enabled = true,
-  audioSensitivity = { bass: 1, mid: 1, high: 1 }
+  audioSensitivity = { bass: 1, mid: 1, high: 1 },
+  position = [0, 0, -10],
+  scale = [20, 20, 1]
 }: AudioReactiveBackgroundProps) {
   const meshRef = useRef<THREE.Mesh>(null)
   const materialRef = useRef<THREE.ShaderMaterial>(null)
@@ -294,7 +298,7 @@ export function AudioReactiveShaderBackground({
         uRippleStrength: { value: 1.0 }
       }
     }
-  }), [size])
+  } as const), [size])
 
   // Mouse tracking for interactive effects
   useEffect(() => {
@@ -414,10 +418,10 @@ export function AudioReactiveShaderBackground({
   return (
     <mesh 
       ref={meshRef}
-      position={[0, 0, -10]}
-      scale={[viewport.width * 1.5, viewport.height * 1.5, 1]}
+      position={position as any}
+      scale={scale as any}
     >
-      <planeGeometry args={[1, 1, 64, 64]} />
+      <planeGeometry args={[1, 1, 64, 64] as any} />
       {/* Material will be set dynamically */}
     </mesh>
   )

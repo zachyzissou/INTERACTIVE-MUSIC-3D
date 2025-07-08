@@ -1,21 +1,20 @@
-'use client'
+// Config file - no client components
 
-import React from 'react'
-import { 
-  SparklesIcon, 
-  BoltIcon, 
-  FireIcon, 
-  BeakerIcon,
-  EyeDropperIcon,
-  SwatchIcon,
-  CubeIcon,
-  GlobeAltIcon
-} from '@heroicons/react/24/outline'
+// Define possible icon types
+export type ShaderIconType = 
+  | 'sparkles' 
+  | 'bolt' 
+  | 'fire' 
+  | 'beaker'
+  | 'eyeDropper'
+  | 'swatch'
+  | 'cube'
+  | 'globeAlt'
 
 export interface ShaderConfig {
   id: string
   name: string
-  icon: React.ReactNode
+  iconType: ShaderIconType
   params: {
     [key: string]: {
       value: number
@@ -31,7 +30,7 @@ export const shaderConfigurations: ShaderConfig[] = [
   {
     id: 'metaball',
     name: 'Metaballs',
-    icon: <SparklesIcon className="w-5 h-5" />,
+    iconType: 'sparkles',
     params: {
       metaballCount: {
         value: 3,
@@ -80,7 +79,7 @@ export const shaderConfigurations: ShaderConfig[] = [
   {
     id: 'proceduralNoise',
     name: 'Noise',
-    icon: <BeakerIcon className="w-5 h-5" />,
+    iconType: 'beaker',
     params: {
       noiseScale: {
         value: 3.0,
@@ -143,7 +142,7 @@ export const shaderConfigurations: ShaderConfig[] = [
   {
     id: 'waterRipple',
     name: 'Ripples',
-    icon: <GlobeAltIcon className="w-5 h-5" />,
+    iconType: 'globeAlt',
     params: {
       rippleSpeed: {
         value: 2.0,
@@ -185,7 +184,7 @@ export const shaderConfigurations: ShaderConfig[] = [
   {
     id: 'rgbGlitch',
     name: 'RGB Glitch',
-    icon: <BoltIcon className="w-5 h-5" />,
+    iconType: 'bolt',
     params: {
       glitchIntensity: {
         value: 0.5,
@@ -227,7 +226,7 @@ export const shaderConfigurations: ShaderConfig[] = [
   {
     id: 'voronoi',
     name: 'Voronoi',
-    icon: <CubeIcon className="w-5 h-5" />,
+    iconType: 'cube',
     params: {
       cellCount: {
         value: 8,
@@ -269,7 +268,7 @@ export const shaderConfigurations: ShaderConfig[] = [
   {
     id: 'plasma',
     name: 'Plasma',
-    icon: <FireIcon className="w-5 h-5" />,
+    iconType: 'fire',
     params: {
       frequency1: {
         value: 2.0,

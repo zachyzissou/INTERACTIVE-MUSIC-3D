@@ -24,7 +24,8 @@ import { motion, AnimatePresence } from 'framer-motion'
 import AudioVisualizer from './AudioVisualizer'
 import ShaderSelector from './ShaderSelector'
 import ShaderControls from './ShaderControls'
-import '../../../styles/god-tier-ui.css'
+import '@/styles/god-tier-ui.css'
+import type { ShaderIconType } from '@/config/shaderConfigs'
 
 interface AudioData {
   bass: number
@@ -37,7 +38,7 @@ interface AudioData {
 interface ShaderConfig {
   id: string
   name: string
-  icon: React.ReactNode
+  iconType: ShaderIconType
   params: {
     [key: string]: {
       value: number

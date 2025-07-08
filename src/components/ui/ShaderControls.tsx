@@ -1,11 +1,12 @@
 'use client'
 
 import React from 'react'
+import type { ShaderIconType } from '@/config/shaderConfigs'
 
 interface ShaderConfig {
   id: string
   name: string
-  icon: React.ReactNode
+  iconType: ShaderIconType
   params: {
     [key: string]: {
       value: number

@@ -163,14 +163,14 @@ fn vs_main(input: VertexInput) -> VertexOutput {
 `;
 
 // WebGPU type definitions for TypeScript
+// Only declare these if they don't already exist in the global namespace
 declare global {
-    interface Navigator {
-        gpu?: GPU;
-    }
-    
-    interface GPU {
-        requestAdapter(options?: GPURequestAdapterOptions): Promise<GPUAdapter | null>;
-        getPreferredCanvasFormat(): GPUTextureFormat;
+    // Use a more specific type to avoid conflicts
+    interface WebGPUNavigator extends Navigator {
+        readonly gpu?: {
+            requestAdapter(options?: GPURequestAdapterOptions): Promise<GPUAdapter | null>;
+            getPreferredCanvasFormat(): GPUTextureFormat;
+        };
     }
     
     interface GPUAdapter {

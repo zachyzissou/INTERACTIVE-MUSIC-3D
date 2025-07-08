@@ -2,11 +2,22 @@
 
 import React from 'react'
 import { motion } from 'framer-motion'
+import { 
+  SparklesIcon, 
+  BoltIcon, 
+  FireIcon, 
+  BeakerIcon,
+  EyeDropperIcon,
+  SwatchIcon,
+  CubeIcon,
+  GlobeAltIcon
+} from '@heroicons/react/24/outline'
+import type { ShaderIconType } from '@/config/shaderConfigs'
 
 interface ShaderConfig {
   id: string
   name: string
-  icon: React.ReactNode
+  iconType: ShaderIconType
   params: {
     [key: string]: {
       value: number
@@ -15,6 +26,30 @@ interface ShaderConfig {
       step: number
       label: string
     }
+  }
+}
+
+// Icon mapper function
+const getIconComponent = (iconType: ShaderIconType): React.ReactNode => {
+  switch (iconType) {
+    case 'sparkles':
+      return <SparklesIcon className="w-5 h-5" />
+    case 'bolt':
+      return <BoltIcon className="w-5 h-5" />
+    case 'fire':
+      return <FireIcon className="w-5 h-5" />
+    case 'beaker':
+      return <BeakerIcon className="w-5 h-5" />
+    case 'eyeDropper':
+      return <EyeDropperIcon className="w-5 h-5" />
+    case 'swatch':
+      return <SwatchIcon className="w-5 h-5" />
+    case 'cube':
+      return <CubeIcon className="w-5 h-5" />
+    case 'globeAlt':
+      return <GlobeAltIcon className="w-5 h-5" />
+    default:
+      return <SparklesIcon className="w-5 h-5" />
   }
 }
 
@@ -45,7 +80,7 @@ const ShaderSelector: React.FC<ShaderSelectorProps> = ({
             whileTap={{ scale: 0.95 }}
             aria-label={`Select ${shader.name} shader`}
           >
-            <div className="text-lg">{shader.icon}</div>
+            <div className="text-lg">{getIconComponent(shader.iconType)}</div>
             <span className="text-xs">{shader.name}</span>
           </motion.button>
         ))}

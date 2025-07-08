@@ -10,6 +10,7 @@ import SafariCanvasDetector from "@/components/SafariCanvasDetector";
 import PerformanceMonitor from "@/components/PerformanceMonitor";
 import AccessibilityPanel from "@/components/AccessibilityPanel";
 import { startAudio } from "@/lib/engine";
+import type { ShaderIconType } from "@/config/shaderConfigs";
 
 // New God-Tier UI System
 import GodTierUI from "@/components/ui/GodTierUI";
@@ -54,7 +55,7 @@ export default function Home() {
     {
       id: 'metaball',
       name: 'Metaballs',
-      icon: '🟣',
+      iconType: 'sparkles' as ShaderIconType,
       params: {
         glow: { value: 0.5, min: 0, max: 1, step: 0.01, label: 'Glow' },
         count: { value: 3, min: 1, max: 8, step: 1, label: 'Count' },
@@ -65,7 +66,7 @@ export default function Home() {
     {
       id: 'glitch',
       name: 'RGB Glitch',
-      icon: '🌈',
+      iconType: 'bolt' as ShaderIconType,
       params: {
         glow: { value: 0.5, min: 0, max: 1, step: 0.01, label: 'Glow' },
         count: { value: 3, min: 1, max: 8, step: 1, label: 'Count' },
@@ -76,7 +77,7 @@ export default function Home() {
     {
       id: 'ripple',
       name: 'Water Ripple',
-      icon: '💧',
+      iconType: 'globeAlt' as ShaderIconType,
       params: {
         glow: { value: 0.5, min: 0, max: 1, step: 0.01, label: 'Glow' },
         count: { value: 3, min: 1, max: 8, step: 1, label: 'Count' },
