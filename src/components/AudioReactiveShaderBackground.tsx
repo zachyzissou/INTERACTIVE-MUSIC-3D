@@ -378,9 +378,24 @@ export function AudioReactiveShaderBackground({
   // Initialize material once with default shader
   useEffect(() => {
     // This effect runs only once to create the initial material
-    if (!meshRef.current) return
+    if (!meshRef.current || !size) return
 
-    const initialConfig = shaderConfigs.metaball // Use metaball as default
+    // Use a safe default configuration that doesn't depend on dynamic size
+    const initialConfig = {
+      fragmentShader: metaballFragmentShader,
+      uniforms: {
+        uTime: { value: 0 },
+        uBassLevel: { value: 0 },
+        uMidLevel: { value: 0 },
+        uHighLevel: { value: 0 },
+        uResolution: { value: [size.width || 1920, size.height || 1080] },
+        uColorPrimary: { value: new THREE.Color(0x00ffff) },
+        uColorSecondary: { value: new THREE.Color(0xff0080) },
+        uMetaballCount: { value: 6.0 },
+        uGlowIntensity: { value: 1.0 }
+      }
+    }
+    
     const material = new THREE.ShaderMaterial({
       vertexShader,
       fragmentShader: initialConfig.fragmentShader,
@@ -398,41 +413,50 @@ export function AudioReactiveShaderBackground({
         material.dispose()
       }
     }
-  }, [shaderConfigs]) // Include shaderConfigs in dependencies
+  }, [size]) // Depend on size instead of shaderConfigs
   
   // Update material properties when shader changes
   useEffect(() => {
-    if (!materialRef.current || !meshRef.current) return
+    if (!materialRef.current || !meshRef.current || !shaderConfigs) return
     
-    const config = shaderConfigs[activeShader] || shaderConfigs.metaball
-    
-    // For shader changes, we need to create a new material since fragmentShader can't be updated
-    const newMaterial = new THREE.ShaderMaterial({
-      vertexShader,
-      fragmentShader: config.fragmentShader,
-      uniforms: { ...config.uniforms },
-      transparent: true,
-      blending: THREE.AdditiveBlending,
-      side: THREE.DoubleSide
-    })
-    
-    // Dispose old material and assign new one
-    if (materialRef.current) {
-      materialRef.current.dispose()
-    }
-    
-    meshRef.current.material = newMaterial
-    materialRef.current = newMaterial
-    
-    // Animate shader transition
-    gsap.fromTo(newMaterial, 
-      { opacity: 0 },
-      { 
-        opacity: enabled ? 0.8 : 0,
-        duration: 0.5,
-        ease: "power2.out"
+    try {
+      const config = shaderConfigs[activeShader] || shaderConfigs.metaball
+      
+      if (!config || !config.fragmentShader) {
+        console.warn(`Shader config not found for: ${activeShader}`)
+        return
       }
-    )
+
+      // For shader changes, we need to create a new material since fragmentShader can't be updated
+      const newMaterial = new THREE.ShaderMaterial({
+        vertexShader,
+        fragmentShader: config.fragmentShader,
+        uniforms: { ...config.uniforms },
+        transparent: true,
+        blending: THREE.AdditiveBlending,
+        side: THREE.DoubleSide
+      })
+      
+      // Dispose old material and assign new one
+      if (materialRef.current) {
+        materialRef.current.dispose()
+      }
+      
+      meshRef.current.material = newMaterial
+      materialRef.current = newMaterial
+      
+      // Animate shader transition
+      gsap.fromTo(newMaterial, 
+        { opacity: 0 },
+        { 
+          opacity: enabled ? 0.8 : 0,
+          duration: 0.5,
+          ease: "power2.out"
+        }
+      )
+    } catch (error) {
+      console.error('Error updating shader material:', error)
+    }
   }, [activeShader, enabled, shaderConfigs])
 
   // Animation loop
