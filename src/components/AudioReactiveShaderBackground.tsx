@@ -250,7 +250,7 @@ export function AudioReactiveShaderBackground({
 }: AudioReactiveBackgroundProps) {
   const meshRef = useRef<THREE.Mesh>(null)
   const materialRef = useRef<THREE.ShaderMaterial>(null)
-  const { viewport, size } = useThree()
+  const { size } = useThree()
   const [mouse, setMouse] = useState({ x: 0.5, y: 0.5 })
   const timeRef = useRef(0)
 
@@ -498,10 +498,10 @@ export function AudioReactiveShaderBackground({
   return (
     <mesh 
       ref={meshRef}
-      position={position as any}
-      scale={scale as any}
+      position={position ? [position[0], position[1], position[2]] : [0, 0, 0]}
+      scale={scale ? [scale[0], scale[1], scale[2]] : [1, 1, 1]}
     >
-      <planeGeometry args={[1, 1, 64, 64] as any} />
+      <planeGeometry args={[1, 1, 64, 64]} />
       {/* Material will be set dynamically */}
     </mesh>
   )
