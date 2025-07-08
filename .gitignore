@@ -13,3 +13,12 @@ package-lock.json
 .buildcache/*
 !.buildcache/.gitkeep
 tsconfig.tsbuildinfo
+
+# Test artifacts and build results
+test-results/
+playwright-report/
+coverage/
+*.tgz
+.nyc_output/
+dist/
+out/
