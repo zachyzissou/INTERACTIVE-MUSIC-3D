@@ -3,23 +3,16 @@ import React from "react";
 import dynamic from 'next/dynamic';
 import PerformanceSelector from "@/components/PerformanceSelector";
 import PwaInstallPrompt from "@/components/PwaInstallPrompt";
-import ShapeEditorPanel from "@/components/ShapeEditorPanel";
 import ExampleModal from "@/components/ExampleModal";
 import StartOverlay from "@/components/StartOverlay";
 import { CanvasErrorBoundary } from "@/components/CanvasErrorBoundary";
 import SafariCanvasDetector from "@/components/SafariCanvasDetector";
-import AudioErrorBoundary from "@/components/AudioErrorBoundary";
 import PerformanceMonitor from "@/components/PerformanceMonitor";
 import AccessibilityPanel from "@/components/AccessibilityPanel";
 import { startAudio } from "@/lib/engine";
 
-// Modern UI Components
-import { UIManagerProvider } from "@/components/ui/UIManager";
-import ModernControlBar from "@/components/ui/ModernControlBar";
-import ModernAudioPanel from "@/components/ui/ModernAudioPanel";
-import ModernEffectsPanel from "@/components/ui/ModernEffectsPanel";
-import { AudioControls } from "@/components/ui/AudioControls";
-import { AudioAnalyzer } from "@/components/ui/AudioAnalyzer";
+// New God-Tier UI System
+import GodTierUI from "@/components/ui/GodTierUI";
 
 // Dynamic imports for code splitting
 const CanvasScene = dynamic(() => import('../src/components/CanvasScene'), { 
@@ -36,11 +29,6 @@ const DevCanvas = dynamic(() => import('../src/components/DevCanvas'), {
   </div>
 });
 
-const BottomDrawer = dynamic(() => import("@/components/BottomDrawer"), {
-  ssr: false,
-  loading: () => <div className="fixed bottom-0 left-0 right-0 h-20 bg-gray-900 bg-opacity-80" />
-});
-
 const PerformanceAnalytics = dynamic(() => import("@/components/PerformanceAnalytics"), {
   ssr: false,
   loading: () => null
@@ -50,15 +38,54 @@ export default function Home() {
   const [Scene, setScene] = React.useState(() => CanvasScene)
   const [started, setStarted] = React.useState(false)
   const [showAnalytics, setShowAnalytics] = React.useState(false)
-  
   // Audio reactive state
   const [bassData, setBassData] = React.useState(0)
   const [midData, setMidData] = React.useState(0)
   const [highData, setHighData] = React.useState(0)
+  const [volume, setVolume] = React.useState(1)
+  const [isPlaying, setIsPlaying] = React.useState(false)
   const [activeShader, setActiveShader] = React.useState('metaball')
   const [glitchIntensity, setGlitchIntensity] = React.useState(0)
   const [audioSource, setAudioSource] = React.useState<MediaElementAudioSourceNode | null>(null)
-  
+  const [spectrum, setSpectrum] = React.useState<Float32Array>(new Float32Array(16))
+
+  // GodTierUI shaderConfigs as state, all params always present
+  const [shaderConfigs, setShaderConfigs] = React.useState([
+    {
+      id: 'metaball',
+      name: 'Metaballs',
+      icon: '🟣',
+      params: {
+        glow: { value: 0.5, min: 0, max: 1, step: 0.01, label: 'Glow' },
+        count: { value: 3, min: 1, max: 8, step: 1, label: 'Count' },
+        intensity: { value: 0.2, min: 0, max: 1, step: 0.01, label: 'Intensity' },
+        speed: { value: 0.5, min: 0, max: 2, step: 0.01, label: 'Speed' }
+      }
+    },
+    {
+      id: 'glitch',
+      name: 'RGB Glitch',
+      icon: '🌈',
+      params: {
+        glow: { value: 0.5, min: 0, max: 1, step: 0.01, label: 'Glow' },
+        count: { value: 3, min: 1, max: 8, step: 1, label: 'Count' },
+        intensity: { value: 0.2, min: 0, max: 1, step: 0.01, label: 'Intensity' },
+        speed: { value: 0.5, min: 0, max: 2, step: 0.01, label: 'Speed' }
+      }
+    },
+    {
+      id: 'ripple',
+      name: 'Water Ripple',
+      icon: '💧',
+      params: {
+        glow: { value: 0.5, min: 0, max: 1, step: 0.01, label: 'Glow' },
+        count: { value: 3, min: 1, max: 8, step: 1, label: 'Count' },
+        intensity: { value: 0.2, min: 0, max: 1, step: 0.01, label: 'Intensity' },
+        speed: { value: 0.5, min: 0, max: 2, step: 0.01, label: 'Speed' }
+      }
+    }
+  ])
+
   React.useEffect(() => {
     const useDev = new URLSearchParams(window.location.search).get('devcanvas') === '1'
     const showAnalytics = new URLSearchParams(window.location.search).get('analytics') === '1'
@@ -69,10 +96,60 @@ export default function Home() {
   const handleStart = React.useCallback(async () => {
     await startAudio()
     setStarted(true)
+    setIsPlaying(true)
   }, [])
 
+  const handleAudioToggle = React.useCallback(() => {
+    setIsPlaying(!isPlaying)
+    // Here you would integrate with your actual audio system
+  }, [isPlaying])
+
+  const handleVolumeChange = React.useCallback((volume: number) => {
+    setVolume(volume)
+    // Here you would integrate with your actual audio system
+  }, [])
+
+  const handleShaderChange = React.useCallback((shaderId: string) => {
+    setActiveShader(shaderId)
+    // Here you would integrate with your shader system
+  }, [])
+
+  // Handler for updating shader param values
+  const handleParamChange = (shaderId: string, paramName: string, value: number) => {
+    setShaderConfigs(prev => prev.map((config: any) =>
+      config.id === shaderId
+        ? {
+            ...config,
+            params: {
+              ...config.params,
+              [paramName]: {
+                ...config.params[paramName],
+                value
+              }
+            }
+          }
+        : config
+    ))
+  }
+
+  // Simulate audio data updates (replace with real audio analysis)
+  React.useEffect(() => {
+    if (!isPlaying) return
+    
+    const generateSpectrum = () => new Float32Array(16).map(() => Math.random() * 0.5)
+    
+    const interval = setInterval(() => {
+      setBassData(Math.random() * 0.8)
+      setMidData(Math.random() * 0.6)
+      setHighData(Math.random() * 0.4)
+      setSpectrum(generateSpectrum())
+    }, 100)
+    
+    return () => clearInterval(interval)
+  }, [isPlaying])
+
   return (
-    <UIManagerProvider>
+    <>
       <a href="#main-content" className="skip-link">
         Skip to main content
       </a>
@@ -86,27 +163,22 @@ export default function Home() {
               </SafariCanvasDetector>
             </CanvasErrorBoundary>
           </main>
-          <ShapeEditorPanel />
-          {/* Modern floating UI */}
-          <ModernControlBar variant="neon" />
-          <ModernAudioPanel />
-          <ModernEffectsPanel />
-          
-          {/* Audio Reactive Controls */}
-          <AudioControls
-            onBassChange={setBassData}
-            onMidChange={setMidData}
-            onHighChange={setHighData}
+          {/* Unified God-Tier UI */}
+          <GodTierUI
+            audioData={{
+              bass: bassData,
+              mid: midData,
+              high: highData,
+              volume,
+              spectrum
+            }}
+            onAudioToggle={() => setIsPlaying((p) => !p)}
+            onVolumeChange={setVolume}
             onShaderChange={setActiveShader}
-            onGlitchIntensityChange={setGlitchIntensity}
-          />
-          
-          {/* Audio Analyzer */}
-          <AudioAnalyzer
-            audioSource={audioSource}
-            onBassData={setBassData}
-            onMidData={setMidData}
-            onHighData={setHighData}
+            onParamChange={handleParamChange}
+            isPlaying={isPlaying}
+            currentShader={activeShader}
+            shaderConfigs={shaderConfigs}
           />
         </>
       )}
@@ -116,11 +188,6 @@ export default function Home() {
       <PerformanceMonitor />
       <AccessibilityPanel />
       {showAnalytics && <PerformanceAnalytics />}
-      {started && (
-        <AudioErrorBoundary>
-          <BottomDrawer />
-        </AudioErrorBoundary>
-      )}
-    </UIManagerProvider>
+    </>
   )
 }

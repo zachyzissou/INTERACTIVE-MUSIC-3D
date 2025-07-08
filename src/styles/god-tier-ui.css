@@ -1,0 +1,212 @@
+/* God-Tier UI Styles */
+
+.god-tier-main-panel {
+  position: fixed;
+  z-index: 1000;
+}
+
+.god-tier-drag-handle {
+  cursor: grab;
+}
+
+.god-tier-drag-handle.dragging {
+  cursor: grabbing;
+}
+
+.god-tier-audio-visualizer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+
+.god-tier-spectrum-bar {
+  width: 4px;
+  background: linear-gradient(to top, #06b6d4, #8b5cf6);
+  border-radius: 2px;
+  transition: height 75ms ease-out;
+  min-height: 4px;
+  height: 4px; /* Default height, will be updated via JavaScript */
+}
+
+.god-tier-slider {
+  background: linear-gradient(90deg, #374151 0%, #6366f1 100%);
+  outline: none;
+  border-radius: 8px;
+  height: 8px;
+  appearance: none;
+  width: 100%;
+}
+
+.god-tier-slider::-webkit-slider-thumb {
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #06b6d4;
+  cursor: pointer;
+  border: 2px solid #0891b2;
+  box-shadow: 0 0 10px rgba(6, 182, 212, 0.5);
+}
+
+.god-tier-slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #06b6d4;
+  cursor: pointer;
+  border: 2px solid #0891b2;
+  box-shadow: 0 0 10px rgba(6, 182, 212, 0.5);
+}
+
+.god-tier-custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.god-tier-custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(75, 85, 99, 0.3);
+  border-radius: 2px;
+}
+
+.god-tier-custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(6, 182, 212, 0.6);
+  border-radius: 2px;
+}
+
+.god-tier-custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(6, 182, 212, 0.8);
+}
+
+.god-tier-skip-link {
+  position: absolute;
+  top: -40px;
+  left: 6px;
+  background: #000;
+  color: #fff;
+  padding: 8px;
+  text-decoration: none;
+  border-radius: 4px;
+  z-index: 1000;
+}
+
+.god-tier-skip-link:focus {
+  top: 6px;
+}
+
+/* Audio reactive glow animations */
+@keyframes pulse-bass {
+  0% { 
+    box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
+  }
+  100% { 
+    box-shadow: 0 0 40px rgba(239, 68, 68, 0.6);
+  }
+}
+
+@keyframes pulse-mid {
+  0% { 
+    box-shadow: 0 0 20px rgba(34, 197, 94, 0.3);
+  }
+  100% { 
+    box-shadow: 0 0 40px rgba(34, 197, 94, 0.6);
+  }
+}
+
+@keyframes pulse-high {
+  0% { 
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+  }
+  100% { 
+    box-shadow: 0 0 40px rgba(59, 130, 246, 0.6);
+  }
+}
+
+.god-tier-bass-reactive {
+  animation: pulse-bass 0.5s ease-in-out infinite alternate;
+}
+
+.god-tier-mid-reactive {
+  animation: pulse-mid 0.5s ease-in-out infinite alternate;
+}
+
+.god-tier-high-reactive {
+  animation: pulse-high 0.5s ease-in-out infinite alternate;
+}
+
+/* Performance monitor styles */
+.god-tier-performance-monitor {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  background: rgba(0, 0, 0, 0.8);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  border-radius: 8px;
+  border: 1px solid rgba(75, 85, 99, 0.5);
+  padding: 12px;
+  font-size: 12px;
+  color: rgba(156, 163, 175, 1);
+  z-index: 50;
+}
+
+/* Shader grid layout */
+.god-tier-shader-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.god-tier-shader-button {
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid;
+  transition: all 200ms ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+}
+
+.god-tier-shader-button.active {
+  border-color: #06b6d4;
+  background: rgba(6, 182, 212, 0.2);
+  color: #67e8f9;
+}
+
+.god-tier-shader-button.inactive {
+  border-color: #4b5563;
+  background: rgba(0, 0, 0, 0.2);
+  color: #9ca3af;
+}
+
+.god-tier-shader-button.inactive:hover {
+  border-color: #6b7280;
+}
+
+/* Panel transitions */
+.god-tier-panel-enter {
+  opacity: 0;
+  height: 0;
+}
+
+.god-tier-panel-enter-active {
+  opacity: 1;
+  height: auto;
+  transition: all 300ms ease-in-out;
+}
+
+.god-tier-panel-exit {
+  opacity: 1;
+  height: auto;
+}
+
+.god-tier-panel-exit-active {
+  opacity: 0;
+  height: 0;
+  transition: all 300ms ease-in-out;
+}
