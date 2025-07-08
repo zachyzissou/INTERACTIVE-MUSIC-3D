@@ -1,5 +1,6 @@
 'use client'
 import React, { useState, useEffect } from 'react';
+import { logger } from '@/lib/logger';
 
 export default function XRButtons() {
   const [isXRSupported, setIsXRSupported] = useState(false);
@@ -27,7 +28,7 @@ export default function XRButtons() {
         onClick={() => {
           // XR functionality can be added later when properly configured
           if (process.env.NODE_ENV === 'development') {
-            console.log('XR feature coming soon!')
+            logger.info('XR feature coming soon!')
           }
         }}
       >
@@ -38,7 +39,7 @@ export default function XRButtons() {
         onClick={() => {
           // XR functionality can be added later when properly configured
           if (process.env.NODE_ENV === 'development') {
-            console.log('AR feature coming soon!')
+            logger.info('AR feature coming soon!')
           }
         }}
       >
