@@ -174,18 +174,17 @@ export default function CanvasScene() {
             audioSensitivity={{ bass: 1, mid: 1, high: 1 }}
           />
           {perfLevel === 'high' && (
-            <>
-              <AudioReactiveShaderBackground 
-                activeShader="voronoi" 
-                position={[-10, 5, -12]} 
-                scale={[15, 15, 1]} 
-                bassLevel={0.5}
-                midLevel={0.3}
-                highLevel={0.2}
-                glitchIntensity={0}
-                enabled={true}
-                audioSensitivity={{ bass: 1, mid: 1, high: 1 }}
-              />
+            <>          <AudioReactiveShaderBackground 
+            activeShader="voronoi" 
+            position={[-10, 5, -12]} 
+            scale={[15, 15, 1]} 
+            bassLevel={0.5}
+            midLevel={0.3}
+            highLevel={0.2}
+            glitchIntensity={0}
+            enabled={true}
+            audioSensitivity={{ bass: 1, mid: 1, high: 1 }}
+          />
               <AudioReactiveShaderBackground 
                 activeShader="water" 
                 position={[10, -5, -12]} 

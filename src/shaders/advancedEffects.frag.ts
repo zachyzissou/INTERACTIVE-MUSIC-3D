@@ -219,8 +219,11 @@ void main() {
 }
 `;
 
-export default {
+// Define the shader exports
+const advancedShaders = {
   voronoiFragmentShader,
   rgbGlitchFragmentShader,
   plasmaFragmentShader
 };
+
+export default advancedShaders;

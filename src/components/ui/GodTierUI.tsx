@@ -161,7 +161,7 @@ const GodTierUI: React.FC<GodTierUIProps> = ({
                 {Array.from({ length: 16 }).map((_, i) => (
                   <div
                     key={i}
-                    className="w-1 transition-all duration-75 rounded-full bg-gradient-to-t from-cyan-500 to-purple-500 spectrum-bar"
+                    className="w-1 transition-all duration-75 rounded-full bg-gradient-to-t from-cyan-500 to-purple-500 god-tier-spectrum-bar"
                     aria-label={`Spectrum bar ${i}`}
                     style={{
                       // @ts-ignore

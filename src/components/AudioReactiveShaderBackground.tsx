@@ -3,6 +3,7 @@ import React, { useRef, useEffect, useState, useMemo } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
 import { gsap } from 'gsap'
+import { voronoiFragmentShader } from '../shaders/advancedEffects.frag'
 
 interface AudioReactiveBackgroundProps {
   readonly bassLevel: number
@@ -300,7 +301,7 @@ export function AudioReactiveShaderBackground({
     },
     
     voronoi: {
-      fragmentShader: metaballFragmentShader, // Placeholder - should use actual voronoi shader
+      fragmentShader: voronoiFragmentShader, // Using proper voronoi shader
       uniforms: {
         uTime: { value: 0 },
         uBassLevel: { value: 0 },

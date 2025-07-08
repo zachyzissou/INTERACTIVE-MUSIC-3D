@@ -140,7 +140,7 @@ export const shaderConfigurations: ShaderConfig[] = [
     }
   },
   {
-    id: 'waterRipple',
+    id: 'water',
     name: 'Ripples',
     iconType: 'globeAlt',
     params: {

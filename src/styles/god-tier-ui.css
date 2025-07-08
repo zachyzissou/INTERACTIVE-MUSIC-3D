@@ -42,6 +42,12 @@
   width: 100%;
 }
 
+.god-tier-slider:focus-visible {
+  outline: 2px solid #6366f1;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.3);
+}
+
 .god-tier-slider::-webkit-slider-thumb {
   appearance: none;
   width: 16px;
