@@ -11,6 +11,7 @@ import PerformanceMonitor from "@/components/PerformanceMonitor";
 import AccessibilityPanel from "@/components/AccessibilityPanel";
 import { startAudio } from "@/lib/engine";
 import type { ShaderIconType } from "@/config/shaderConfigs";
+import { shaderConfigurations } from "@/config/shaderConfigs";
 
 // New God-Tier UI System
 import GodTierUI from "@/components/ui/GodTierUI";
@@ -50,42 +51,8 @@ export default function Home() {
   const [audioSource, setAudioSource] = React.useState<MediaElementAudioSourceNode | null>(null)
   const [spectrum, setSpectrum] = React.useState<Float32Array>(new Float32Array(16))
 
-  // GodTierUI shaderConfigs as state, all params always present
-  const [shaderConfigs, setShaderConfigs] = React.useState([
-    {
-      id: 'metaball',
-      name: 'Metaballs',
-      iconType: 'sparkles' as ShaderIconType,
-      params: {
-        glow: { value: 0.5, min: 0, max: 1, step: 0.01, label: 'Glow' },
-        count: { value: 3, min: 1, max: 8, step: 1, label: 'Count' },
-        intensity: { value: 0.2, min: 0, max: 1, step: 0.01, label: 'Intensity' },
-        speed: { value: 0.5, min: 0, max: 2, step: 0.01, label: 'Speed' }
-      }
-    },
-    {
-      id: 'glitch',
-      name: 'RGB Glitch',
-      iconType: 'bolt' as ShaderIconType,
-      params: {
-        glow: { value: 0.5, min: 0, max: 1, step: 0.01, label: 'Glow' },
-        count: { value: 3, min: 1, max: 8, step: 1, label: 'Count' },
-        intensity: { value: 0.2, min: 0, max: 1, step: 0.01, label: 'Intensity' },
-        speed: { value: 0.5, min: 0, max: 2, step: 0.01, label: 'Speed' }
-      }
-    },
-    {
-      id: 'ripple',
-      name: 'Water Ripple',
-      iconType: 'globeAlt' as ShaderIconType,
-      params: {
-        glow: { value: 0.5, min: 0, max: 1, step: 0.01, label: 'Glow' },
-        count: { value: 3, min: 1, max: 8, step: 1, label: 'Count' },
-        intensity: { value: 0.2, min: 0, max: 1, step: 0.01, label: 'Intensity' },
-        speed: { value: 0.5, min: 0, max: 2, step: 0.01, label: 'Speed' }
-      }
-    }
-  ])
+  // Use imported shader configurations from config file
+  const [shaderConfigs, setShaderConfigs] = React.useState(shaderConfigurations)
 
   React.useEffect(() => {
     const useDev = new URLSearchParams(window.location.search).get('devcanvas') === '1'

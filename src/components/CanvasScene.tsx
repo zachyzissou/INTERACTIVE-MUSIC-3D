@@ -176,13 +176,16 @@ export default function CanvasScene() {
           {perfLevel === 'high' && (
             <>
               <AudioReactiveShaderBackground 
-                activeShader="metaball" 
+                activeShader="voronoi" 
                 position={[-10, 5, -12]} 
                 scale={[15, 15, 1]} 
                 bassLevel={0.5}
                 midLevel={0.3}
                 highLevel={0.2}
                 glitchIntensity={0}
+                enabled={true}
+                audioSensitivity={{ bass: 1, mid: 1, high: 1 }}
+              />
                 enabled={true}
                 audioSensitivity={{ bass: 1, mid: 1, high: 1 }}
               />

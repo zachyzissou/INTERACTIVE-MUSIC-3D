@@ -8,7 +8,7 @@ interface AudioReactiveBackgroundProps {
   readonly bassLevel: number
   readonly midLevel: number
   readonly highLevel: number
-  readonly activeShader: 'metaball' | 'noise' | 'water'
+  readonly activeShader: 'metaball' | 'noise' | 'water' | 'voronoi' | 'rgbGlitch' | 'proceduralNoise' | 'plasma'
   readonly glitchIntensity: number
   readonly enabled: boolean
   readonly audioSensitivity: {
@@ -296,6 +296,67 @@ export function AudioReactiveShaderBackground({
         uResolution: { value: [size.width, size.height] },
         uRippleSpeed: { value: 5.0 },
         uRippleStrength: { value: 1.0 }
+      }
+    },
+    
+    voronoi: {
+      fragmentShader: metaballFragmentShader, // Placeholder - should use actual voronoi shader
+      uniforms: {
+        uTime: { value: 0 },
+        uBassLevel: { value: 0 },
+        uMidLevel: { value: 0 },
+        uHighLevel: { value: 0 },
+        uResolution: { value: [size.width, size.height] },
+        uColorPrimary: { value: new THREE.Color(0x00ffff) },
+        uColorSecondary: { value: new THREE.Color(0xff0080) },
+        uMetaballCount: { value: 6.0 },
+        uGlowIntensity: { value: 1.0 }
+      }
+    },
+    
+    rgbGlitch: {
+      fragmentShader: metaballFragmentShader, // Placeholder - should use actual glitch shader
+      uniforms: {
+        uTime: { value: 0 },
+        uBassLevel: { value: 0 },
+        uMidLevel: { value: 0 },
+        uHighLevel: { value: 0 },
+        uResolution: { value: [size.width, size.height] },
+        uColorPrimary: { value: new THREE.Color(0x00ffff) },
+        uColorSecondary: { value: new THREE.Color(0xff0080) },
+        uMetaballCount: { value: 6.0 },
+        uGlowIntensity: { value: 1.0 }
+      }
+    },
+    
+    proceduralNoise: {
+      fragmentShader: proceduralNoiseFragmentShader,
+      uniforms: {
+        uTime: { value: 0 },
+        uBassLevel: { value: 0 },
+        uMidLevel: { value: 0 },
+        uHighLevel: { value: 0 },
+        uResolution: { value: [size.width, size.height] },
+        uNoiseScale: { value: 3.0 },
+        uDistortionAmount: { value: 0.1 },
+        uColorA: { value: new THREE.Color(0x9d00ff) },
+        uColorB: { value: new THREE.Color(0x00ffff) },
+        uColorC: { value: new THREE.Color(0xff4081) }
+      }
+    },
+    
+    plasma: {
+      fragmentShader: metaballFragmentShader, // Placeholder - should use actual plasma shader
+      uniforms: {
+        uTime: { value: 0 },
+        uBassLevel: { value: 0 },
+        uMidLevel: { value: 0 },
+        uHighLevel: { value: 0 },
+        uResolution: { value: [size.width, size.height] },
+        uColorPrimary: { value: new THREE.Color(0x00ffff) },
+        uColorSecondary: { value: new THREE.Color(0xff0080) },
+        uMetaballCount: { value: 6.0 },
+        uGlowIntensity: { value: 1.0 }
       }
     }
   } as const), [size])
