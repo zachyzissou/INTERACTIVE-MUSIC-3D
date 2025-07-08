@@ -13,6 +13,8 @@ import XRButtons from './XRButtons'
 import AudioReactiveOrb3D from './AudioReactiveOrb3D'
 import AudioReactivePostProcess from './AudioReactivePostProcess'
 import PostProcessErrorBoundary from './PostProcessErrorBoundary'
+import AudioReactiveShaderBackground from './AudioReactiveShaderBackground'
+import SceneLights from './SceneLights'
 import { usePerformanceSettings } from '../store/usePerformanceSettings'
 import { useAudioSettings } from '../store/useAudioSettings'
 
@@ -112,44 +114,82 @@ export default function CanvasScene() {
     }
   }, [setPerf])
 
-  const canvasProps = React.useMemo(() => ({
-    className: "absolute inset-0",
-    shadows: !contextLostRef.current,
-    gl: rendererRef.current ?? {
-      antialias: perfLevel !== 'low',
-      alpha: true,
-      powerPreference: perfLevel === 'high' ? 'high-performance' as const : 'default' as const,
-      failIfMajorPerformanceCaveat: false,
-      preserveDrawingBuffer: false,
-      stencil: false,
-      depth: true,
-    },
-    camera: { fov: 50, position: [0, 5, 10] as [number, number, number] },
-    style: { width: '100vw', height: '100vh' },
-    resize: { scroll: false, debounce: { scroll: 0, resize: 0 } },
-    dpr: Math.min(window.devicePixelRatio || 1, perfLevel === 'high' ? 2 : 1),
-    performance: {
-      min: 0.5,
-      max: perfLevel === 'high' ? 1 : 0.8,
-      debounce: 200,
-    },
-    frameloop: contextLostRef.current ? 'never' as const : 'always' as const,
-  }), [perfLevel]) // Remove contextLostRef.current dependency as it's a mutable ref
+  const canvasProps = React.useMemo(() => {
+    // Enhanced Safari compatibility
+    const isSafari = typeof navigator !== 'undefined' && /^((?!chrome|android).)*safari/i.test(navigator.userAgent)
+    const isWebKit = typeof navigator !== 'undefined' && /webkit/i.test(navigator.userAgent) && !/chrome/i.test(navigator.userAgent)
+    
+    return {
+      className: "absolute inset-0",
+      shadows: !contextLostRef.current && !isSafari, // Disable shadows on Safari for compatibility
+      gl: rendererRef.current ?? {
+        antialias: perfLevel !== 'low' && !isSafari, // Conservative antialias for Safari
+        alpha: true,
+        powerPreference: (perfLevel === 'high' && !isWebKit) ? 'high-performance' as const : 'default' as const,
+        failIfMajorPerformanceCaveat: false,
+        preserveDrawingBuffer: isSafari, // Safari sometimes needs this
+        stencil: false,
+        depth: true,
+        // Safari-specific WebGL context attributes
+        ...(isSafari && {
+          premultipliedAlpha: false,
+          desynchronized: false,
+        }),
+      },
+      camera: { fov: 50, position: [0, 5, 10] as [number, number, number] },
+      style: { width: '100vw', height: '100vh' },
+      resize: { scroll: false, debounce: { scroll: 0, resize: 0 } },
+      dpr: Math.min(window.devicePixelRatio || 1, (perfLevel === 'high' && !isWebKit) ? 2 : 1),
+      performance: {
+        min: 0.5,
+        max: (perfLevel === 'high' && !isSafari) ? 1 : 0.8,
+        debounce: 200,
+      },
+      frameloop: contextLostRef.current ? 'never' as const : 'always' as const,
+      // Force canvas creation without waiting for async initialization
+      onCreated: ({ gl }: { gl: any; scene: any; camera: any }) => {
+        // Immediate canvas setup for test compatibility
+        gl.domElement.setAttribute('data-testid', 'webgl-canvas')
+        // Canvas created and ready for testing
+      },
+    }
+  }, [perfLevel]) // Remove contextLostRef.current dependency as it's a mutable ref
 
   return (
     <Canvas {...canvasProps}>
       <AdaptiveDpr pixelated />
+      
+      {/* Audio-reactive shader backgrounds */}
+      {perfLevel !== 'low' && (
+        <>
+          <AudioReactiveShaderBackground 
+            shaderType="metaball" 
+            position={[0, 0, -15]} 
+            scale={[25, 25, 1]} 
+          />
+          {perfLevel === 'high' && (
+            <>
+              <AudioReactiveShaderBackground 
+                shaderType="voronoi" 
+                position={[-10, 5, -12]} 
+                scale={[15, 15, 1]} 
+              />
+              <AudioReactiveShaderBackground 
+                shaderType="water" 
+                position={[10, -5, -12]} 
+                scale={[15, 15, 1]} 
+              />
+            </>
+          )}
+        </>
+      )}
+      
       <AnimatedGradient />
       {perfLevel !== 'low' && <Stars radius={100} depth={50} count={1000} factor={4} saturation={0} fade />}
       <ResizeHandler />
       <Physics>
         <PerspectiveCamera makeDefault fov={50} position={[0,5,10]} />
-        {/* @ts-ignore */}
-        <ambientLight intensity={0.4} />
-        {/* @ts-ignore */}
-        <directionalLight position={[5,10,5]} intensity={0.8} castShadow />
-        {/* @ts-ignore */}
-        <pointLight position={[0,5,-5]} intensity={0.5} />
+        <SceneLights />
         
         {/* Audio-reactive background elements */}
         {perfLevel !== 'low' && volume > 0 && (

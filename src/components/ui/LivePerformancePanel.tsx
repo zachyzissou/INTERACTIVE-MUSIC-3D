@@ -1,6 +1,5 @@
 'use client'
 import React, { useEffect, useState, useRef } from 'react'
-import { motion } from 'framer-motion'
 import { Activity, Zap, Monitor, Wifi, HardDrive, Cpu } from 'lucide-react'
 import { useUIManager } from './UIManager'
 import FloatingPanel from './FloatingPanel'

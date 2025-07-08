@@ -7,6 +7,7 @@ import ShapeEditorPanel from "@/components/ShapeEditorPanel";
 import ExampleModal from "@/components/ExampleModal";
 import StartOverlay from "@/components/StartOverlay";
 import { CanvasErrorBoundary } from "@/components/CanvasErrorBoundary";
+import SafariCanvasDetector from "@/components/SafariCanvasDetector";
 import AudioErrorBoundary from "@/components/AudioErrorBoundary";
 import PerformanceMonitor from "@/components/PerformanceMonitor";
 import AccessibilityPanel from "@/components/AccessibilityPanel";
@@ -17,6 +18,8 @@ import { UIManagerProvider } from "@/components/ui/UIManager";
 import ModernControlBar from "@/components/ui/ModernControlBar";
 import ModernAudioPanel from "@/components/ui/ModernAudioPanel";
 import ModernEffectsPanel from "@/components/ui/ModernEffectsPanel";
+import { AudioControls } from "@/components/ui/AudioControls";
+import { AudioAnalyzer } from "@/components/ui/AudioAnalyzer";
 
 // Dynamic imports for code splitting
 const CanvasScene = dynamic(() => import('../src/components/CanvasScene'), { 
@@ -48,6 +51,14 @@ export default function Home() {
   const [started, setStarted] = React.useState(false)
   const [showAnalytics, setShowAnalytics] = React.useState(false)
   
+  // Audio reactive state
+  const [bassData, setBassData] = React.useState(0)
+  const [midData, setMidData] = React.useState(0)
+  const [highData, setHighData] = React.useState(0)
+  const [activeShader, setActiveShader] = React.useState('metaball')
+  const [glitchIntensity, setGlitchIntensity] = React.useState(0)
+  const [audioSource, setAudioSource] = React.useState<MediaElementAudioSourceNode | null>(null)
+  
   React.useEffect(() => {
     const useDev = new URLSearchParams(window.location.search).get('devcanvas') === '1'
     const showAnalytics = new URLSearchParams(window.location.search).get('analytics') === '1'
@@ -70,7 +81,9 @@ export default function Home() {
         <>
           <main id="main-content" className="relative h-full w-full">
             <CanvasErrorBoundary>
-              <Scene />
+              <SafariCanvasDetector>
+                <Scene />
+              </SafariCanvasDetector>
             </CanvasErrorBoundary>
           </main>
           <ShapeEditorPanel />
@@ -78,6 +91,23 @@ export default function Home() {
           <ModernControlBar variant="neon" />
           <ModernAudioPanel />
           <ModernEffectsPanel />
+          
+          {/* Audio Reactive Controls */}
+          <AudioControls
+            onBassChange={setBassData}
+            onMidChange={setMidData}
+            onHighChange={setHighData}
+            onShaderChange={setActiveShader}
+            onGlitchIntensityChange={setGlitchIntensity}
+          />
+          
+          {/* Audio Analyzer */}
+          <AudioAnalyzer
+            audioSource={audioSource}
+            onBassData={setBassData}
+            onMidData={setMidData}
+            onHighData={setHighData}
+          />
         </>
       )}
       <ExampleModal />

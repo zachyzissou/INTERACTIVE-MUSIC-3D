@@ -1,6 +1,5 @@
 'use client'
 import React, { ErrorInfo, ReactNode } from 'react'
-import { motion } from 'framer-motion'
 import ui from '../styles/ui.module.css'
 import { safeStringify } from '../lib/safeStringify'
 import { logger } from '../lib/logger'
@@ -78,11 +77,8 @@ class EnhancedErrorBoundary extends React.Component<Props, State> {
       const showDetails = isDev || this.props.verbose
 
       return (
-        <motion.div 
-          className={`${ui.glass} min-h-[200px] flex flex-col items-center justify-center p-6 m-4 text-center`}
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.3 }}
+        <div 
+          className={`${ui.glass} min-h-[200px] flex flex-col items-center justify-center p-6 m-4 text-center animate-fade-in`}
         >
           <div className="text-red-400 mb-4">
             <svg className="w-16 h-16 mx-auto mb-2" fill="currentColor" viewBox="0 0 20 20">
@@ -104,21 +100,16 @@ class EnhancedErrorBoundary extends React.Component<Props, State> {
             </p>
           )}
 
-          <motion.button
-            className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+          <button
+            className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all duration-200 hover:scale-105 active:scale-95"
             onClick={this.retry}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
           >
             Try Again
-          </motion.button>
+          </button>
 
           {showDetails && this.state.error && (
-            <motion.details 
+            <details 
               className="mt-6 max-w-full"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.2 }}
             >
               <summary className="cursor-pointer text-sm text-gray-400 hover:text-gray-300">
                 Show Error Details
@@ -136,9 +127,9 @@ class EnhancedErrorBoundary extends React.Component<Props, State> {
                   )}
                 </code>
               </pre>
-            </motion.details>
+            </details>
           )}
-        </motion.div>
+        </div>
       )
     }
 

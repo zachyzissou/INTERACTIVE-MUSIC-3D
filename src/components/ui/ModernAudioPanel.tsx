@@ -1,6 +1,5 @@
 'use client'
 import React, { useEffect } from 'react'
-import { motion } from 'framer-motion'
 import { Volume2, Headphones, Sliders, Filter } from 'lucide-react'
 import { useAudioSettings } from '@/store/useAudioSettings'
 import { useUIManager } from './UIManager'

@@ -45,3 +45,31 @@
   border: 1px solid rgba(255, 255, 255, 0.05);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
 }
+
+.contentHidden {
+  display: none;
+}
+
+.contentVisible {
+  display: block;
+}
+
+.panelContainer {
+  position: fixed;
+  -webkit-user-select: none;
+  user-select: none;
+  overflow: hidden;
+}
+
+@keyframes animate-liquid {
+  0%, 100% {
+    transform: scale(1) rotate(0deg);
+  }
+  50% {
+    transform: scale(1.05) rotate(180deg);
+  }
+}
+
+.animate-liquid {
+  animation: animate-liquid 6s ease-in-out infinite;
+}

@@ -1,6 +1,5 @@
 'use client'
 import { useState, useMemo, useCallback } from 'react'
-import { motion } from '@motionone/react'
 import { useObjects } from '@/store/useObjects'
 import { useAudioSettings } from '@/store/useAudioSettings'
 import { useEffectSettings } from '@/store/useEffectSettings'
@@ -61,14 +60,12 @@ export default function BottomDrawer() {
     }
   }, [selected, objects, playing, mode])
 
-  const drawerClosedY = 120
   return (
     <div className="pointer-events-none">
-      <motion.div
-        initial={{ y: drawerClosedY }}
-        animate={{ y: selected ? 0 : drawerClosedY }}
-        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-        className="fixed bottom-0 left-0 w-full pointer-events-auto"
+      <div
+        className={`fixed bottom-0 left-0 w-full pointer-events-auto transition-transform duration-300 ease-out ${
+          selected ? 'translate-y-0' : 'translate-y-[120px]'
+        }`}
       >
         {/* Liquid background with glassmorphism */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-purple-900/50 to-transparent backdrop-blur-lg">
@@ -179,7 +176,7 @@ export default function BottomDrawer() {
             </div>
           </div>
         )}
-      </motion.div>
+      </div>
     </div>
   )
 }

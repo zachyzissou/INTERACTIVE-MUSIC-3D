@@ -40,6 +40,86 @@ export class WebGPURenderer {
     limits: {}
   }
 
+  // WGSL Shader Sources
+  private metaballVertexShader = `
+    @vertex
+    fn vs_main(@builtin(vertex_index) vertexIndex : u32) -> @builtin(position) vec4<f32> {
+        let pos = array<vec2<f32>, 3>(
+            vec2<f32>(-1.0, -1.0),
+            vec2<f32>( 3.0, -1.0),
+            vec2<f32>(-1.0,  3.0)
+        );
+        return vec4<f32>(pos[vertexIndex], 0.0, 1.0);
+    }
+  `
+
+  private metaballFragmentShader = `
+    struct Uniforms {
+        time: f32,
+        resolution: vec2<f32>,
+        bassSensitivity: f32,
+        audioData: array<f32, 32>,
+    }
+    
+    @group(0) @binding(0) var<uniform> uniforms: Uniforms;
+    
+    fn metaball(uv: vec2<f32>, center: vec2<f32>, radius: f32) -> f32 {
+        let dist = length(uv - center);
+        return smoothstep(radius, radius - 0.02, dist);
+    }
+    
+    fn smin(a: f32, b: f32, k: f32) -> f32 {
+        let h = clamp(0.5 + 0.5 * (b - a) / k, 0.0, 1.0);
+        return mix(b, a, h) - k * h * (1.0 - h);
+    }
+    
+    @fragment
+    fn fs_main(@builtin(position) fragCoord: vec4<f32>) -> @location(0) vec4<f32> {
+        var uv = (fragCoord.xy / uniforms.resolution.xy) * 2.0 - 1.0;
+        uv.x *= uniforms.resolution.x / uniforms.resolution.y;
+        
+        // Audio-reactive parameters
+        let bassEnergy = uniforms.audioData[4] * uniforms.bassSensitivity;
+        let midEnergy = uniforms.audioData[16];
+        
+        // Animated metaball centers
+        let center1 = vec2<f32>(sin(uniforms.time * 0.5) * 0.3, cos(uniforms.time * 0.7) * 0.2);
+        let center2 = vec2<f32>(cos(uniforms.time * 0.3) * 0.4, sin(uniforms.time * 0.6) * 0.3);
+        let center3 = vec2<f32>(sin(uniforms.time * 0.8) * 0.2, cos(uniforms.time * 0.4) * 0.35);
+        
+        // Audio-reactive sizes
+        let radius1 = 0.15 + bassEnergy * 0.1;
+        let radius2 = 0.12 + midEnergy * 0.08;
+        let radius3 = 0.18 + bassEnergy * 0.05;
+        
+        // Calculate metaballs
+        let m1 = metaball(uv, center1, radius1);
+        let m2 = metaball(uv, center2, radius2);
+        let m3 = metaball(uv, center3, radius3);
+        
+        // Smooth union for organic blending
+        let combined = smin(smin(m1, m2, 0.1), m3, 0.1);
+        
+        // Color gradient based on audio
+        let color1 = vec3<f32>(1.0, 0.0, 1.0); // Magenta
+        let color2 = vec3<f32>(0.0, 1.0, 1.0); // Cyan
+        let color3 = vec3<f32>(1.0, 1.0, 0.0); // Yellow
+        
+        var finalColor = mix(color1, color2, sin(uniforms.time + bassEnergy) * 0.5 + 0.5);
+        finalColor = mix(finalColor, color3, midEnergy);
+        
+        // Add glow effect
+        let glow = exp(-length(uv) * 2.0) * bassEnergy;
+        finalColor += glow * vec3<f32>(1.0, 0.5, 1.0);
+        
+        return vec4<f32>(finalColor * combined, combined);
+    }
+  `
+
+  private renderPipeline: any = null
+  private uniformBuffer: any = null
+  private bindGroup: any = null
+
   async initialize(canvas: HTMLCanvasElement): Promise<boolean> {
     try {
       // Check WebGPU support

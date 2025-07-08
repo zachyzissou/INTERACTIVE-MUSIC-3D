@@ -1,10 +1,11 @@
 'use client'
-import React, { useEffect, useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import React, { useEffect, useState, useRef } from 'react'
+import { gsap } from 'gsap'
 import { Sparkles, Zap, Waves, Grid, Layers, Palette, Star, Circle } from 'lucide-react'
 import { useUIManager } from './UIManager'
 import { useEffectSettings } from '@/store/useEffectSettings'
 import FloatingPanel from './FloatingPanel'
+import styles from './ModernEffectsPanel.module.css'
 
 interface EffectCardProps {
   readonly name: string
@@ -16,6 +17,8 @@ interface EffectCardProps {
 }
 
 function EffectCard({ name, description, icon: Icon, isActive, onClick, color }: EffectCardProps) {
+  const buttonRef = useRef<HTMLButtonElement>(null)
+  
   const getColorClasses = () => {
     switch (color) {
       case 'cyan': return 'from-neon-cyan/20 to-blue-500/20 border-neon-cyan/30 text-neon-cyan'
@@ -27,11 +30,38 @@ function EffectCard({ name, description, icon: Icon, isActive, onClick, color }:
     }
   }
 
+  const handleMouseEnter = () => {
+    if (buttonRef.current) {
+      gsap.to(buttonRef.current, { scale: 1.05, duration: 0.3, ease: "power2.out" })
+    }
+  }
+
+  const handleMouseLeave = () => {
+    if (buttonRef.current) {
+      gsap.to(buttonRef.current, { scale: 1, duration: 0.3, ease: "power2.out" })
+    }
+  }
+
+  const handleClick = () => {
+    if (buttonRef.current) {
+      gsap.to(buttonRef.current, { 
+        scale: 0.95, 
+        duration: 0.1, 
+        ease: "power2.out",
+        onComplete: () => {
+          gsap.to(buttonRef.current, { scale: 1.05, duration: 0.1, ease: "power2.out" })
+        }
+      })
+    }
+    onClick()
+  }
+
   return (
-    <motion.button
-      onClick={onClick}
-      whileHover={{ scale: 1.05 }}
-      whileTap={{ scale: 0.95 }}
+    <button
+      ref={buttonRef}
+      onClick={handleClick}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
       className={`
         relative p-4 rounded-xl border-2 bg-gradient-to-br transition-all duration-300
         ${isActive 
@@ -47,20 +77,56 @@ function EffectCard({ name, description, icon: Icon, isActive, onClick, color }:
       </div>
       
       {isActive && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="absolute inset-0 -z-10 rounded-xl bg-gradient-to-br from-transparent to-white/5 blur-sm"
-        />
+        <div className="absolute inset-0 -z-10 rounded-xl bg-gradient-to-br from-transparent to-white/5 blur-sm" />
       )}
-    </motion.button>
+    </button>
+  )
+}
+
+function PresetButton({ preset }: { readonly preset: string }) {
+  const buttonRef = useRef<HTMLButtonElement>(null)
+  
+  const handlePresetHover = (isEntering: boolean) => {
+    if (buttonRef.current) {
+      gsap.to(buttonRef.current, {
+        scale: isEntering ? 1.02 : 1,
+        duration: 0.2,
+        ease: "power2.out"
+      })
+    }
+  }
+
+  const handlePresetClick = () => {
+    if (buttonRef.current) {
+      gsap.to(buttonRef.current, {
+        scale: 0.98,
+        duration: 0.1,
+        ease: "power2.out",
+        onComplete: () => {
+          gsap.to(buttonRef.current, { scale: 1, duration: 0.1, ease: "power2.out" })
+        }
+      })
+    }
+  }
+
+  return (
+    <button
+      ref={buttonRef}
+      onMouseEnter={() => handlePresetHover(true)}
+      onMouseLeave={() => handlePresetHover(false)}
+      onClick={handlePresetClick}
+      className="p-3 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-left transition-all duration-200"
+    >
+      <span className="text-sm font-medium text-white/90">{preset}</span>
+    </button>
   )
 }
 
 export function ModernEffectsPanel() {
   const { registerPanel, unregisterPanel, visiblePanels, hidePanel } = useUIManager()
-  const { setEffect, getParams } = useEffectSettings()
+  const { setEffect } = useEffectSettings()
   const [activeEffect, setActiveEffect] = useState<string | null>(null)
+  const activeEffectRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     registerPanel({
@@ -139,14 +205,45 @@ export function ModernEffectsPanel() {
   ]
 
   const handleEffectToggle = (effectId: string) => {
+    const prevEffect = activeEffect
+    
     if (activeEffect === effectId) {
       setActiveEffect(null)
       // Reset effect parameters to defaults
       setEffect(effectId, { reverb: 0, delay: 0, lowpass: 20000, highpass: 0 })
+      
+      // Animate out
+      if (activeEffectRef.current) {
+        gsap.to(activeEffectRef.current, {
+          opacity: 0,
+          height: 0,
+          duration: 0.3,
+          ease: "power2.out",
+          onComplete: () => {
+            if (activeEffectRef.current) {
+              activeEffectRef.current.style.display = 'none'
+            }
+          }
+        })
+      }
     } else {
       setActiveEffect(effectId)
       // Apply some default effect settings
       setEffect(effectId, { reverb: 0.3, delay: 0.2, lowpass: 15000, highpass: 100 })
+      
+      // Animate in
+      if (activeEffectRef.current) {
+        if (!prevEffect) {
+          // First time showing
+          gsap.set(activeEffectRef.current, { display: 'block', opacity: 0, height: 0 })
+          gsap.to(activeEffectRef.current, {
+            opacity: 1,
+            height: 'auto',
+            duration: 0.3,
+            ease: "power2.out"
+          })
+        }
+      }
     }
   }
 
@@ -182,52 +279,48 @@ export function ModernEffectsPanel() {
         </div>
 
         {/* Active Effect Controls */}
-        <AnimatePresence>
-          {activeEffect && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              className="p-4 rounded-lg bg-neon-purple/10 border border-neon-purple/30"
-            >
-              <div className="flex items-center gap-2 mb-3">
-                <Zap size={16} className="text-neon-purple" />
-                <span className="font-medium text-white/90">
-                  {effects.find(e => e.id === activeEffect)?.name} Settings
-                </span>
+        {activeEffect && (
+          <div
+            ref={activeEffectRef}
+            className={`p-4 rounded-lg bg-neon-purple/10 border border-neon-purple/30 ${styles.activeEffectControls}`}
+          >
+            <div className="flex items-center gap-2 mb-3">
+              <Zap size={16} className="text-neon-purple" />
+              <span className="font-medium text-white/90">
+                {effects.find(e => e.id === activeEffect)?.name} Settings
+              </span>
+            </div>
+            
+            <div className="space-y-3">
+              <div>
+                <label htmlFor="effect-intensity" className="text-sm text-white/70 mb-1 block">Intensity</label>
+                <input
+                  id="effect-intensity"
+                  type="range"
+                  min="0"
+                  max="1"
+                  step="0.1"
+                  defaultValue="0.7"
+                  className="w-full h-1 bg-white/20 rounded-full appearance-none cursor-pointer"
+                  aria-label="Effect intensity"
+                />
               </div>
-              
-              <div className="space-y-3">
-                <div>
-                  <label htmlFor="effect-intensity" className="text-sm text-white/70 mb-1 block">Intensity</label>
-                  <input
-                    id="effect-intensity"
-                    type="range"
-                    min="0"
-                    max="1"
-                    step="0.1"
-                    defaultValue="0.7"
-                    className="w-full h-1 bg-white/20 rounded-full appearance-none cursor-pointer"
-                    aria-label="Effect intensity"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="effect-speed" className="text-sm text-white/70 mb-1 block">Speed</label>
-                  <input
-                    id="effect-speed"
-                    type="range"
-                    min="0.1"
-                    max="2"
-                    step="0.1"
-                    defaultValue="1"
-                    className="w-full h-1 bg-white/20 rounded-full appearance-none cursor-pointer"
-                    aria-label="Effect speed"
-                  />
-                </div>
+              <div>
+                <label htmlFor="effect-speed" className="text-sm text-white/70 mb-1 block">Speed</label>
+                <input
+                  id="effect-speed"
+                  type="range"
+                  min="0.1"
+                  max="2"
+                  step="0.1"
+                  defaultValue="1"
+                  className="w-full h-1 bg-white/20 rounded-full appearance-none cursor-pointer"
+                  aria-label="Effect speed"
+                />
               </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+            </div>
+          </div>
+        )}
 
         {/* Preset Combinations */}
         <div className="space-y-3">
@@ -238,14 +331,7 @@ export function ModernEffectsPanel() {
           
           <div className="grid grid-cols-1 gap-2">
             {['Cyberpunk', 'Ambient Dreams', 'Electric Storm', 'Cosmic Journey'].map((preset) => (
-              <motion.button
-                key={preset}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className="p-3 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-left transition-all duration-200"
-              >
-                <span className="text-sm font-medium text-white/90">{preset}</span>
-              </motion.button>
+              <PresetButton key={preset} preset={preset} />
             ))}
           </div>
         </div>

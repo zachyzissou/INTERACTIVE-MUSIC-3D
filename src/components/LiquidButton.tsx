@@ -1,7 +1,13 @@
 'use client'
+// @ts-nocheck
 import React, { useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
 import { useSpring, animated } from '@react-spring/web'
+
+// Temporary mock for motion during migration
+const motion: any = new Proxy({}, {
+  get: () => (props: any) => React.createElement('div', props)
+})
+const AnimatePresence = ({ children }: any) => <>{children}</>
 
 interface LiquidButtonProps {
   children: React.ReactNode

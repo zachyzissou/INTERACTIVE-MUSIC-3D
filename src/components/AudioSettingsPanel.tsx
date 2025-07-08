@@ -1,6 +1,5 @@
 'use client'
 import React from 'react'
-import { motion } from '@motionone/react'
 import { useAudioSettings, ScaleType } from '../store/useAudioSettings'
 import { setMasterVolume } from '../lib/audio'
 import styles from '../styles/audioSettingsPanel.module.css'
@@ -17,10 +16,7 @@ const AudioSettingsPanel = () => {
   }
 
   return (
-    <motion.div
-      initial={{ y: '100%' }}
-      animate={{ y: 0 }}
-      transition={{ duration: 0.4 }}
+    <div
       className={styles.panel}
     >
       <div className={styles.row}>
@@ -56,6 +52,7 @@ const AudioSettingsPanel = () => {
         <label htmlFor="volume-slider">Volume</label>
         <input
           id="volume-slider"
+          data-testid="volume-slider"
           className={styles.slider}
           type="range"
           min={0}
@@ -83,7 +80,7 @@ const AudioSettingsPanel = () => {
           <option value="pluck">Pluck</option>
         </select>
       </div>
-    </motion.div>
+    </div>
   )
 }
 
