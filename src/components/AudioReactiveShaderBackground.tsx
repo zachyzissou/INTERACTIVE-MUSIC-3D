@@ -375,24 +375,46 @@ export function AudioReactiveShaderBackground({
     return () => window.removeEventListener('mousemove', handleMouseMove)
   }, [])
 
-  // Create and update material when shader changes
+  // Initialize material once
   useEffect(() => {
+    // This effect runs only once to create the initial material
     if (!meshRef.current) return
 
-    const config = shaderConfigs[activeShader] || shaderConfigs.metaball
-    
+    const initialConfig = shaderConfigs[activeShader] || shaderConfigs.metaball
     const material = new THREE.ShaderMaterial({
       vertexShader,
-      fragmentShader: config.fragmentShader,
-      uniforms: { ...config.uniforms },
+      fragmentShader: initialConfig.fragmentShader,
+      uniforms: { ...initialConfig.uniforms },
       transparent: true,
       blending: THREE.AdditiveBlending,
       side: THREE.DoubleSide
     })
-
-    meshRef.current.material = material
-    materialRef.current = material
-
+    
+    if (meshRef.current) {
+      meshRef.current.material = material
+      materialRef.current = material
+    }
+    
+    return () => {
+      if (material) {
+        material.dispose()
+      }
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []) // Empty dependency array ensures this runs once on mount
+  
+  // Update material properties when shader changes
+  useEffect(() => {
+    if (!materialRef.current || !meshRef.current) return
+    
+    const config = shaderConfigs[activeShader] || shaderConfigs.metaball
+    
+    // Update the existing material instead of creating a new one
+    const material = materialRef.current
+    material.fragmentShader = config.fragmentShader
+    Object.assign(material.uniforms, config.uniforms)
+    material.needsUpdate = true
+    
     // Animate shader transition
     gsap.fromTo(material, 
       { opacity: 0 },
@@ -402,10 +424,6 @@ export function AudioReactiveShaderBackground({
         ease: "power2.out"
       }
     )
-
-    return () => {
-      material.dispose()
-    }
   }, [activeShader, enabled, shaderConfigs])
 
   // Animation loop
