@@ -34,10 +34,8 @@ export function FloatingPanel({
   variant = 'glass',
 }: FloatingPanelProps) {
   const [position, setPosition] = useState(defaultPosition)
-  const [size] = useState(defaultSize)
   const [isMinimized, setIsMinimized] = useState(false)
   const [isDragging, setIsDragging] = useState(false)
-  const [zIndex, setZIndex] = useState(10)
   const panelRef = useRef<HTMLDivElement>(null)
   const contentRef = useRef<HTMLDivElement>(null)
   const draggableInstance = useRef<any>(null)
@@ -130,11 +128,9 @@ export function FloatingPanel({
           bounds: "body",
           onDragStart: () => {
             setIsDragging(true)
-            setZIndex(1000)
           },
           onDragEnd: () => {
             setIsDragging(false)
-            setZIndex(10)
             const element = panelRef.current
             if (element) {
               const transform = gsap.getProperty(element, "transform") as string
@@ -220,12 +216,6 @@ export function FloatingPanel({
         ${isDragging ? 'cursor-move' : 'cursor-auto'}
         ${className}
       `}
-      // eslint-disable-next-line react/forbid-dom-props
-      style={{
-        width: size.width,
-        height: isMinimized ? 'auto' : size.height,
-        zIndex,
-      }}
     >
       {/* Header */}
       {title && (

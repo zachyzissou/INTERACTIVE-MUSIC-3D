@@ -61,6 +61,12 @@
   overflow: hidden;
 }
 
+.dynamicSize {
+  width: var(--panel-width);
+  height: var(--panel-height);
+  z-index: var(--panel-z-index, 1000);
+}
+
 @keyframes animate-liquid {
   0%, 100% {
     transform: scale(1) rotate(0deg);

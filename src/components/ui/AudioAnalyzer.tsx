@@ -16,7 +16,7 @@ export function AudioAnalyzer({
   onMidData,
   onHighData,
   audioSource
-}: AudioAnalyzerProps) {
+}: Readonly<AudioAnalyzerProps>) {
   const analyserRef = useRef<AnalyserNode | null>(null)
   const dataArrayRef = useRef<Float32Array | null>(null)
   const animationRef = useRef<number | null>(null)
