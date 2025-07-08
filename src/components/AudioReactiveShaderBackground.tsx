@@ -390,10 +390,8 @@ export function AudioReactiveShaderBackground({
       side: THREE.DoubleSide
     })
     
-    if (meshRef.current) {
-      meshRef.current.material = material
-      materialRef.current = material
-    }
+    meshRef.current.material = material
+    materialRef.current = material
     
     return () => {
       if (material) {
@@ -409,14 +407,26 @@ export function AudioReactiveShaderBackground({
     
     const config = shaderConfigs[activeShader] || shaderConfigs.metaball
     
-    // Update the existing material instead of creating a new one
-    const material = materialRef.current
-    material.fragmentShader = config.fragmentShader
-    Object.assign(material.uniforms, config.uniforms)
-    material.needsUpdate = true
+    // For shader changes, we need to create a new material since fragmentShader can't be updated
+    const newMaterial = new THREE.ShaderMaterial({
+      vertexShader,
+      fragmentShader: config.fragmentShader,
+      uniforms: { ...config.uniforms },
+      transparent: true,
+      blending: THREE.AdditiveBlending,
+      side: THREE.DoubleSide
+    })
+    
+    // Dispose old material and assign new one
+    if (materialRef.current) {
+      materialRef.current.dispose()
+    }
+    
+    meshRef.current.material = newMaterial
+    materialRef.current = newMaterial
     
     // Animate shader transition
-    gsap.fromTo(material, 
+    gsap.fromTo(newMaterial, 
       { opacity: 0 },
       { 
         opacity: enabled ? 0.8 : 0,
