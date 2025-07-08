@@ -186,9 +186,6 @@ export default function CanvasScene() {
                 enabled={true}
                 audioSensitivity={{ bass: 1, mid: 1, high: 1 }}
               />
-                enabled={true}
-                audioSensitivity={{ bass: 1, mid: 1, high: 1 }}
-              />
               <AudioReactiveShaderBackground 
                 activeShader="water" 
                 position={[10, -5, -12]} 
