@@ -375,12 +375,12 @@ export function AudioReactiveShaderBackground({
     return () => window.removeEventListener('mousemove', handleMouseMove)
   }, [])
 
-  // Initialize material once
+  // Initialize material once with default shader
   useEffect(() => {
     // This effect runs only once to create the initial material
     if (!meshRef.current) return
 
-    const initialConfig = shaderConfigs[activeShader] || shaderConfigs.metaball
+    const initialConfig = shaderConfigs.metaball // Use metaball as default
     const material = new THREE.ShaderMaterial({
       vertexShader,
       fragmentShader: initialConfig.fragmentShader,
@@ -398,8 +398,7 @@ export function AudioReactiveShaderBackground({
         material.dispose()
       }
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []) // Empty dependency array ensures this runs once on mount
+  }, [shaderConfigs]) // Include shaderConfigs in dependencies
   
   // Update material properties when shader changes
   useEffect(() => {
