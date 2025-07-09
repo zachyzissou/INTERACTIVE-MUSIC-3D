@@ -37,8 +37,8 @@ export default defineConfig({
       name: 'chromium',
       use: { 
         ...devices['Desktop Chrome'],
-        // Always use system Chrome since it's available in CI
-        channel: 'chrome',
+        // Use system Chrome for CI reliability
+        channel: process.env.CI ? 'chrome' : undefined,
         // Optimize viewport for faster rendering
         viewport: { width: 1280, height: 720 }
       },

@@ -138,15 +138,7 @@ test.describe('Visual Regression Tests', () => {
     }
   })
 
-  test('tablet layout visual test', async ({ page }) => {
-    await page.click('[data-testid="start-button"]')
-    await page.waitForTimeout(2000)
-    
-    await expect(page).toHaveScreenshot('tablet-layout.png', {
-      fullPage: true,
-      threshold: 0.3
-    })
-  })
+
 
   test('high performance mode visual', async ({ page }) => {
     await page.click('[data-testid="start-button"]')

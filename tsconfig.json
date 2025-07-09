@@ -27,7 +27,7 @@
         "src/lib/logger.server.ts"
       ]
     },
-    "types": ["node", "@playwright/test"],
+    "types": ["node"],
     "plugins": [
       {
         "name": "next"

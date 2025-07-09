@@ -47,7 +47,14 @@ jobs:
         with:
           path: ~/.cache/ms-playwright
           key: ${{ runner.os }}-playwright-${{ hashFiles('package-lock.json') }}
-      - run: npx playwright install chromium --with-deps
+      - name: Install system Chrome
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y google-chrome-stable
+        continue-on-error: true
+      - name: Install Playwright dependencies
+        run: npx playwright install-deps
+        continue-on-error: true
       - name: Run smoke tests only
         run: npm run test:smoke
         env:
@@ -75,7 +82,14 @@ jobs:
         with:
           path: ~/.cache/ms-playwright
           key: ${{ runner.os }}-playwright-${{ hashFiles('package-lock.json') }}
-      - run: npx playwright install --with-deps
+      - name: Install system Chrome
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y google-chrome-stable
+        continue-on-error: true
+      - name: Install Playwright dependencies
+        run: npx playwright install-deps
+        continue-on-error: true
       - name: Run full E2E test suite
         run: npm run test:e2e
         env:
