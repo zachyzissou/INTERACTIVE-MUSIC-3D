@@ -10,11 +10,15 @@ export type ShaderIconType =
   | 'swatch'
   | 'cube'
   | 'globeAlt'
+  | 'squares2X2'
+  | 'adjustmentsHorizontal'
+  | 'cloudArrowUp'
 
 export interface ShaderConfig {
   id: string
   name: string
   iconType: ShaderIconType
+  description?: string
   params: {
     [key: string]: {
       value: number
@@ -311,6 +315,156 @@ export const shaderConfigurations: ShaderConfig[] = [
         max: 3.0,
         step: 0.1,
         label: 'Intensity'
+      }
+    }
+  },
+  {
+    id: 'noise',
+    name: 'Procedural Noise',
+    iconType: 'cloudArrowUp',
+    description: 'Advanced multi-octave noise with domain warping',
+    params: {
+      noiseScale: {
+        value: 4.0,
+        min: 0.5,
+        max: 12.0,
+        step: 0.1,
+        label: 'Scale'
+      },
+      octaves: {
+        value: 6,
+        min: 1,
+        max: 8,
+        step: 1,
+        label: 'Octaves'
+      },
+      warpAmount: {
+        value: 0.5,
+        min: 0.0,
+        max: 2.0,
+        step: 0.05,
+        label: 'Warp'
+      },
+      timeScale: {
+        value: 0.2,
+        min: 0.05,
+        max: 1.0,
+        step: 0.05,
+        label: 'Time Scale'
+      },
+      colorMix: {
+        value: 0.8,
+        min: 0.0,
+        max: 1.0,
+        step: 0.01,
+        label: 'Color Mix'
+      },
+      edgeEnhancement: {
+        value: 20.0,
+        min: 0.0,
+        max: 50.0,
+        step: 1.0,
+        label: 'Edge Enhance'
+      }
+    }
+  },
+  {
+    id: 'ripple',
+    name: 'Advanced Ripples',
+    iconType: 'adjustmentsHorizontal',
+    description: 'Multi-layered interference ripple patterns',
+    params: {
+      rippleCount: {
+        value: 4,
+        min: 1,
+        max: 8,
+        step: 1,
+        label: 'Sources'
+      },
+      frequency: {
+        value: 25.0,
+        min: 5.0,
+        max: 50.0,
+        step: 1.0,
+        label: 'Frequency'
+      },
+      amplitude: {
+        value: 0.3,
+        min: 0.1,
+        max: 1.0,
+        step: 0.05,
+        label: 'Amplitude'
+      },
+      decay: {
+        value: 3.0,
+        min: 1.0,
+        max: 8.0,
+        step: 0.1,
+        label: 'Decay'
+      },
+      interferenceStrength: {
+        value: 1.0,
+        min: 0.0,
+        max: 2.0,
+        step: 0.1,
+        label: 'Interference'
+      },
+      causticsIntensity: {
+        value: 0.3,
+        min: 0.0,
+        max: 1.0,
+        step: 0.05,
+        label: 'Caustics'
+      }
+    }
+  },
+  {
+    id: 'particleField',
+    name: 'Particle Field',
+    iconType: 'squares2X2',
+    description: 'Dynamic particle system with connections',
+    params: {
+      particleDensity: {
+        value: 20.0,
+        min: 5.0,
+        max: 40.0,
+        step: 1.0,
+        label: 'Density'
+      },
+      particleSize: {
+        value: 0.02,
+        min: 0.005,
+        max: 0.05,
+        step: 0.001,
+        label: 'Size'
+      },
+      connectionDistance: {
+        value: 0.8,
+        min: 0.2,
+        max: 1.5,
+        step: 0.05,
+        label: 'Connections'
+      },
+      flowStrength: {
+        value: 0.01,
+        min: 0.0,
+        max: 0.05,
+        step: 0.001,
+        label: 'Flow'
+      },
+      trailLength: {
+        value: 5,
+        min: 1,
+        max: 10,
+        step: 1,
+        label: 'Trails'
+      },
+      colorVariation: {
+        value: 1.0,
+        min: 0.0,
+        max: 2.0,
+        step: 0.1,
+        label: 'Color Var'
       }
     }
   }
