@@ -194,6 +194,8 @@ jobs:
       * run: npm ci --legacy-peer-deps
       * run: npm run test:unit
       * run: npm run build
+      * name: Verify build directory
+        run: ls -al .next | head
 
       # Upload build artifacts
       * uses: actions/upload-artifact@v4
