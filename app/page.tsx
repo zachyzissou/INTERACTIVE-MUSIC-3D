@@ -9,6 +9,7 @@ import { CanvasErrorBoundary } from "@/components/CanvasErrorBoundary";
 import SafariCanvasDetector from "@/components/SafariCanvasDetector";
 import PerformanceMonitor from "@/components/PerformanceMonitor";
 import AccessibilityPanel from "@/components/AccessibilityPanel";
+import { AudioControls } from "@/components/AudioControls";
 import { startAudio } from "@/lib/engine";
 import type { ShaderIconType } from "@/config/shaderConfigs";
 import { shaderConfigurations } from "@/config/shaderConfigs";
@@ -105,8 +106,8 @@ export default function Home() {
       <PerformanceSelector />
       <PwaInstallPrompt />
       <PerformanceMonitor />
+      <AudioControls />
       <AccessibilityPanel />
       {showAnalytics && <PerformanceAnalytics />}
     </div>
-  )
-}
+  )}

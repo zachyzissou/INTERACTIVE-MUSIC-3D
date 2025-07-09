@@ -37,7 +37,6 @@
     "@tsparticles/react": "^3.0.0",
     "@tsparticles/slim": "^3.0.0",
     "detect-gpu": "^5.0.70",
-    "framer-motion": "^12.23.0",
     "gsap": "^3.12.2",
     "lucide-react": "^0.525.0",
     "meyda": "5.6.3",

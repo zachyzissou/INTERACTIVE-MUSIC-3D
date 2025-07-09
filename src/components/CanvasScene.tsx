@@ -17,6 +17,7 @@ import AudioReactiveShaderBackground from './AudioReactiveShaderBackground'
 import SceneLights from './SceneLights'
 import { usePerformanceSettings } from '../store/usePerformanceSettings'
 import { useAudioSettings } from '../store/useAudioSettings'
+import { useShaderSettings } from '../store/useShaderSettings'
 
 function ResizeHandler() {
   const { camera, gl, viewport } = useThree()
@@ -66,6 +67,7 @@ export default function CanvasScene() {
   const setPerf = usePerformanceSettings((s) => s.setLevel)
   const perfLevel = usePerformanceSettings((s) => s.level)
   const volume = useAudioSettings((s) => s.volume)
+  const bassSensitivity = useShaderSettings((s) => s.bassSensitivity)
   
   React.useEffect(() => {
     let cancelled = false
@@ -162,16 +164,16 @@ export default function CanvasScene() {
       {/* Audio-reactive shader backgrounds */}
       {perfLevel !== 'low' && (
         <>
-          <AudioReactiveShaderBackground 
-            activeShader="metaball" 
-            position={[0, 0, -15]} 
-            scale={[25, 25, 1]} 
+          <AudioReactiveShaderBackground
+            activeShader="metaball"
+            position={[0, 0, -15]}
+            scale={[25, 25, 1]}
             bassLevel={0.5}
             midLevel={0.3}
             highLevel={0.2}
             glitchIntensity={0}
             enabled={true}
-            audioSensitivity={{ bass: 1, mid: 1, high: 1 }}
+            audioSensitivity={{ bass: bassSensitivity, mid: 1, high: 1 }}
           />
           {perfLevel === 'high' && (
             <>
@@ -184,18 +186,18 @@ export default function CanvasScene() {
                 highLevel={0.2}
                 glitchIntensity={0}
                 enabled={true}
-                audioSensitivity={{ bass: 1, mid: 1, high: 1 }}
+                audioSensitivity={{ bass: bassSensitivity, mid: 1, high: 1 }}
               />
-              <AudioReactiveShaderBackground 
-                activeShader="water" 
-                position={[10, -5, -12]} 
-                scale={[15, 15, 1]} 
+              <AudioReactiveShaderBackground
+                activeShader="water"
+                position={[10, -5, -12]}
+                scale={[15, 15, 1]}
                 bassLevel={0.5}
                 midLevel={0.3}
                 highLevel={0.2}
                 glitchIntensity={0}
                 enabled={true}
-                audioSensitivity={{ bass: 1, mid: 1, high: 1 }}
+                audioSensitivity={{ bass: bassSensitivity, mid: 1, high: 1 }}
               />
             </>
           )}
