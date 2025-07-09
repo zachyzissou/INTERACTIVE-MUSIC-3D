@@ -29,13 +29,14 @@ async function waitForAppStability(page: any, enableMockRandom = false) {
   });
   
   // Wait for any CSS animations to complete and styles to be computed
-  await page.waitForTimeout(1000);
+  // Increased from 1000ms to 1500ms for better CI stability
+  await page.waitForTimeout(1500);
 }
 
 // Helper function to take a consistent screenshot
 async function takeScreenshot(page: any, name: string, options: any = {}) {
-  // Final stability check
-  await page.waitForTimeout(500);
+  // Final stability check - increased from 500ms to 1000ms
+  await page.waitForTimeout(1000);
   
   // Verify viewport is still correct
   const viewport = page.viewportSize();
@@ -47,6 +48,7 @@ async function takeScreenshot(page: any, name: string, options: any = {}) {
     fullPage: true,
     threshold: 0.2,
     animations: 'disabled',
+    timeout: 10000, // Increased timeout to 10 seconds for CI stability
     ...options
   });
 }
@@ -56,8 +58,8 @@ async function waitForAppToStart(page: any) {
   // Click start overlay
   await page.click('[data-testid="start-overlay"]');
   
-  // Wait a moment for the click to register
-  await page.waitForTimeout(1000);
+  // Wait longer for the click to register and app to start loading
+  await page.waitForTimeout(1500);
   
   // Check if start overlay is still visible, if so try clicking again
   try {
@@ -65,7 +67,7 @@ async function waitForAppToStart(page: any) {
     if (await startOverlay.isVisible()) {
       // Try clicking again - sometimes the first click doesn't register
       await page.click('[data-testid="start-overlay"]');
-      await page.waitForTimeout(1000);
+      await page.waitForTimeout(1500);
     }
   } catch (e) {
     // Overlay might already be gone, that's fine
@@ -83,8 +85,8 @@ async function waitForAppToStart(page: any) {
     return hasMainContent;
   }, { timeout: 15000 });
   
-  // Additional stability wait for everything to render
-  await page.waitForTimeout(3000);
+  // Additional stability wait for everything to render - increased for better CI reliability
+  await page.waitForTimeout(4000);
 }
 
 test.describe('Visual Regression Tests', () => {
@@ -317,6 +319,8 @@ test.describe('Visual Regression Tests', () => {
       }
     })
     
+    // Wait longer after performance mode change for UI to stabilize
+    await page.waitForTimeout(1500);
     await waitForAppStability(page, true);
     await takeScreenshot(page, 'high-performance.png');
   })
@@ -332,6 +336,8 @@ test.describe('Visual Regression Tests', () => {
       }
     })
     
+    // Wait longer after performance mode change for UI to stabilize
+    await page.waitForTimeout(1500);
     await waitForAppStability(page, true);
     await takeScreenshot(page, 'low-performance.png');
   })
@@ -339,6 +345,8 @@ test.describe('Visual Regression Tests', () => {
   test('dark theme visual', async ({ page }) => {
     await page.emulateMedia({ colorScheme: 'dark' })
     await waitForAppToStart(page);
+    // Wait longer after theme change for styling to apply
+    await page.waitForTimeout(1500);
     await waitForAppStability(page, true);
     await takeScreenshot(page, 'dark-theme.png');
   })
@@ -350,7 +358,8 @@ test.describe('Visual Regression Tests', () => {
     const audioButton = page.locator('[data-testid="audio-button"]')
     if (await audioButton.isVisible()) {
       await audioButton.click()
-      await page.waitForTimeout(1000)
+      // Wait longer after panel open for animations and layout to complete
+      await page.waitForTimeout(1500)
     }
     
     await waitForAppStability(page, true);
@@ -364,7 +373,8 @@ test.describe('Visual Regression Tests', () => {
     const effectsButton = page.locator('[data-testid="effects-button"]')
     if (await effectsButton.isVisible()) {
       await effectsButton.click()
-      await page.waitForTimeout(1000)
+      // Wait longer after panel open for animations and layout to complete
+      await page.waitForTimeout(1500)
     }
     
     await waitForAppStability(page, true);
