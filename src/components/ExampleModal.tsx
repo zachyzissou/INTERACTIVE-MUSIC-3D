@@ -5,7 +5,7 @@ import { useObjects } from "@/store/useObjects";
 import type { ObjectType } from "@/store/useObjects";
 
 const ExampleModal: React.FC = () => {
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
   const spawn = useObjects((s) => s.spawn);
 
   const load = (scene: (typeof scenes)[0]) => {
