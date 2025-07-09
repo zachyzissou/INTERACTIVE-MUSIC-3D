@@ -349,21 +349,56 @@ jobs:
 
 ---
 
-## 🧪 Testing Strategy
+## 🧪 Advanced Testing Strategy
 
-### **End-to-End Testing (Playwright)**
+### **Optimized CI/CD Pipeline**
 
+**Quick Checks (All Branches - Under 10 Minutes)**
+```bash
+# Fast feedback for all PRs and main branch
+npm run type-check    # TypeScript validation
+npm run lint          # ESLint + code style
+npm run build         # Production build test
+npm run test:smoke    # Essential functionality only
+```
+
+**Full Test Suite (Staging Branch Only)**
+```bash
+# Comprehensive testing on staging deployments
+npm run test:e2e      # Complete E2E test suite
+npm run test:visual   # Visual regression testing
+npm run test:performance  # Performance benchmarks
+```
+
+### **Testing Architecture**
+
+**1. Smoke Tests (Fast - 2-3 minutes)**
+- ✅ Application startup and basic functionality
+- ✅ Critical user paths (start overlay → main experience)
+- ✅ No critical console errors
+- ✅ Basic performance validation
+
+**2. Full E2E Tests (Staging Only - 15-20 minutes)**
 ```bash
 # Run all E2E tests
 npm run test:e2e
 
 # Run specific test suites
 npx playwright test enhanced-features
-npx playwright test visual-regression
+npx playwright test complete-journey
 npx playwright test accessibility
 
 # Debug mode with browser UI
 npx playwright test --debug
+```
+
+**3. Visual Regression Tests (Staging Only)**
+```bash
+# Comprehensive visual testing
+npm run test:visual
+
+# Generate new baselines
+npx playwright test --update-snapshots
 ```
 
 **Test Coverage:**
@@ -373,19 +408,31 @@ npx playwright test --debug
 - ✅ UI interactions and responsiveness
 - ✅ AI music generation
 - ✅ WebGL/WebGPU rendering
-- ✅ Accessibility compliance
-- ✅ Performance benchmarks
-- ✅ Visual regression testing
-- ✅ Cross-browser compatibility
+- ✅ Accessibility compliance (WCAG 2.1)
+- ✅ Performance benchmarks (60fps target)
+- ✅ Visual regression testing (glassmorphism, neon effects)
+- ✅ Cross-browser compatibility (Chrome, Firefox, Safari)
+- ✅ Mobile and tablet responsiveness
 
-### **Unit Testing (Vitest)**
+### **Test Artifacts & Reports**
 
+**Automatic Artifact Collection:**
+- 📸 **Screenshots** - On test failure for debugging
+- 🎥 **Video Recordings** - Full test execution videos
+- 📊 **Performance Reports** - FPS, memory, load times
+- 🎨 **Visual Diff Reports** - Before/after comparison
+- 📋 **Test Results** - JUnit XML and JSON formats
+
+**Access Test Results:**
 ```bash
-# Run unit tests
-npm run test:unit
+# View latest test report
+npx playwright show-report
 
-# Run with coverage
-npm run test:coverage
+# View visual regression differences
+open playwright-report/visual-diffs/
+
+# Check performance metrics
+cat test-results/performance-report.json
 ```
 
 ### **Performance Testing**
@@ -395,11 +442,18 @@ npm run test:coverage
 npm run test:lighthouse
 
 # Bundle size analysis
-npm run analyze
+npm run build:analyze
 
 # Memory leak detection
 npm run test:memory
 ```
+
+**Performance Targets:**
+- ⚡ **Build Time**: <10 minutes (main branch)
+- 🚀 **Page Load**: <3 seconds (initial load)
+- 🎮 **Frame Rate**: >60 FPS (desktop), >30 FPS (mobile)
+- 📦 **Bundle Size**: <2.5MB (total), <500KB (initial load)
+- 🧠 **Memory Usage**: <100MB (idle), <200MB (active)
 
 ---
 

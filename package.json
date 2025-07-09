@@ -12,7 +12,7 @@
     "test": "playwright test",
     "test:ci": "playwright test --reporter=html",
     "test:headed": "playwright test --headed",
-    "test:smoke": "playwright test tests/e2e/essential-functionality.spec.ts tests/e2e/home.spec.ts --project=chromium",
+    "test:smoke": "playwright test tests/e2e/essential-functionality.spec.ts tests/e2e/home.spec.ts --project=chromium --timeout=30000",
     "test:e2e": "playwright test tests/e2e/ --project=chromium,mobile-chrome",
     "test:visual": "playwright test tests/e2e/visual-regression.spec.ts --project=chromium",
     "test:performance": "playwright test tests/e2e/enhanced-features.spec.ts --project=chromium",
