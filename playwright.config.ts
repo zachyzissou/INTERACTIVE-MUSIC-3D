@@ -24,14 +24,20 @@ export default defineConfig({
       name: 'webkit',
       use: { ...devices['Desktop Safari'] },
     },
-    /* Test against mobile viewports. */
+    /* Test against mobile viewports with consistent dimensions */
     {
       name: 'Mobile Chrome',
-      use: { ...devices['Pixel 5'] },
+      use: { 
+        ...devices['Pixel 5'],
+        viewport: { width: 390, height: 664 }, // Match baseline snapshots
+      },
     },
     {
       name: 'Mobile Safari',
-      use: { ...devices['iPhone 12'] },
+      use: { 
+        ...devices['iPhone 12'],
+        viewport: { width: 390, height: 664 }, // Match baseline snapshots
+      },
     },
   ],
 });

@@ -19,14 +19,14 @@ import GodTierUI from "@/components/ui/GodTierUI";
 // Dynamic imports for code splitting
 const CanvasScene = dynamic(() => import('../src/components/CanvasScene'), { 
   ssr: false,
-  loading: () => <div className="absolute inset-0 bg-black flex items-center justify-center">
+  loading: () => <div className="absolute inset-0 flex items-center justify-center bg-black">
     <div className="text-white">Loading 3D Scene...</div>
   </div>
 });
 
 const DevCanvas = dynamic(() => import('../src/components/DevCanvas'), { 
   ssr: false,
-  loading: () => <div className="absolute inset-0 bg-black flex items-center justify-center">
+  loading: () => <div className="absolute inset-0 flex items-center justify-center bg-black">
     <div className="text-white">Loading Dev Canvas...</div>
   </div>
 });
@@ -62,9 +62,16 @@ export default function Home() {
   }, [])
 
   const handleStart = React.useCallback(async () => {
-    await startAudio()
+    try {
+      await startAudio()
+      setIsPlaying(true)
+    } catch (error) {
+      console.warn('Audio initialization failed (Safari/WebKit compatibility):', error)
+      // Continue without audio on WebKit/Safari
+      setIsPlaying(false)
+    }
+    // Always set started to true to show main content, regardless of audio status
     setStarted(true)
-    setIsPlaying(true)
   }, [])
 
   const handleAudioToggle = React.useCallback(() => {
@@ -124,7 +131,7 @@ export default function Home() {
       {!started && <StartOverlay onFinish={handleStart} />}
       {started && (
         <>
-          <main id="main-content" className="relative h-full w-full">
+          <main id="main-content" className="relative w-full h-full">
             <CanvasErrorBoundary>
               <SafariCanvasDetector>
                 <Scene />
