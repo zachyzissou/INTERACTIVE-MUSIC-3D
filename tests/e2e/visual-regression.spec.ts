@@ -137,8 +137,8 @@ test.describe('Visual Regression Tests', () => {
       })
     }
   })
-})
-    
+
+  test('tablet layout visual test', async ({ page }) => {
     await page.click('[data-testid="start-button"]')
     await page.waitForTimeout(2000)
     
