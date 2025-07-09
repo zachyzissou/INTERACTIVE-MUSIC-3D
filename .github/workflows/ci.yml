@@ -132,6 +132,15 @@ jobs:
       - name: Install dependencies
         run: npm ci --legacy-peer-deps --prefer-offline
 
+      - name: Verify build artifacts and rebuild if needed
+        run: |
+          if [ ! -d ".next" ] || [ ! -f ".next/BUILD_ID" ]; then
+            echo "Build artifacts missing or incomplete, rebuilding..."
+            npm run build
+          else
+            echo "Using cached build artifacts"
+          fi
+
       - name: Cache Playwright browsers
         uses: actions/cache@v4
         with:
