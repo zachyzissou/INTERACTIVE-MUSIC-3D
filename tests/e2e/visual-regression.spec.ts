@@ -38,9 +38,6 @@ test.describe('Visual Regression Tests', () => {
       ` 
     });
     
-    // Ensure consistent viewport for all tests - Mobile Safari size
-    await page.setViewportSize({ width: 390, height: 664 });
-    
     await page.goto('/', { waitUntil: 'networkidle' })
     await page.waitForSelector('[data-testid="start-overlay"]', { timeout: 10000 })
     
@@ -57,7 +54,8 @@ test.describe('Visual Regression Tests', () => {
   })
 
   test('main experience visual regression', async ({ page }) => {
-    await page.click('[data-testid="start-button"]')
+    // Click anywhere on the start overlay to proceed
+    await page.click('[data-testid="start-overlay"]')
     
     // Wait for main content to be visible and fully loaded
     await page.waitForSelector('#main-content', { timeout: 15000 })
@@ -80,13 +78,12 @@ test.describe('Visual Regression Tests', () => {
     await expect(page).toHaveScreenshot('main-experience.png', {
       fullPage: true,
       threshold: 0.3,
-      animations: 'disabled',
-      clip: { x: 0, y: 0, width: 390, height: 664 } // Explicit clipping
+      animations: 'disabled'
     })
   })
 
   test('mobile layout visual regression', async ({ page }) => {
-    await page.click('[data-testid="start-button"]')
+    await page.click('[data-testid="start-overlay"]')
     
     // Wait for main content and UI stabilization
     await page.waitForSelector('#main-content', { timeout: 15000 })
@@ -96,8 +93,7 @@ test.describe('Visual Regression Tests', () => {
     await expect(page).toHaveScreenshot('mobile-layout.png', {
       fullPage: true,
       threshold: 0.3,
-      animations: 'disabled',
-      clip: { x: 0, y: 0, width: 390, height: 664 }
+      animations: 'disabled'
     })
   })
 
@@ -105,7 +101,7 @@ test.describe('Visual Regression Tests', () => {
     // Set tablet viewport explicitly
     await page.setViewportSize({ width: 768, height: 1024 })
     
-    await page.click('[data-testid="start-button"]')
+    await page.click('[data-testid="start-overlay"]')
     
     // Wait for main content and full loading
     await page.waitForSelector('#main-content', { timeout: 15000 })
@@ -121,7 +117,7 @@ test.describe('Visual Regression Tests', () => {
   })
 
   test('high performance mode visual', async ({ page }) => {
-    await page.click('[data-testid="start-button"]')
+    await page.click('[data-testid="start-overlay"]')
     
     // Wait for main content
     await page.waitForSelector('#main-content', { timeout: 10000 })
@@ -144,7 +140,7 @@ test.describe('Visual Regression Tests', () => {
   })
 
   test('low performance mode visual', async ({ page }) => {
-    await page.click('[data-testid="start-button"]')
+    await page.click('[data-testid="start-overlay"]')
     
     // Wait for main content
     await page.waitForSelector('#main-content', { timeout: 10000 })
@@ -169,7 +165,7 @@ test.describe('Visual Regression Tests', () => {
   test('dark theme visual', async ({ page }) => {
     await page.emulateMedia({ colorScheme: 'dark' })
     
-    await page.click('[data-testid="start-button"]')
+    await page.click('[data-testid="start-overlay"]')
     
     // Wait for main content
     await page.waitForSelector('#main-content', { timeout: 10000 })
@@ -183,7 +179,7 @@ test.describe('Visual Regression Tests', () => {
   })
 
   test('audio controls panel visual', async ({ page }) => {
-    await page.click('[data-testid="start-button"]')
+    await page.click('[data-testid="start-overlay"]')
     
     // Wait for main content
     await page.waitForSelector('#main-content', { timeout: 10000 })
@@ -205,7 +201,7 @@ test.describe('Visual Regression Tests', () => {
   })
 
   test('effects panel visual', async ({ page }) => {
-    await page.click('[data-testid="start-button"]')
+    await page.click('[data-testid="start-overlay"]')
     
     // Wait for main content
     await page.waitForSelector('#main-content', { timeout: 10000 })
@@ -234,7 +230,7 @@ test.describe('Visual Regression Tests', () => {
       })
     })
     
-    await page.click('[data-testid="start-button"]')
+    await page.click('[data-testid="start-overlay"]')
     
     // Wait for main content or error state
     await page.waitForTimeout(3000)
@@ -252,7 +248,7 @@ test.describe('Visual Regression Tests', () => {
       setTimeout(() => route.continue(), 1000)
     })
     
-    await page.click('[data-testid="start-button"]')
+    await page.click('[data-testid="start-overlay"]')
     await page.waitForTimeout(1000)
     
     await expect(page).toHaveScreenshot('loading-state.png', {

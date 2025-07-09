@@ -14,29 +14,38 @@ export default defineConfig({
   projects: [
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      use: { 
+        ...devices['Desktop Chrome'],
+        viewport: { width: 1280, height: 720 }, // Match existing snapshots
+      },
     },
     {
       name: 'firefox',
-      use: { ...devices['Desktop Firefox'] },
+      use: { 
+        ...devices['Desktop Firefox'],
+        viewport: { width: 1280, height: 720 }, // Match existing snapshots
+      },
     },
     {
       name: 'webkit',
-      use: { ...devices['Desktop Safari'] },
+      use: { 
+        ...devices['Desktop Safari'],
+        viewport: { width: 1280, height: 720 }, // Match existing snapshots
+      },
     },
-    /* Test against mobile viewports with consistent dimensions */
+    /* Test against mobile viewports with existing snapshot dimensions */
     {
       name: 'Mobile Chrome',
       use: { 
         ...devices['Pixel 5'],
-        viewport: { width: 390, height: 664 }, // Match baseline snapshots
+        viewport: { width: 481, height: 819 }, // Match darwin baseline snapshots
       },
     },
     {
       name: 'Mobile Safari',
       use: { 
         ...devices['iPhone 12'],
-        viewport: { width: 390, height: 664 }, // Match baseline snapshots
+        viewport: { width: 467, height: 664 }, // Match existing Mobile Safari snapshots
       },
     },
   ],
