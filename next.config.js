@@ -1,6 +1,9 @@
 const path = require('path');
+const withBundleAnalyzer = require('@next/bundle-analyzer')({
+  enabled: process.env.ANALYZE === 'true',
+});
 
-module.exports = {
+module.exports = withBundleAnalyzer({
   reactStrictMode: true,
   productionBrowserSourceMaps: false, // Disable in production for performance
   
@@ -86,7 +89,7 @@ module.exports = {
       config.optimization.splitChunks = {
         chunks: 'all',
         minSize: 20000,
-        maxSize: 250000,
+        maxSize: 200000, // Reduced chunk size for better loading
         cacheGroups: {
           default: {
             minChunks: 2,
@@ -119,6 +122,14 @@ module.exports = {
             priority: 10,
             chunks: 'all',
             enforce: true
+          },
+          // Split large libraries into separate chunks
+          magenta: {
+            test: /[\\/]node_modules[\\/]@magenta[\\/]/,
+            name: 'magenta',
+            priority: 25,
+            chunks: 'all',
+            enforce: true
           }
         }
       };
@@ -126,4 +137,4 @@ module.exports = {
     
     return config;
   },
-};
+});
