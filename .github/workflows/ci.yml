@@ -168,7 +168,7 @@ jobs:
       - name: Run Playwright tests
         run: |
           # Use start-server-and-test for better process management
-          npx start-server-and-test start http://localhost:3000 "playwright test --project=${{ matrix.browser }}"
+          npx start-server-and-test start http://localhost:3000 "playwright test --project=\"${{ matrix.browser }}\""
         env:
           CI: true
 
