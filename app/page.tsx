@@ -48,135 +48,7 @@ export default function Home() {
   const [isPlaying, setIsPlaying] = React.useState(false)
   const [activeShader, setActiveShader] = React.useState('metaball')
   const [glitchIntensity, setGlitchIntensity] = React.useState(0)
-  const [audioSource, setAudioSource] = React.useState<MediaElementAudioSourceNode | null>(null)
-  const [spectrum, setSpectrum] = React.useState<Float32Array>(new Float32Array(16))
 
-  // Use imported shader configurations from config file
-  const [shaderConfigs, setShaderConfigs] = React.useState(shaderConfigurations)
-
-  React.useEffect(() => {
-    const useDev = new URLSearchParams(window.location.search).get('devcanvas') === '1'
-    const showAnalytics = new URLSearchParams(window.location.search).get('analytics') === '1'
-    setScene(() => useDev ? DevCanvas : CanvasScene)
-    setShowAnalytics(showAnalytics)
-  }, [])
-
-  const handleStart = React.useCallback(async () => {
-    try {
-      await startAudio()
-      setIsPlaying(true)
-    } catch (error) {
-      console.warn('Audio initialization failed (Safari/WebKit compatibility):', error)
-      // Continue without audio on WebKit/Safari
-      setIsPlaying(false)
-    }
-    // Always set started to true to show main content, regardless of audio status
-    setStarted(true)
-  }, [])
-
-  const handleAudioToggle = React.useCallback(() => {
-    setIsPlaying(!isPlaying)
-    // Here you would integrate with your actual audio system
-  }, [isPlaying])
-
-  const handleVolumeChange = React.useCallback((volume: number) => {
-    setVolume(volume)
-    // Here you would integrate with your actual audio system
-  }, [])
-
-  const handleShaderChange = React.useCallback((shaderId: string) => {
-    setActiveShader(shaderId)
-    // Here you would integrate with your shader system
-  }, [])
-
-  // Handler for updating shader param values
-  const handleParamChange = (shaderId: string, paramName: string, value: number) => {
-    setShaderConfigs(prev => prev.map((config: any) =>
-      config.id === shaderId
-        ? {
-            ...config,
-            params: {
-              ...config.params,
-              [paramName]: {
-                ...config.params[paramName],
-                value
-              }
-            }
-          }
-        : config
-    ))
-  }
-
-  // Simulate audio data updates (replace with real audio analysis)
-  React.useEffect(() => {
-    if (!isPlaying) return
-    
-    const generateSpectrum = () => new Float32Array(16).map(() => Math.random() * 0.5)
-    
-    const interval = setInterval(() => {
-      setBassData(Math.random() * 0.8)
-      setMidData(Math.random() * 0.6)
-      setHighData(Math.random() * 0.4)
-      setSpectrum(generateSpectrum())
-    }, 100)
-    
-    return () => clearInterval(interval)
-  }, [isPlaying])
-
-  return (
-    <>
-      <a href="#main-content" className="skip-link">
-        Skip to main content
-      </a>
-      {!started && <StartOverlay onFinish={handleStart} />}
-      {started && (
-        <>
-          <main id="main-content" className="relative w-full h-full">
-            <CanvasErrorBoundary>
-              <SafariCanvasDetector>
-                <Scene />
-              </SafariCanvasDetector>
-            </CanvasErrorBoundary>
-          </main>
-          {/* Unified God-Tier UI */}
-          <GodTierUI
-            audioData={{
-              bass: bassData,
-              mid: midData,
-              high: highData,
-              volume,
-              spectrum
-            }}
-            onAudioToggle={() => setIsPlaying((p) => !p)}
-            onVolumeChange={setVolume}
-            onShaderChange={setActiveShader}
-            onParamChange={handleParamChange}
-            isPlaying={isPlaying}
-            currentShader={activeShader}
-            shaderConfigs={shaderConfigs}
-          />
-        </>
-      )}
-      <PwaInstallPrompt />
-      <ExampleModal />
-      <PerformanceSelector />
-      <PerformanceMonitor />
-      <AccessibilityPanel />
-      {showAnalytics && <PerformanceAnalytics />}
-    </>
-  )
-}
-  const [started, setStarted] = React.useState(false)
-  const [showAnalytics, setShowAnalytics] = React.useState(false)
-  
-  // Audio reactive state
-  const [bassData, setBassData] = React.useState(0)
-  const [midData, setMidData] = React.useState(0)
-  const [highData, setHighData] = React.useState(0)
-  const [activeShader, setActiveShader] = React.useState('metaball')
-  const [glitchIntensity, setGlitchIntensity] = React.useState(0)
-  const [audioSource, setAudioSource] = React.useState<MediaElementAudioSourceNode | null>(null)
-  
   React.useEffect(() => {
     const useDev = new URLSearchParams(window.location.search).get('devcanvas') === '1'
     const showAnalytics = new URLSearchParams(window.location.search).get('analytics') === '1'
@@ -190,8 +62,8 @@ export default function Home() {
   }, [])
 
   return (
-    <UIManagerProvider>
-      <a href="#main-content" className="skip-link">
+    <div className="relative h-full w-full">
+      <a href="#main-content" className="god-tier-skip-link">
         Skip to main content
       </a>
       {!started && <StartOverlay onFinish={handleStart} />}
@@ -204,27 +76,28 @@ export default function Home() {
               </SafariCanvasDetector>
             </CanvasErrorBoundary>
           </main>
-          <ShapeEditorPanel />
-          {/* Modern floating UI */}
-          <ModernControlBar variant="neon" />
-          <ModernAudioPanel />
-          <ModernEffectsPanel />
           
-          {/* Audio Reactive Controls */}
-          <AudioControls
-            onBassChange={setBassData}
-            onMidChange={setMidData}
-            onHighChange={setHighData}
+          {/* God-Tier UI System */}
+          <GodTierUI 
+            audioData={{
+              bass: bassData,
+              mid: midData,
+              high: highData,
+              volume: volume,
+              spectrum: new Float32Array(32) // Mock spectrum data
+            }}
+            onAudioToggle={() => setIsPlaying(!isPlaying)}
+            onVolumeChange={setVolume}
             onShaderChange={setActiveShader}
-            onGlitchIntensityChange={setGlitchIntensity}
-          />
-          
-          {/* Audio Analyzer */}
-          <AudioAnalyzer
-            audioSource={audioSource}
-            onBassData={setBassData}
-            onMidData={setMidData}
-            onHighData={setHighData}
+            onParamChange={(shaderId, paramName, value) => {
+              // Handle parameter changes for specific shaders
+              if (paramName === 'glitch') {
+                setGlitchIntensity(value)
+              }
+            }}
+            isPlaying={isPlaying}
+            currentShader={activeShader}
+            shaderConfigs={shaderConfigurations}
           />
         </>
       )}
@@ -234,11 +107,6 @@ export default function Home() {
       <PerformanceMonitor />
       <AccessibilityPanel />
       {showAnalytics && <PerformanceAnalytics />}
-      {started && (
-        <AudioErrorBoundary>
-          <BottomDrawer />
-        </AudioErrorBoundary>
-      )}
-    </UIManagerProvider>
+    </div>
   )
 }
