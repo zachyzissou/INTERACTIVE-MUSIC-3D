@@ -6,21 +6,30 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
-  reporter: 'html',
+  reporter: [
+    ['html'],
+    ['junit', { outputFile: 'test-results/junit.xml' }],
+    ['json', { outputFile: 'test-results/results.json' }]
+  ],
   
-  // Web server configuration - automatically start dev server for tests
+  // Optimized web server configuration for faster startup
   webServer: {
-    command: 'npm run dev',
+    command: process.env.CI ? 'npm run build && npm start' : 'npm run dev',
     port: 3000,
-    reuseExistingServer: true, // Always reuse existing server to avoid port conflicts
-    timeout: 120 * 1000, // 2 minutes
+    reuseExistingServer: true, // Always reuse for testing
+    timeout: process.env.CI ? 90000 : 120000, // Increased timeout for CI build
+    stderr: 'pipe',
+    stdout: 'pipe',
   },
   
   use: {
     baseURL: 'http://localhost:3000',
-    trace: 'on-first-retry',
-    video: 'retain-on-failure',
+    trace: 'off', // Disable tracing for CI to avoid FFmpeg issues
+    video: 'off', // Disable video recording for CI
     screenshot: 'only-on-failure',
+    // Reduce navigation timeout for faster test execution
+    navigationTimeout: 30000,
+    actionTimeout: 15000,
   },
   
   projects: [
@@ -28,32 +37,41 @@ export default defineConfig({
       name: 'chromium',
       use: { 
         ...devices['Desktop Chrome'],
-        // Use system Chrome browser to avoid download issues
-        channel: 'chrome'
+        // Use system Chrome for CI reliability
+        channel: process.env.CI ? 'chrome' : undefined,
+        // Optimize viewport for faster rendering
+        viewport: { width: 1280, height: 720 }
       },
     },
     {
       name: 'mobile-chrome',
       use: { 
-        ...devices['Pixel 5'] 
+        ...devices['Pixel 5'],
+        // Optimize mobile viewport
+        viewport: { width: 393, height: 851 }
       },
     },
-    // Uncomment when ready for full browser testing
-    // {
-    //   name: 'firefox',
-    //   use: { ...devices['Desktop Firefox'] },
-    // },
-    // {
-    //   name: 'webkit',
-    //   use: { ...devices['Desktop Safari'] },
-    // },
+    // Full browser testing only for staging
+    ...(process.env.GITHUB_REF === 'refs/heads/staging' ? [
+      {
+        name: 'firefox',
+        use: { ...devices['Desktop Firefox'] },
+      },
+      {
+        name: 'webkit',
+        use: { ...devices['Desktop Safari'] },
+      },
+    ] : []),
   ],
   
-  // Global test timeout
-  timeout: 60 * 1000, // 1 minute per test
+  // Optimized timeouts for faster execution
+  timeout: process.env.CI ? 30000 : 60000, // Reduced from 60s to 30s for CI
   
-  // Expect timeout for assertions
+  // Faster assertion timeout
   expect: {
-    timeout: 10 * 1000, // 10 seconds
+    timeout: 8000, // Reduced from 10s to 8s
   },
+  
+  // Output directory
+  outputDir: 'test-results/',
 });

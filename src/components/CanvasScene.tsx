@@ -250,8 +250,8 @@ export default function CanvasScene() {
       <PlusButton3D />
       <XRButtons />
       
-      {/* Post-processing effects - enhanced with error boundaries for WebKit compatibility */}
-      {perfLevel !== 'low' && (
+      {/* Post-processing effects - temporarily disabled to fix 3D scene visibility */}
+      {false && perfLevel !== 'low' && (
         <PostProcessErrorBoundary>
           <AudioReactivePostProcess 
             intensity={volume}

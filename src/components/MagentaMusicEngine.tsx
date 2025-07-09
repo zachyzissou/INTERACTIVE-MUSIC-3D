@@ -200,7 +200,7 @@ const MagentaMusicEngine: React.FC<MagentaMusicEngineProps> = ({
     }
     
     return sequence
-  }, [config, audioData, generateAlgorithmicSequence])
+  }, [config, audioData]) // Removed generateAlgorithmicSequence from dependencies
 
   // Generate music with Magenta or fallback
   const generateMusic = useCallback(async () => {
@@ -251,7 +251,7 @@ const MagentaMusicEngine: React.FC<MagentaMusicEngineProps> = ({
     } finally {
       setIsLoading(false)
     }
-  }, [models, config, audioData, onSequenceGenerated, generateAlgorithmicSequence, isLoading])
+  }, [models, config, audioData, onSequenceGenerated, generateEnhancedAlgorithmicSequence, generateAlgorithmicSequence, isLoading]) // Added all dependencies
 
   // Auto-generate based on audio energy
   useEffect(() => {
