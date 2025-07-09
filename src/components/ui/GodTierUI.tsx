@@ -20,7 +20,6 @@ import {
   BeakerIcon,
   ComputerDesktopIcon
 } from '@heroicons/react/24/outline'
-import { motion, AnimatePresence } from 'framer-motion'
 import AudioVisualizer from './AudioVisualizer'
 import ShaderSelector from './ShaderSelector'
 import ShaderControls from './ShaderControls'
@@ -77,6 +76,51 @@ const GodTierUI: React.FC<GodTierUIProps> = ({
   
   const mainPanelRef = useRef<HTMLDivElement>(null)
   const dragRef = useRef<HTMLDivElement>(null)
+  const expandedPanelRef = useRef<HTMLDivElement>(null)
+  const buttonsRef = useRef<HTMLButtonElement[]>([])
+
+  // GSAP animations
+  useEffect(() => {
+    if (mainPanelRef.current) {
+      gsap.fromTo(mainPanelRef.current, 
+        { opacity: 0, scale: 0.8, y: 20 },
+        { opacity: 1, scale: 1, y: 0, duration: 0.5, ease: "back.out(1.7)" }
+      )
+    }
+  }, [])
+
+  // Animate button hover effects with GSAP
+  const animateButtonHover = useCallback((element: HTMLElement, isHover: boolean) => {
+    gsap.to(element, {
+      scale: isHover ? 1.05 : 1,
+      duration: 0.2,
+      ease: "power2.out"
+    })
+  }, [])
+
+  // Animate panel expansion with GSAP
+  useEffect(() => {
+    if (expandedPanelRef.current) {
+      if (isExpanded && activePanel) {
+        gsap.fromTo(expandedPanelRef.current,
+          { height: 0, opacity: 0 },
+          { height: 'auto', opacity: 1, duration: 0.3, ease: "power2.out" }
+        )
+      }
+    }
+  }, [isExpanded, activePanel])
+
+  // Audio-reactive glow effect
+  useEffect(() => {
+    if (mainPanelRef.current) {
+      const intensity = (audioData.bass + audioData.mid + audioData.high) / 3
+      gsap.to(mainPanelRef.current, {
+        boxShadow: `0 0 ${20 + intensity * 30}px rgba(59, 130, 246, ${0.3 + intensity * 0.4})`,
+        duration: 0.1,
+        ease: "power2.out"
+      })
+    }
+  }, [audioData.bass, audioData.mid, audioData.high])
 
   // Drag functionality
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
@@ -121,26 +165,18 @@ const GodTierUI: React.FC<GodTierUIProps> = ({
   return (
     <>
       {/* Main Control Hub */}
-      <motion.div
+      <div
         ref={mainPanelRef}
         className="god-tier-main-panel"
         style={{ 
           left: position.x, 
           top: position.y
         }}
-        drag
-        dragMomentum={false}
-        onDrag={(_, info) => {
-          setPosition({
-            x: position.x + info.delta.x,
-            y: position.y + info.delta.y
-          })
-        }}
       >
         <div className="overflow-hidden border shadow-2xl bg-black/80 backdrop-blur-xl rounded-2xl border-gray-700/50">
           {/* Main Control Bar */}
           <div className="flex items-center p-4 space-x-3 bg-gradient-to-r from-purple-900/30 to-cyan-900/30">
-            <motion.button
+            <button
               onClick={onAudioToggle}
               className={`
                 p-2 rounded-full transition-all duration-200
@@ -149,12 +185,12 @@ const GodTierUI: React.FC<GodTierUIProps> = ({
                   : 'bg-red-500/20 text-red-400 border border-red-400/50'
                 }
               `}
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
+              onMouseEnter={(e) => animateButtonHover(e.currentTarget, true)}
+              onMouseLeave={(e) => animateButtonHover(e.currentTarget, false)}
               aria-label={isPlaying ? 'Pause audio' : 'Play audio'}
             >
               {isPlaying ? <PauseIcon className="w-4 h-4" /> : <PlayIcon className="w-4 h-4" />}
-            </motion.button>
+            </button>
 
             <div className="flex items-center p-3 space-x-2 rounded-lg bg-black/30 backdrop-blur-md">
               <div className="flex space-x-1">
@@ -164,8 +200,7 @@ const GodTierUI: React.FC<GodTierUIProps> = ({
                     className="w-1 transition-all duration-75 rounded-full bg-gradient-to-t from-cyan-500 to-purple-500 god-tier-spectrum-bar"
                     aria-label={`Spectrum bar ${i}`}
                     style={{
-                      // @ts-ignore
-                      '--bar-height': `${Math.max(4, (audioData.spectrum?.[i] || 0) * 40)}px`
+                      height: `${Math.max(4, (audioData.spectrum?.[i] || 0) * 40)}px`
                     }}
                   />
                 ))}
@@ -194,7 +229,7 @@ const GodTierUI: React.FC<GodTierUIProps> = ({
             </div>
 
             <div className="flex space-x-1">
-              <motion.button
+              <button
                 onClick={() => {
                   setActivePanel(activePanel === 'audio' ? null : 'audio')
                   setIsExpanded(!isExpanded || activePanel !== 'audio')
@@ -206,14 +241,14 @@ const GodTierUI: React.FC<GodTierUIProps> = ({
                     : 'bg-gray-700/30 text-gray-400 hover:bg-gray-600/30'
                   }
                 `}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                onMouseEnter={(e) => animateButtonHover(e.currentTarget, true)}
+                onMouseLeave={(e) => animateButtonHover(e.currentTarget, false)}
                 aria-label="Toggle audio panel"
               >
                 <MusicalNoteIcon className="w-4 h-4" />
-              </motion.button>
+              </button>
 
-              <motion.button
+              <button
                 onClick={() => {
                   setActivePanel(activePanel === 'shaders' ? null : 'shaders')
                   setIsExpanded(!isExpanded || activePanel !== 'shaders')
@@ -225,14 +260,14 @@ const GodTierUI: React.FC<GodTierUIProps> = ({
                     : 'bg-gray-700/30 text-gray-400 hover:bg-gray-600/30'
                   }
                 `}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                onMouseEnter={(e) => animateButtonHover(e.currentTarget, true)}
+                onMouseLeave={(e) => animateButtonHover(e.currentTarget, false)}
                 aria-label="Toggle shader panel"
               >
                 <SparklesIcon className="w-4 h-4" />
-              </motion.button>
+              </button>
 
-              <motion.button
+              <button
                 onClick={() => {
                   setActivePanel(activePanel === 'effects' ? null : 'effects')
                   setIsExpanded(!isExpanded || activePanel !== 'effects')
@@ -244,26 +279,26 @@ const GodTierUI: React.FC<GodTierUIProps> = ({
                     : 'bg-gray-700/30 text-gray-400 hover:bg-gray-600/30'
                   }
                 `}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                onMouseEnter={(e) => animateButtonHover(e.currentTarget, true)}
+                onMouseLeave={(e) => animateButtonHover(e.currentTarget, false)}
                 aria-label="Toggle effects panel"
               >
                 <AdjustmentsHorizontalIcon className="w-4 h-4" />
-              </motion.button>
+              </button>
             </div>
 
-            <motion.button
+            <button
               onClick={() => {
                 setIsExpanded(!isExpanded)
                 if (!isExpanded) setActivePanel(null)
               }}
               className="p-2 text-gray-400 transition-all duration-200 rounded-lg bg-gray-700/30 hover:bg-gray-600/30"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              onMouseEnter={(e) => animateButtonHover(e.currentTarget, true)}
+              onMouseLeave={(e) => animateButtonHover(e.currentTarget, false)}
               aria-label={isExpanded ? 'Collapse panel' : 'Expand panel'}
             >
               {isExpanded ? <XMarkIcon className="w-4 h-4" /> : <Bars3Icon className="w-4 h-4" />}
-            </motion.button>
+            </button>
           </div>
 
           {/* Drag Handle for repositioning */}
@@ -282,76 +317,71 @@ const GodTierUI: React.FC<GodTierUIProps> = ({
           />
 
           {/* Expanded Panels */}
-          <AnimatePresence>
-            {isExpanded && activePanel && (
-              <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: 'auto', opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                transition={{ duration: 0.3, ease: 'easeInOut' }}
-                className="border-t border-gray-700/50"
-              >
-                <div className="p-4 overflow-y-auto max-h-96 god-tier-custom-scrollbar">
-                  {activePanel === 'audio' && <AudioVisualizer audioData={audioData} />}
-                  {activePanel === 'shaders' && (
-                    <div className="space-y-4">
-                      <ShaderSelector 
+          {isExpanded && activePanel && (
+            <div
+              ref={expandedPanelRef}
+              className="border-t border-gray-700/50"
+            >
+              <div className="p-4 overflow-y-auto max-h-96 god-tier-custom-scrollbar">
+                {activePanel === 'audio' && <AudioVisualizer audioData={audioData} />}
+                {activePanel === 'shaders' && (
+                  <div className="space-y-4">
+                    <ShaderSelector 
+                      shaderConfigs={shaderConfigs}
+                      currentShader={currentShader}
+                      onShaderChange={onShaderChange}
+                    />
+                    <div className="pt-4 border-t border-gray-700/50">
+                      <ShaderControls
                         shaderConfigs={shaderConfigs}
                         currentShader={currentShader}
-                        onShaderChange={onShaderChange}
+                        onParamChange={onParamChange}
                       />
-                      <div className="pt-4 border-t border-gray-700/50">
-                        <ShaderControls
-                          shaderConfigs={shaderConfigs}
-                          currentShader={currentShader}
-                          onParamChange={onParamChange}
+                    </div>
+                  </div>
+                )}
+                {activePanel === 'effects' && (
+                  <div className="space-y-3">
+                    <h3 className="mb-3 text-sm font-medium text-gray-200">Audio Effects</h3>
+                    <div className="space-y-3">
+                      <div>
+                        <div className="flex justify-between mb-1 text-xs text-gray-400">
+                          <label htmlFor="reverb-slider">Reverb</label>
+                          <span>0.30</span>
+                        </div>
+                        <input 
+                          id="reverb-slider"
+                          type="range" 
+                          min="0" 
+                          max="1" 
+                          step="0.01" 
+                          className="w-full slider" 
+                          title="Reverb"
+                        />
+                      </div>
+                      <div>
+                        <div className="flex justify-between mb-1 text-xs text-gray-400">
+                          <label htmlFor="distortion-slider">Distortion</label>
+                          <span>0.15</span>
+                        </div>
+                        <input 
+                          id="distortion-slider"
+                          type="range" 
+                          min="0" 
+                          max="1" 
+                          step="0.01" 
+                          className="w-full slider" 
+                          title="Distortion"
                         />
                       </div>
                     </div>
-                  )}
-                  {activePanel === 'effects' && (
-                    <div className="space-y-3">
-                      <h3 className="mb-3 text-sm font-medium text-gray-200">Audio Effects</h3>
-                      <div className="space-y-3">
-                        <div>
-                          <div className="flex justify-between mb-1 text-xs text-gray-400">
-                            <label htmlFor="reverb-slider">Reverb</label>
-                            <span>0.30</span>
-                          </div>
-                          <input 
-                            id="reverb-slider"
-                            type="range" 
-                            min="0" 
-                            max="1" 
-                            step="0.01" 
-                            className="w-full slider" 
-                            title="Reverb"
-                          />
-                        </div>
-                        <div>
-                          <div className="flex justify-between mb-1 text-xs text-gray-400">
-                            <label htmlFor="distortion-slider">Distortion</label>
-                            <span>0.15</span>
-                          </div>
-                          <input 
-                            id="distortion-slider"
-                            type="range" 
-                            min="0" 
-                            max="1" 
-                            step="0.01" 
-                            className="w-full slider" 
-                            title="Distortion"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </div>
-      </motion.div>
+      </div>
 
       {/* Performance Monitor Mini-Widget */}
       <div className="god-tier-performance-monitor">

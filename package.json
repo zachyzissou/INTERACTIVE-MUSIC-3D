@@ -5,10 +5,16 @@
   "scripts": {
     "dev": "next dev -p 3000",
     "build": "next build",
+    "build:analyze": "ANALYZE=true npm run build",
     "start": "next start",
     "lint": "next lint",
+    "lint:fix": "next lint --fix",
     "test": "playwright test",
-    "jam-server": "node server/jam-server.js"
+    "test:ci": "playwright test --reporter=html",
+    "test:headed": "playwright test --headed",
+    "jam-server": "node server/jam-server.js",
+    "type-check": "tsc --noEmit",
+    "audit:fix": "npm audit fix --force"
   },
   "dependencies": {
     "@dimforge/rapier3d-compat": "^0.17.3",
@@ -63,6 +69,7 @@
     "null-loader": "^4.0.1",
     "playwright": "^1.53.2",
     "postcss": "^8.5.6",
+    "raw-loader": "^4.0.2",
     "tailwindcss": "^4.1.11",
     "ts-node": "^10.9.2",
     "typescript": "5.8.3"
