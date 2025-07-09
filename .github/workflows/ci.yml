@@ -5,39 +5,187 @@ on:
     branches: [main]
   pull_request:
 
+env:
+  NODE_VERSION: 20
+  FORCE_COLOR: 1
+
 jobs:
+  # Fast feedback job - runs linting and type checking in parallel
+  quality-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.npm
+            node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps --prefer-offline
+
+      - name: Run linting and type checking in parallel
+        run: |
+          # Run lint and type check in parallel for faster feedback
+          npx concurrently --names "LINT,TYPE" --prefix-colors "blue,green" \
+            "npm run lint" \
+            "npx tsc --noEmit"
+
+  # Build job - creates production build and caches it
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          node-version: 20
-      - run: npm ci --legacy-peer-deps
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.npm
+            node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Cache Next.js build
+        uses: actions/cache@v4
+        with:
+          path: |
+            .next/cache
+            .next/static
+            .next/standalone
+          key: ${{ runner.os }}-nextjs-${{ hashFiles('package-lock.json') }}-${{ hashFiles('**/*.ts', '**/*.tsx', '**/*.js', '**/*.jsx') }}
+          restore-keys: |
+            ${{ runner.os }}-nextjs-${{ hashFiles('package-lock.json') }}-
+            ${{ runner.os }}-nextjs-
+
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps --prefer-offline
+
+      - name: Build application
+        run: npm run build
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts
+          path: |
+            .next
+            package.json
+            package-lock.json
+          retention-days: 1
+
+  # Visual regression tests - optimized for speed
+  visual-regression:
+    needs: build
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # Reduced browser matrix for faster feedback
+        # Full matrix only runs on main branch
+        browser: ${{ github.ref == 'refs/heads/main' && fromJson('["chromium", "firefox", "webkit", "Mobile Chrome", "Mobile Safari"]') || fromJson('["chromium", "Mobile Safari"]') }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.npm
+            node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifacts
+
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps --prefer-offline
+
       - name: Cache Playwright browsers
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-${{ hashFiles('package-lock.json') }}
+          key: ${{ runner.os }}-playwright-${{ hashFiles('package-lock.json') }}-${{ matrix.browser }}
           restore-keys: |
+            ${{ runner.os }}-playwright-${{ hashFiles('package-lock.json') }}-
             ${{ runner.os }}-playwright-
-      - run: npx tsc --noEmit
-      - run: npm run lint
-      - run: npm run build
-      - name: Install Playwright browsers and system dependencies
-        run: npx playwright install --with-deps
-      - name: Start Next.js server and run Playwright tests
+
+      - name: Install Playwright browser
         run: |
-          # Install wait-on for server readiness check
-          npm install -g wait-on
-          # Start the Next.js server in the background
-          npm start &
-          SERVER_PID=$!
-          # Wait for the server to be ready
-          wait-on http://localhost:3000 --timeout 60000
-          # Run the Playwright tests
-          npm test
-          # Clean up: kill the server process
-          kill $SERVER_PID || true
+          # Only install the specific browser for this matrix job
+          case "${{ matrix.browser }}" in
+            "chromium"|"Mobile Chrome")
+              npx playwright install chromium --with-deps
+              ;;
+            "firefox")
+              npx playwright install firefox --with-deps
+              ;;
+            "webkit"|"Mobile Safari")
+              npx playwright install webkit --with-deps
+              ;;
+          esac
+
+      - name: Run Playwright tests
+        run: |
+          # Use start-server-and-test for better process management
+          npx start-server-and-test start http://localhost:3000 "playwright test --project=${{ matrix.browser }}"
         env:
           CI: true
+
+      - name: Upload Playwright report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report-${{ matrix.browser }}
+          path: playwright-report/
+          retention-days: 7
+
+  # Summary job that depends on all other jobs
+  ci-summary:
+    if: always()
+    needs: [quality-checks, build, visual-regression]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check job results
+        run: |
+          echo "Quality checks: ${{ needs.quality-checks.result }}"
+          echo "Build: ${{ needs.build.result }}"
+          echo "Visual regression: ${{ needs.visual-regression.result }}"
+          
+          if [[ "${{ needs.quality-checks.result }}" != "success" || "${{ needs.build.result }}" != "success" || "${{ needs.visual-regression.result }}" != "success" ]]; then
+            echo "❌ CI failed"
+            exit 1
+          else
+            echo "✅ CI passed"
+          fi
