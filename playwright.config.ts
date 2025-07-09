@@ -16,16 +16,16 @@ export default defineConfig({
   webServer: {
     command: process.env.CI ? 'npm run build && npm start' : 'npm run dev',
     port: 3000,
-    reuseExistingServer: !process.env.CI,
-    timeout: process.env.CI ? 60000 : 120000, // Reduced timeout for CI
+    reuseExistingServer: true, // Always reuse for testing
+    timeout: process.env.CI ? 90000 : 120000, // Increased timeout for CI build
     stderr: 'pipe',
     stdout: 'pipe',
   },
   
   use: {
     baseURL: 'http://localhost:3000',
-    trace: 'on-first-retry',
-    video: process.env.CI ? 'retain-on-failure' : 'off',
+    trace: 'off', // Disable tracing for CI to avoid FFmpeg issues
+    video: 'off', // Disable video recording for CI
     screenshot: 'only-on-failure',
     // Reduce navigation timeout for faster test execution
     navigationTimeout: 30000,
@@ -37,7 +37,7 @@ export default defineConfig({
       name: 'chromium',
       use: { 
         ...devices['Desktop Chrome'],
-        // Use system Chrome browser for better performance
+        // Always use system Chrome since it's available in CI
         channel: 'chrome',
         // Optimize viewport for faster rendering
         viewport: { width: 1280, height: 720 }

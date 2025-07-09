@@ -30,12 +30,12 @@ test.describe('Essential Functionality Verification - Smoke Tests', () => {
       await expect(body).toBeVisible();
       console.log('Safari/WebKit: Basic app structure verified (audio may be limited)');
     } else {
-      // For other browsers, check basic canvas functionality
+      // For other browsers, check main content area appears after start
       await page.waitForTimeout(2000); // Brief wait for initialization
       
-      // Check that main content area is available
-      const hasContent = await page.locator('#__next').isVisible();
-      expect(hasContent).toBe(true);
+      // Check that main content area is available after starting
+      const hasMainContent = await page.locator('#main-content').isVisible();
+      expect(hasMainContent).toBe(true);
       console.log('App initialized successfully with interactive content');
     }
   });
