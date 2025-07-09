@@ -12,7 +12,7 @@ module.exports = withBundleAnalyzer({
     optimizePackageImports: ['three', '@react-three/fiber', '@react-three/drei', 'tone'],
   },
   
-  // Turbopack configuration (moved from experimental)
+  // Turbopack configuration
   turbopack: {
     rules: {
       '*.glsl': {
@@ -24,6 +24,12 @@ module.exports = withBundleAnalyzer({
   
   eslint: {
     dirs: ['app', 'src']
+  },
+  
+  // Optimize image loading
+  images: {
+    formats: ['image/webp', 'image/avif'],
+    minimumCacheTTL: 31536000,
   },
   
   // Enhanced security headers
@@ -54,7 +60,10 @@ module.exports = withBundleAnalyzer({
         minimize: true,
         sideEffects: false,
         usedExports: true,
-        providedExports: true
+        providedExports: true,
+        // Add caching for faster rebuilds
+        moduleIds: 'deterministic',
+        chunkIds: 'deterministic'
       };
     }
     
@@ -89,7 +98,7 @@ module.exports = withBundleAnalyzer({
       config.optimization.splitChunks = {
         chunks: 'all',
         minSize: 20000,
-        maxSize: 200000, // Reduced chunk size for better loading
+        maxSize: 150000, // Further reduced chunk size for faster loading
         cacheGroups: {
           default: {
             minChunks: 2,
