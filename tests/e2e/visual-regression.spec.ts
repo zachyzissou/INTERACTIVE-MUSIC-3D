@@ -8,6 +8,9 @@ test.describe('Visual Regression Tests', () => {
       document.documentElement.style.setProperty('--transition-duration', '0s');
     });
     
+    // Ensure consistent viewport for all tests
+    await page.setViewportSize({ width: 390, height: 664 });
+    
     await page.goto('/')
     await page.waitForSelector('[data-testid="start-overlay"]', { timeout: 10000 })
   })
@@ -35,8 +38,6 @@ test.describe('Visual Regression Tests', () => {
   })
 
   test('mobile layout visual regression', async ({ page }) => {
-    await page.setViewportSize({ width: 390, height: 664 })
-    
     await page.click('[data-testid="start-button"]')
     await page.waitForTimeout(3000)
     
