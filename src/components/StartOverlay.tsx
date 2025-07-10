@@ -2,16 +2,19 @@
 import React, { useState } from "react";
 
 interface StartOverlayProps {
-  readonly onFinish: () => void;
+  readonly onFinish: () => Promise<boolean>;
 }
 
 export default function StartOverlay({ onFinish }: StartOverlayProps) {
   const [exiting, setExiting] = useState(false);
 
-  const handleClick = React.useCallback(() => {
+  const handleClick = React.useCallback(async () => {
     setExiting(true);
-    // Call onFinish immediately when user clicks
-    onFinish();
+    const success = await onFinish();
+    if (!success) {
+      // Re-show overlay if audio failed to start
+      setExiting(false);
+    }
   }, [onFinish]);
 
   if (exiting) {
@@ -28,7 +31,7 @@ export default function StartOverlay({ onFinish }: StartOverlayProps) {
       }}
       onClick={handleClick}
     >
-      <div className="text-center">
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center">
         <p
           data-testid="start-button"
           className="z-10 text-xl md:text-3xl font-semibold hover:text-blue-400 transition-colors duration-300"
