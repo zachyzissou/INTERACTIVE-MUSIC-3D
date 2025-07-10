@@ -29,7 +29,6 @@ jobs:
       - name: Remove build cache
         run: rm -rf .next/cache
       - name: Upload build artifacts
-        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: build-files
