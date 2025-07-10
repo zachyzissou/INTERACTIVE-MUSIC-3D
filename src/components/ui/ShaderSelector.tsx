@@ -1,7 +1,6 @@
 'use client'
 
 import React from 'react'
-import { motion } from 'framer-motion'
 import { 
   SparklesIcon, 
   BoltIcon, 
@@ -69,24 +68,22 @@ const ShaderSelector: React.FC<ShaderSelectorProps> = ({
       <h3 className="text-sm font-medium text-gray-200 mb-3">Visual Shaders</h3>
       <div className="god-tier-shader-grid">
         {shaderConfigs.map((shader) => (
-          <motion.button
+          <button
             key={shader.id}
             onClick={() => onShaderChange(shader.id)}
             className={`
               god-tier-shader-button
               ${currentShader === shader.id ? 'active' : 'inactive'}
             `}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
             aria-label={`Select ${shader.name} shader`}
           >
             <div className="text-lg">{getIconComponent(shader.iconType)}</div>
             <span className="text-xs">{shader.name}</span>
-          </motion.button>
+          </button>
         ))}
       </div>
     </div>
   )
 }
-
 export default ShaderSelector
+

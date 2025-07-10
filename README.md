@@ -15,6 +15,7 @@
 - 🔥 **React 19** + **Next.js 15** - Latest React features with App Router
 - 🎨 **Three.js ^0.178** - Advanced 3D rendering and WebGPU support
 - 🎬 **GSAP ^3.12** - Professional animation engine (replaced Framer Motion)
+- ❌ **Framer Motion removed** - Animations now handled via CSS and GSAP
 - 🧠 **Magenta.js** - Google's AI music generation library
 - 🎧 **Enhanced Web Audio API** - Real-time audio analysis and effects
 - 💎 **Zustand** - Lightweight, performant state management
@@ -183,6 +184,7 @@
 - **Audio Analyzer** — Real-time frequency spectrum visualization
 - **Effect Chain** — Reverb, delay, chorus, distortion, bitcrusher controls
 - **Recording** — Capture and export your musical creations
+- **Bass Sensitivity** — Adjust shader response to low frequencies
 
 ---
 

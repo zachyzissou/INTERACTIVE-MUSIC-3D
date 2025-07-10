@@ -19,11 +19,23 @@ jobs:
       - run: npx tsc --noEmit
       - run: npm run lint
       - run: npm run build
+      - name: Verify .next output
+        run: |
+          if [ ! -d ".next" ]; then
+            echo "No build output found" && exit 1
+          fi
+          du -sh .next
+          ls -al .next | head
+      - name: Remove build cache
+        run: rm -rf .next/cache
       - name: Upload build artifacts
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: build-files
-          path: .next/
+          path: .next/**
+          include-hidden-files: true
+          if-no-files-found: error
           retention-days: 1
 
   # Lightweight smoke tests - basic functionality only
@@ -41,7 +53,10 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: build-files
-          path: .next/
+          path: .next
+          if-no-files-found: error
+      - name: List downloaded build
+        run: ls -al .next | head
       - name: Cache Playwright browsers
         uses: actions/cache@v4
         with:
@@ -76,7 +91,10 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: build-files
-          path: .next/
+          path: .next
+          if-no-files-found: error
+      - name: List downloaded build
+        run: ls -al .next | head
       - name: Cache Playwright browsers
         uses: actions/cache@v4
         with:
