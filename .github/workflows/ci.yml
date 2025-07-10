@@ -29,10 +29,11 @@ jobs:
       - name: Remove build cache
         run: rm -rf .next/cache
       - name: Upload build artifacts
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: build-files
-          path: .next
+          path: .next/**
           if-no-files-found: error
           retention-days: 1
 

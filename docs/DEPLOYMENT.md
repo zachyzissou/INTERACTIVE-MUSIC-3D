@@ -201,7 +201,7 @@ jobs:
       * uses: actions/upload-artifact@v4
         with:
           name: build-files
-          path: .next/
+          path: .next/**
 
   deploy:
     needs: [security-scan, test]
