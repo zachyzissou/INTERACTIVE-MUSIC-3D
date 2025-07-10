@@ -33,7 +33,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: build-files
-          path: .next/
+          path: .next
+          if-no-files-found: error
           retention-days: 1
 
   # Lightweight smoke tests - basic functionality only
@@ -51,7 +52,8 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: build-files
-          path: .next/
+          path: .next
+          if-no-files-found: error
       - name: List downloaded build
         run: ls -al .next | head
       - name: Cache Playwright browsers
@@ -88,7 +90,8 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: build-files
-          path: .next/
+          path: .next
+          if-no-files-found: error
       - name: List downloaded build
         run: ls -al .next | head
       - name: Cache Playwright browsers
