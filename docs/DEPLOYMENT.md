@@ -202,6 +202,7 @@ jobs:
         with:
           name: build-files
           path: .next/**
+          include-hidden-files: true
 
   deploy:
     needs: [security-scan, test]
