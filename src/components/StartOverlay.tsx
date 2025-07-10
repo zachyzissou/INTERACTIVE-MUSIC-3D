@@ -24,10 +24,13 @@ export default function StartOverlay({ onFinish }: StartOverlayProps) {
   return (
     <div
       data-testid="start-overlay"
-      className="fixed inset-0 z-[9999] flex items-center justify-center text-white select-none cursor-pointer"
+      className="fixed z-[9999] flex items-center justify-center text-white select-none cursor-pointer"
       style={{
-        background:
-          "radial-gradient(circle at center, rgba(0,0,0,0.95), #000000 80%)",
+        top: 0,
+        right: 0,
+        bottom: 0,
+        left: 0,
+        background: "radial-gradient(circle at center, rgba(0,0,0,0.95), #000000 80%)",
       }}
       onClick={handleClick}
     >
