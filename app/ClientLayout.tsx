@@ -3,7 +3,6 @@ import React, { useEffect } from 'react'
 import { registerServiceWorker } from '@/lib/registerServiceWorker'
 import { loadObjectsFromStorage } from '@/store/useObjects'
 import PluginLoader from "./PluginLoader"
-import AudioSettingsPanel from '@/components/AudioSettingsPanel'
 import ErrorBoundary from '@/components/EnhancedErrorBoundary'
 import { assertPrimitives } from '@/lib/assertPrimitives'
 import { safeStringify } from '@/lib/safeStringify'
@@ -39,7 +38,6 @@ export default function ClientLayout({ children }: { readonly children: React.Re
   
   return (
     <ErrorBoundary context="ClientLayout" verbose>
-      <AudioSettingsPanel />
       <PluginLoader />
       {children}
     </ErrorBoundary>

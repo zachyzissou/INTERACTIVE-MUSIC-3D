@@ -2,15 +2,12 @@
 import React from "react";
 import dynamic from 'next/dynamic';
 import PerformanceSelector from "@/components/PerformanceSelector";
-import PwaInstallPrompt from "@/components/PwaInstallPrompt";
 import ExampleModal from "@/components/ExampleModal";
 import StartOverlay from "@/components/StartOverlay";
 import { CanvasErrorBoundary } from "@/components/CanvasErrorBoundary";
 import { AudioErrorBoundary } from "@/components/AudioErrorBoundary";
 import SafariCanvasDetector from "@/components/SafariCanvasDetector";
 import PerformanceMonitor from "@/components/PerformanceMonitor";
-import AccessibilityPanel from "@/components/AccessibilityPanel";
-import { AudioControls } from "@/components/AudioControls";
 import { startAudio } from "@/lib/engine";
 import type { ShaderIconType } from "@/config/shaderConfigs";
 import { shaderConfigurations } from "@/config/shaderConfigs";
@@ -109,10 +106,7 @@ export default function Home() {
       )}
       <ExampleModal />
       <PerformanceSelector />
-      <PwaInstallPrompt />
       <PerformanceMonitor />
-      <AudioControls />
-      <AccessibilityPanel />
       {showAnalytics && <PerformanceAnalytics />}
     </div>
     </AudioErrorBoundary>
