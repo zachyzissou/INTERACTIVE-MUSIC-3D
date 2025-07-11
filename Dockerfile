@@ -2,15 +2,19 @@
 # Multi-stage Dockerfile for Enhanced Oscillo Audio-Reactive Platform
 
 FROM ubuntu:22.04 AS base
+ENV DEBIAN_FRONTEND=noninteractive
+ENV TZ=Etc/UTC
 WORKDIR /app
 
 # Install Node 20 and enhanced build dependencies for WebGPU/audio processing
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends tzdata \
     curl gnupg ca-certificates python3 make g++ \
     libnss3 libatk-bridge2.0-0 libxss1 libgtk-3-0 libx11-xcb1 \
     libasound2-dev libpulse-dev libjack-dev \
     mesa-utils libgl1-mesa-dev libglu1-mesa-dev \
     xvfb x11vnc fluxbox \
+    && ln -fs /usr/share/zoneinfo/$TZ /etc/localtime && dpkg-reconfigure -f noninteractive tzdata \
     && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get install -y nodejs \
     && npm install -g npm@11.4.2 \
@@ -47,8 +51,8 @@ RUN mkdir -p "$LOG_DIR" /tmp/.X11-unix \
 
 # Copy built application
 COPY --from=builder /app/public ./public
-COPY --from=builder /app/.next/standalone ./
-COPY --from=builder /app/.next/static ./.next/static
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/node_modules ./node_modules
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
@@ -57,4 +61,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
 EXPOSE 3000
 
 # Start virtual display and application
-CMD ["sh", "-c", "Xvfb :99 -screen 0 1024x768x24 & exec node server.js"]
+CMD ["sh", "-c", "Xvfb :99 -screen 0 1024x768x24 & exec npm run start"]
