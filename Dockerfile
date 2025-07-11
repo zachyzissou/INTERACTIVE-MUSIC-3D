@@ -2,15 +2,19 @@
 # Multi-stage Dockerfile for Enhanced Oscillo Audio-Reactive Platform
 
 FROM ubuntu:22.04 AS base
+ENV DEBIAN_FRONTEND=noninteractive
+ENV TZ=Etc/UTC
 WORKDIR /app
 
 # Install Node 20 and enhanced build dependencies for WebGPU/audio processing
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends tzdata \
     curl gnupg ca-certificates python3 make g++ \
     libnss3 libatk-bridge2.0-0 libxss1 libgtk-3-0 libx11-xcb1 \
     libasound2-dev libpulse-dev libjack-dev \
     mesa-utils libgl1-mesa-dev libglu1-mesa-dev \
     xvfb x11vnc fluxbox \
+    && ln -fs /usr/share/zoneinfo/$TZ /etc/localtime && dpkg-reconfigure -f noninteractive tzdata \
     && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get install -y nodejs \
     && npm install -g npm@11.4.2 \

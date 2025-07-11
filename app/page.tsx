@@ -6,6 +6,7 @@ import PwaInstallPrompt from "@/components/PwaInstallPrompt";
 import ExampleModal from "@/components/ExampleModal";
 import StartOverlay from "@/components/StartOverlay";
 import { CanvasErrorBoundary } from "@/components/CanvasErrorBoundary";
+import { AudioErrorBoundary } from "@/components/AudioErrorBoundary";
 import SafariCanvasDetector from "@/components/SafariCanvasDetector";
 import PerformanceMonitor from "@/components/PerformanceMonitor";
 import AccessibilityPanel from "@/components/AccessibilityPanel";
@@ -58,11 +59,15 @@ export default function Home() {
   }, [])
 
   const handleStart = React.useCallback(async () => {
-    await startAudio()
-    setStarted(true)
+    const ok = await startAudio()
+    if (ok) {
+      setStarted(true)
+    }
+    return ok
   }, [])
 
   return (
+    <AudioErrorBoundary>
     <div className="relative h-full w-full">
       <a href="#main-content" className="god-tier-skip-link">
         Skip to main content
@@ -110,4 +115,5 @@ export default function Home() {
       <AccessibilityPanel />
       {showAnalytics && <PerformanceAnalytics />}
     </div>
+    </AudioErrorBoundary>
   )}
