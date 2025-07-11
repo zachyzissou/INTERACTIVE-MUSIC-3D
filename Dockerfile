@@ -51,8 +51,8 @@ RUN mkdir -p "$LOG_DIR" /tmp/.X11-unix \
 
 # Copy built application
 COPY --from=builder /app/public ./public
-COPY --from=builder /app/.next/standalone ./
-COPY --from=builder /app/.next/static ./.next/static
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/node_modules ./node_modules
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
@@ -61,4 +61,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
 EXPOSE 3000
 
 # Start virtual display and application
-CMD ["sh", "-c", "Xvfb :99 -screen 0 1024x768x24 & exec node server.js"]
+CMD ["sh", "-c", "Xvfb :99 -screen 0 1024x768x24 & exec npm run start"]
