@@ -34,7 +34,10 @@ export default function StartOverlay({ onFinish }: StartOverlayProps) {
       }}
       onClick={handleClick}
     >
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center">
+      <div
+        className="absolute left-1/2 -translate-x-1/2 text-center"
+        style={{ top: '30%' }}
+      >
         <p
           data-testid="start-button"
           className="z-10 text-xl md:text-3xl font-semibold hover:text-blue-400 transition-colors duration-300"

@@ -18,7 +18,8 @@ import {
   BoltIcon,
   FireIcon,
   BeakerIcon,
-  ComputerDesktopIcon
+  ComputerDesktopIcon,
+  ArrowDownTrayIcon
 } from '@heroicons/react/24/outline'
 import AudioVisualizer from './AudioVisualizer'
 import ShaderSelector from './ShaderSelector'
@@ -78,6 +79,7 @@ const GodTierUI: React.FC<GodTierUIProps> = ({
   const dragRef = useRef<HTMLDivElement>(null)
   const expandedPanelRef = useRef<HTMLDivElement>(null)
   const buttonsRef = useRef<HTMLButtonElement[]>([])
+  const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null)
 
   // GSAP animations
   useEffect(() => {
@@ -153,10 +155,20 @@ const GodTierUI: React.FC<GodTierUIProps> = ({
         setIsExpanded(false)
         setActivePanel(null)
       }, 10000) // Auto-collapse after 10 seconds
-      
+
       return () => clearTimeout(timer)
     }
   }, [isExpanded, activePanel])
+
+  // Capture PWA install prompt event
+  useEffect(() => {
+    const handler = (e: any) => {
+      e.preventDefault()
+      setInstallPrompt(e)
+    }
+    window.addEventListener('beforeinstallprompt', handler)
+    return () => window.removeEventListener('beforeinstallprompt', handler)
+  }, [])
 
   const handleVolumeChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     onVolumeChange(parseFloat(e.target.value))
@@ -285,6 +297,21 @@ const GodTierUI: React.FC<GodTierUIProps> = ({
               >
                 <AdjustmentsHorizontalIcon className="w-4 h-4" />
               </button>
+
+              {installPrompt && (
+                <button
+                  onClick={() => {
+                    installPrompt.prompt()
+                    setInstallPrompt(null)
+                  }}
+                  className="p-2 rounded-lg transition-all duration-200 bg-gray-700/30 text-gray-400 hover:bg-gray-600/30"
+                  onMouseEnter={(e) => animateButtonHover(e.currentTarget, true)}
+                  onMouseLeave={(e) => animateButtonHover(e.currentTarget, false)}
+                  aria-label="Install app"
+                >
+                  <ArrowDownTrayIcon className="w-4 h-4" />
+                </button>
+              )}
             </div>
 
             <button
