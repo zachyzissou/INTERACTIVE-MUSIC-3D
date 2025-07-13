@@ -251,7 +251,7 @@ const MagentaMusicEngine: React.FC<MagentaMusicEngineProps> = ({
     } finally {
       setIsLoading(false)
     }
-  }, [models, config, audioData, onSequenceGenerated, generateEnhancedAlgorithmicSequence, generateAlgorithmicSequence, isLoading]) // Added all dependencies
+  }, [models, audioData, onSequenceGenerated, generateEnhancedAlgorithmicSequence, generateAlgorithmicSequence, isLoading])
 
   // Auto-generate based on audio energy
   useEffect(() => {
