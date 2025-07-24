@@ -267,16 +267,21 @@ export async function initAudioEngine() {
   if (audioInitialized || !allowInit) return
   if (initPromise) return initPromise
   
-  // Detect WebKit and skip audio initialization to prevent crashes
-  const isWebKit = typeof window !== 'undefined' && 
+  // Check for Web Audio API support using feature detection (not user agent sniffing)
+  if (!window.AudioContext && !(window as any).webkitAudioContext) {
+    console.error('Web Audio API not supported on this browser')
+    audioInitialized = false
+    audioEvents.dispatchEvent(new Event('init-failed'))
+    return
+  }
+  
+  // Safari/WebKit compatibility: Use more conservative settings
+  const isWebKit = typeof navigator !== 'undefined' && 
     /WebKit/i.test(navigator.userAgent) && 
     !/Chrome/i.test(navigator.userAgent)
   
   if (isWebKit) {
-    console.warn('WebKit detected - skipping audio initialization due to compatibility issues')
-    audioInitialized = true
-    audioEvents.dispatchEvent(new Event('init'))
-    return
+    console.log('WebKit browser detected - using compatibility mode for audio initialization')
   }
   
   initPromise = (async () => {
@@ -421,50 +426,89 @@ function applyParams(chain: EffectChain, params: EffectParams) {
  * Play a single note.
  * Ensures audio engine is initialized before scheduling.
  */
-export async function playNote(id: string, note: string = 'C4') {
+export async function playNote(id: string, note: string = 'C4'): Promise<boolean> {
   await initAudioEngine()
-  if (!audioInitialized || !noteSynth) return
-  const { key } = useAudioSettings.getState()
-  const finalNote = transpose(note, key)
-  const os = await getObjectSynth(id, 'note')
-  const params = useEffectSettings.getState().getParams(id)
-  applyParams(os.chain, params)
-  const Tone = getTone()
-  if (!Tone) return
-  ;(os.synth as Synth).triggerAttackRelease(finalNote, '8n', Tone.now() + 0.01)
+  if (!audioInitialized || !noteSynth) {
+    console.warn('Cannot play note: audio not initialized or noteSynth missing')
+    return false
+  }
+  
+  try {
+    const { key } = useAudioSettings.getState()
+    const finalNote = transpose(note, key)
+    const os = await getObjectSynth(id, 'note')
+    const params = useEffectSettings.getState().getParams(id)
+    applyParams(os.chain, params)
+    const Tone = getTone()
+    if (!Tone) {
+      console.warn('Cannot play note: Tone.js not available')
+      return false
+    }
+    ;(os.synth as Synth).triggerAttackRelease(finalNote, '8n', Tone.now() + 0.01)
+    return true
+  } catch (error) {
+    console.error('Error playing note:', error)
+    return false
+  }
 }
 
 /**
  * Play a triad chord.
  */
-export async function playChord(id: string, notes: string[] = ['C4', 'E4', 'G4']) {
+export async function playChord(id: string, notes: string[] = ['C4', 'E4', 'G4']): Promise<boolean> {
   await initAudioEngine()
-  if (!audioInitialized || !chordSynth) return
-  const { key } = useAudioSettings.getState()
-  const final = notes.map((n) => transpose(n, key))
-  const os = await getObjectSynth(id, 'chord')
-  const params = useEffectSettings.getState().getParams(id)
-  applyParams(os.chain, params)
-  const Tone = getTone()
-  if (!Tone) return
-  ;(os.synth as PolySynth).triggerAttackRelease(final, '4n', Tone.now() + 0.01)
+  if (!audioInitialized || !chordSynth) {
+    console.warn('Cannot play chord: audio not initialized or chordSynth missing')
+    return false
+  }
+  
+  try {
+    const { key } = useAudioSettings.getState()
+    const final = notes.map((n) => transpose(n, key))
+    const os = await getObjectSynth(id, 'chord')
+    const params = useEffectSettings.getState().getParams(id)
+    applyParams(os.chain, params)
+    const Tone = getTone()
+    if (!Tone) {
+      console.warn('Cannot play chord: Tone.js not available')
+      return false
+    }
+    ;(os.synth as PolySynth).triggerAttackRelease(final, '4n', Tone.now() + 0.01)
+    return true
+  } catch (error) {
+    console.error('Error playing chord:', error)
+    return false
+  }
 }
 
 /**
  * Play a beat kick.
  */
-export async function playBeat(id: string) {
+export async function playBeat(id: string): Promise<boolean> {
   beatBus.dispatchEvent(new Event("beat"));
   await initAudioEngine()
-  if (!audioInitialized || !beatSynth) return
-  const { key } = useAudioSettings.getState()
-  const note = transpose('C2', key)
-  const os = await getObjectSynth(id, 'beat')
-  const params = useEffectSettings.getState().getParams(id)
-  applyParams(os.chain, params)
-  const Tone = getTone()
-  if (!Tone) return
-  ;(os.synth as MembraneSynth).triggerAttackRelease(note, '8n', Tone.now() + 0.01)
+  if (!audioInitialized || !beatSynth) {
+    console.warn('Cannot play beat: audio not initialized or beatSynth missing')
+    return false
+  }
+  
+  try {
+    const { key } = useAudioSettings.getState()
+    const note = transpose('C2', key)
+    const os = await getObjectSynth(id, 'beat')
+    const params = useEffectSettings.getState().getParams(id)
+    applyParams(os.chain, params)
+    const Tone = getTone()
+    if (!Tone) {
+      console.warn('Cannot play beat: Tone.js not available')
+      return false
+    }
+    ;(os.synth as MembraneSynth).triggerAttackRelease(note, '8n', Tone.now() + 0.01)
+    return true
+  } catch (error) {
+    console.error('Error playing beat:', error)
+    return false
+  }
 }
 
 /**
@@ -556,22 +600,40 @@ export function getLoopProgress(id: string): number {
   return elapsed / info.duration
 }
 
-export async function startLoop(id: string, interval: string = '1m') {
+export async function startLoop(id: string, interval: string = '1m'): Promise<boolean> {
   await initAudioEngine()
-  if (!audioInitialized) return
-  if (loops.has(id)) return
-  const bpm = useAudioSettings.getState().bpm
-  const Tone = getTone()!
-  const transport = Tone.getTransport()
-  transport.bpm.value = bpm
-  const dur = Tone.Time(interval).toSeconds()
-  const start = transport.seconds
-  const loop = new Tone.Loop(() => {
-    playBeat(id)
-  }, interval).start(0)
-  loops.set(id, { loop, start, duration: dur })
-  if (transport.state !== 'started') transport.start()
-  useLoops.getState().start(id)
+  if (!audioInitialized) {
+    console.warn('Cannot start loop: audio not initialized')
+    return false
+  }
+  if (loops.has(id)) {
+    console.log(`Loop ${id} already running`)
+    return true
+  }
+  
+  try {
+    const bpm = useAudioSettings.getState().bpm
+    const Tone = getTone()
+    if (!Tone) {
+      console.warn('Cannot start loop: Tone.js not available')
+      return false
+    }
+    
+    const transport = Tone.getTransport()
+    transport.bpm.value = bpm
+    const dur = Tone.Time(interval).toSeconds()
+    const start = transport.seconds
+    const loop = new Tone.Loop(() => {
+      playBeat(id)
+    }, interval).start(0)
+    loops.set(id, { loop, start, duration: dur })
+    if (transport.state !== 'started') transport.start()
+    useLoops.getState().start(id)
+    return true
+  } catch (error) {
+    console.error('Error starting loop:', error)
+    return false
+  }
 }
 
 export function stopLoop(id: string) {

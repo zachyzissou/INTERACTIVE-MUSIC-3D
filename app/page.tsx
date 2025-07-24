@@ -12,6 +12,7 @@ import { startAudio } from "@/lib/engine";
 import type { ShaderIconType } from "@/config/shaderConfigs";
 import { shaderConfigurations } from "@/config/shaderConfigs";
 import { LoadingSpinner, CanvasSkeleton, UISkeleton } from "@/components/LoadingSpinner";
+import { getAnalyserBands, getFrequencyDataArray, subscribeToAudioLevel } from "@/lib/analyser";
 
 // Dynamic imports for code splitting with enhanced loading states
 const CanvasScene = dynamic(() => import('../src/components/CanvasScene'), { 
@@ -55,9 +56,14 @@ export default function Home() {
   const [isAudioInitialized, setIsAudioInitialized] = React.useState(false)
   const [initProgress, setInitProgress] = React.useState(0)
   // Audio reactive state
-  const [bassData, setBassData] = React.useState(0)
-  const [midData, setMidData] = React.useState(0)
-  const [highData, setHighData] = React.useState(0)
+  // Real-time audio analysis data (replacing mock data)
+  const [audioAnalysis, setAudioAnalysis] = React.useState({
+    bass: 0,
+    mid: 0,
+    treble: 0,
+    spectrum: new Float32Array(256), // Real spectrum data
+    level: 0
+  })
   const [volume, setVolume] = React.useState(1)
   const [isPlaying, setIsPlaying] = React.useState(false)
   const [activeShader, setActiveShader] = React.useState('metaball')
@@ -69,6 +75,43 @@ export default function Home() {
     if (useDev) setScene(() => DevCanvas)
     if (showAnalytics) setShowAnalytics(true)
   }, [])
+
+  // Set up real-time audio analysis (replaces mock data)  
+  React.useEffect(() => {
+    if (!isAudioInitialized) return
+
+    let animationFrame: number
+    const updateAudioAnalysis = () => {
+      try {
+        // Get real-time frequency analysis
+        const bands = getAnalyserBands()
+        const spectrum = getFrequencyDataArray()
+        
+        setAudioAnalysis(prev => ({
+          bass: bands.bass / 255, // Normalize to 0-1
+          mid: bands.mid / 255,
+          treble: bands.treble / 255,
+          spectrum: spectrum.length > 0 ? spectrum : prev.spectrum,
+          level: (bands.bass + bands.mid + bands.treble) / (3 * 255)
+        }))
+        
+        animationFrame = requestAnimationFrame(updateAudioAnalysis)
+      } catch (error) {
+        console.warn('Audio analysis update failed:', error)
+        // Continue trying with fallback data
+        animationFrame = requestAnimationFrame(updateAudioAnalysis)
+      }
+    }
+
+    // Start real-time updates
+    updateAudioAnalysis()
+
+    return () => {
+      if (animationFrame) {
+        cancelAnimationFrame(animationFrame)
+      }
+    }
+  }, [isAudioInitialized])
 
   const handleStart = React.useCallback(async () => {
     try {
@@ -119,11 +162,11 @@ export default function Home() {
           <Suspense fallback={<UISkeleton />}>
             <GodTierUI 
               audioData={{
-                bass: bassData,
-                mid: midData,
-                high: highData,
+                bass: audioAnalysis.bass,
+                mid: audioAnalysis.mid,
+                high: audioAnalysis.treble,
                 volume: volume,
-                spectrum: new Float32Array(32) // Mock spectrum data
+                spectrum: audioAnalysis.spectrum // Real-time spectrum data
               }}
               onAudioToggle={() => setIsPlaying(!isPlaying)}
               onVolumeChange={setVolume}
