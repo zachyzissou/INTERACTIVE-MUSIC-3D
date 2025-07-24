@@ -5,7 +5,7 @@ import { Physics } from '@react-three/rapier'
 import { PerspectiveCamera, AdaptiveDpr, Stars, Float } from '@react-three/drei'
 import { getGPUTier } from 'detect-gpu'
 import { advancedRenderer } from '../lib/renderer'
-import { webglSafeguards } from '../lib/webgl-safeguards'
+import { webglSafeguards, WebGLSafeguards } from '../lib/webgl-safeguards'
 import * as THREE from 'three'
 import AnimatedGradient from './AnimatedGradient'
 import MusicalObject from './MusicalObject'
@@ -82,13 +82,13 @@ export default function CanvasScene() {
         setWebglError(null)
 
         // Check WebGL availability first
-        const isAvailable = await webglSafeguards.isWebGLAvailable()
+        const isAvailable = await WebGLSafeguards.isWebGLAvailable()
         if (!isAvailable) {
           throw new Error('WebGL is not supported on this device')
         }
 
         // Get performance tier from WebGL capabilities
-        const tier = await webglSafeguards.getPerformanceTier()
+        const tier = await WebGLSafeguards.getPerformanceTier()
         setPerf(tier)
         console.log(`Performance tier set to: ${tier}`)
 
