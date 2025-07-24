@@ -24,7 +24,14 @@ interface ObjectState {
 }
 
 export const useObjects = create<ObjectState>((set, get) => ({
-  objects: [],
+  objects: [
+    // Create some default interactive shapes for immediate testing
+    { id: 'default-note-1', type: 'note', position: [-2, 2, 0] },
+    { id: 'default-chord-1', type: 'chord', position: [2, 2, 0] },
+    { id: 'default-beat-1', type: 'beat', position: [0, 0, 0] },
+    { id: 'default-note-2', type: 'note', position: [-4, 1, -2] },
+    { id: 'default-chord-2', type: 'chord', position: [4, 1, -2] },
+  ],
   spawn: (type: ObjectType, position?: [number, number, number]) => {
     const id = Date.now().toString()
     const newObj: MusicalObject = {

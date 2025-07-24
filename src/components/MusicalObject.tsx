@@ -57,11 +57,32 @@ const MusicalObjectInstances: React.FC = () => {
                   scale={objectConfigs[t].baseScale}
                   onClick={async (e) => {
                     e.stopPropagation()
-                    if (process.env.NODE_ENV !== 'production') {
-                      logger.info('Clicked object ' + obj.id)
+                    
+                    // Immediate visual feedback
+                    console.log(`🎵 CLICKED ${obj.type.toUpperCase()} ${obj.id}`)
+                    
+                    // Flash effect - make the shape briefly larger and brighter
+                    const mesh = e.object
+                    if (mesh && mesh.scale) {
+                      const originalScale = mesh.scale.clone()
+                      mesh.scale.multiplyScalar(1.5)
+                      setTimeout(() => {
+                        if (mesh.scale) mesh.scale.copy(originalScale)
+                      }, 200)
                     }
+                    
                     select(obj.id)
-                    await triggerSound(obj.type, obj.id)
+                    
+                    // Try to play sound
+                    const success = await triggerSound(obj.type, obj.id)
+                    console.log(`🔊 Sound result: ${success ? 'SUCCESS' : 'FAILED'}`)
+                    
+                    // Show user feedback
+                    if (success) {
+                      console.log(`✅ ${obj.type} sound played successfully!`)
+                    } else {
+                      console.warn(`❌ ${obj.type} sound failed - check audio initialization`)
+                    }
                   }}
                 />
               )

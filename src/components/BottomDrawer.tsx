@@ -47,16 +47,27 @@ export default function BottomDrawer() {
 
 
   const togglePlay = useCallback(async () => {
-    if (!selected) return
+    if (!selected) {
+      console.warn('🎵 BottomDrawer: No shape selected')
+      return
+    }
     const target = objects.find((o) => o.id === selected)
-    if (!target) return
+    if (!target) {
+      console.warn('🎵 BottomDrawer: Selected object not found:', selected)
+      return
+    }
+    
+    console.log(`🎵 BottomDrawer: Playing ${target.type} with mode ${mode}`)
+    
     if (playing && target.type === 'loop') {
       const { stopLoop } = require('@/lib/audio')
       stopLoop(selected)
       setPlaying(false)
+      console.log('🔇 BottomDrawer: Stopped loop')
     } else {
-      await triggerSound(mode, selected)
-      setPlaying(true)
+      const success = await triggerSound(mode as any, selected)
+      console.log(`🔊 BottomDrawer: Sound result: ${success ? 'SUCCESS' : 'FAILED'}`)
+      setPlaying(success)
     }
   }, [selected, objects, playing, mode])
 

@@ -31,15 +31,6 @@ const GodTierUI = dynamic(() => import("@/components/ui/GodTierUI"), {
   loading: () => <UISkeleton />
 });
 
-// Revolutionary Music Interface - the future of music creation
-const RevolutionaryMusicInterface = dynamic(() => import("@/components/RevolutionaryMusicInterface"), {
-  ssr: false,
-  loading: () => (
-    <div className="absolute inset-0 bg-black/20 backdrop-blur-xl rounded-xl flex items-center justify-center">
-      <LoadingSpinner message="Loading Revolutionary Systems..." size="large" variant="general" />
-    </div>
-  )
-});
 
 // Lazy load AI components only when needed
 const MagentaMusicGenerator = dynamic(
@@ -79,19 +70,13 @@ export default function Home() {
   const [activeShader, setActiveShader] = React.useState('metaball')
   const [glitchIntensity, setGlitchIntensity] = React.useState(0)
   
-  // Revolutionary Mode State
-  const [revolutionaryMode, setRevolutionaryMode] = React.useState(false)
-  const [gestureStats, setGestureStats] = React.useState({ total: 0, types: {} })
-  const [neuralActivity, setNeuralActivity] = React.useState(0)
 
   React.useEffect(() => {
     const useDev = new URLSearchParams(window.location.search).get('devcanvas') === '1'
     const showAnalytics = new URLSearchParams(window.location.search).get('analytics') === '1'
-    const useRevolutionary = new URLSearchParams(window.location.search).get('revolutionary') === '1'
     
     if (useDev) setScene(() => DevCanvas)
     if (showAnalytics) setShowAnalytics(true)
-    if (useRevolutionary) setRevolutionaryMode(true)
   }, [])
 
   // Set up real-time audio analysis (replaces mock data)  
@@ -208,50 +193,6 @@ export default function Home() {
             </Suspense>
           )}
 
-          {/* 🚀 REVOLUTIONARY MUSIC INTERFACE - The Future of Music Creation */}
-          {revolutionaryMode && isAudioInitialized && (
-            <div className="absolute inset-0 z-50 bg-black/10">
-              <Suspense fallback={
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <LoadingSpinner message="Loading Revolutionary Systems..." size="large" variant="general" />
-                </div>
-              }>
-                <RevolutionaryMusicInterface
-                  isActive={revolutionaryMode}
-                  onGestureComposed={(gesture) => {
-                    console.log('🎭 New gesture composed:', gesture.type)
-                    setGestureStats(prev => ({ 
-                      total: prev.total + 1, 
-                      types: { ...prev.types, [gesture.type]: (prev.types[gesture.type] || 0) + 1 }
-                    }))
-                  }}
-                  onNeuralActivation={(neuronId, intensity) => {
-                    console.log('🧠 Neural activation:', neuronId, intensity)
-                    setNeuralActivity(intensity)
-                  }}
-                  className="absolute inset-4"
-                />
-              </Suspense>
-              
-              {/* Revolutionary Mode Toggle */}
-              <button
-                onClick={() => setRevolutionaryMode(false)}
-                className="absolute top-4 right-4 z-60 bg-red-500/80 hover:bg-red-500 text-white px-4 py-2 rounded-lg font-medium transition-all backdrop-blur-sm"
-              >
-                Exit Revolutionary Mode
-              </button>
-            </div>
-          )}
-
-          {/* Revolutionary Mode Activator */}
-          {!revolutionaryMode && isAudioInitialized && (
-            <button
-              onClick={() => setRevolutionaryMode(true)}
-              className="absolute bottom-20 right-4 z-40 bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-500 hover:to-cyan-500 text-white px-6 py-3 rounded-xl font-bold transition-all transform hover:scale-105 shadow-lg shadow-purple-500/30"
-            >
-              🚀 Revolutionary Mode
-            </button>
-          )}
         </>
       )}
       <ExampleModal />
