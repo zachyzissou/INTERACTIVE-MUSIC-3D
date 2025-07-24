@@ -9,7 +9,8 @@ module.exports = withBundleAnalyzer({
   
   // Enable experimental features for build optimization
   experimental: {
-    optimizePackageImports: ['three', '@react-three/fiber', '@react-three/drei', 'tone'],
+    optimizePackageImports: ['three', '@react-three/fiber', '@react-three/drei'],
+    // Remove 'tone' and magenta - these will be loaded dynamically
   },
   
   // Turbopack configuration
@@ -98,7 +99,8 @@ module.exports = withBundleAnalyzer({
       config.optimization.splitChunks = {
         chunks: 'all',
         minSize: 20000,
-        maxSize: 150000, // Further reduced chunk size for faster loading
+        maxSize: 100000, // Reduced chunk size for faster loading
+        maxAsyncSize: 200000, // Allow larger async chunks
         cacheGroups: {
           default: {
             minChunks: 2,
@@ -118,11 +120,12 @@ module.exports = withBundleAnalyzer({
             chunks: 'all',
             enforce: true
           },
-          audio: {
-            test: /[\\/]node_modules[\\/](tone|@magenta)[\\/]/,
-            name: 'audio',
-            priority: 15,
-            chunks: 'all',
+          // Remove audio group - split tone and magenta separately
+          tone: {
+            test: /[\\/]node_modules[\\/]tone[\\/]/,
+            name: 'tone',
+            priority: 20,
+            chunks: 'async', // Load only when needed
             enforce: true
           },
           ui: {
@@ -132,12 +135,27 @@ module.exports = withBundleAnalyzer({
             chunks: 'all',
             enforce: true
           },
-          // Split large libraries into separate chunks
+          // Split large libraries into separate chunks - Load magenta async only
           magenta: {
             test: /[\\/]node_modules[\\/]@magenta[\\/]/,
             name: 'magenta',
             priority: 25,
+            chunks: 'async', // Changed from 'all' to 'async' - only loads when imported
+            enforce: true
+          },
+          // Split Three.js more granularly for better loading
+          threeCore: {
+            test: /[\\/]node_modules[\\/]three[\\/]src[\\/]core[\\/]/,
+            name: 'three-core',
+            priority: 30,
             chunks: 'all',
+            enforce: true
+          },
+          threeExtras: {
+            test: /[\\/]node_modules[\\/]three[\\/]src[\\/](?!core)/,
+            name: 'three-extras',
+            priority: 15,
+            chunks: 'async',
             enforce: true
           }
         }

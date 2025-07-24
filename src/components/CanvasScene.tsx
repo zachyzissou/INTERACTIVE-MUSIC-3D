@@ -5,6 +5,7 @@ import { Physics } from '@react-three/rapier'
 import { PerspectiveCamera, AdaptiveDpr, Stars, Float } from '@react-three/drei'
 import { getGPUTier } from 'detect-gpu'
 import { advancedRenderer } from '../lib/renderer'
+import { webglSafeguards } from '../lib/webgl-safeguards'
 import * as THREE from 'three'
 import AnimatedGradient from './AnimatedGradient'
 import MusicalObject from './MusicalObject'
@@ -64,6 +65,8 @@ function ResizeHandler() {
 export default function CanvasScene() {
   const rendererRef = React.useRef<THREE.WebGLRenderer | null>(null)
   const contextLostRef = React.useRef(false)
+  const [webglError, setWebglError] = React.useState<string | null>(null)
+  const [isInitializing, setIsInitializing] = React.useState(true)
   const setPerf = usePerformanceSettings((s) => s.setLevel)
   const perfLevel = usePerformanceSettings((s) => s.level)
   const volume = useAudioSettings((s) => s.volume)
@@ -74,38 +77,96 @@ export default function CanvasScene() {
     if (rendererRef.current) return
     
     const initializeGPU = async () => {
-      const gpu = await getGPUTier()
-      if (gpu && gpu.tier < 1) {
-        setPerf('low')
-      } else if (gpu && gpu.tier < 3) {
-        setPerf('medium')
-      }
-      
-      if (!cancelled) {
-        try {
-          // Use the advanced renderer from lib/renderer.ts
-          const canvas = document.createElement('canvas')
-          const renderer = await advancedRenderer.initializeRenderer(canvas)
-          rendererRef.current = renderer
-          
-          // Set up WebGL context loss/restore handlers
-          const contextLossHandler = (event: Event) => {
-            event.preventDefault()
-            contextLostRef.current = true
-            console.warn('WebGL context lost, attempting recovery...')
-          }
-          
-          const contextRestoreHandler = () => {
-            contextLostRef.current = false
-            console.warn('WebGL context restored')
-          }
-          
-          canvas.addEventListener('webglcontextlost', contextLossHandler, false)
-          canvas.addEventListener('webglcontextrestored', contextRestoreHandler, false)
-          
-        } catch (error) {
-          console.warn('Advanced renderer initialization failed:', error)
+      try {
+        setIsInitializing(true)
+        setWebglError(null)
+
+        // Check WebGL availability first
+        const isAvailable = await webglSafeguards.isWebGLAvailable()
+        if (!isAvailable) {
+          throw new Error('WebGL is not supported on this device')
         }
+
+        // Get performance tier from WebGL capabilities
+        const tier = await webglSafeguards.getPerformanceTier()
+        setPerf(tier)
+        console.log(`Performance tier set to: ${tier}`)
+
+        // Fallback to detect-gpu if needed
+        try {
+          const gpu = await getGPUTier()
+          if (gpu && gpu.tier < 1) {
+            setPerf('low')
+          } else if (gpu && gpu.tier < 3) {
+            setPerf('medium')
+          }
+        } catch (gpuError) {
+          console.warn('GPU tier detection failed, using WebGL tier:', gpuError)
+        }
+        
+        if (!cancelled) {
+          try {
+            // Use the advanced renderer with safeguards
+            const canvas = document.createElement('canvas')
+            
+            // Create safe WebGL context
+            const gl = await webglSafeguards.createSafeWebGLContext(canvas, {
+              preferWebGL2: tier !== 'low',
+              enableFallbacks: true,
+              retryAttempts: 3,
+              retryDelay: 1000,
+              requireWebGL: true
+            })
+
+            if (!gl) {
+              throw new Error('Failed to create WebGL context')
+            }
+
+            // Initialize renderer with the safe context
+            const renderer = await advancedRenderer.initializeRenderer(canvas)
+            rendererRef.current = renderer
+            
+            // Set up enhanced context loss/restore handlers
+            const handleContextLost = (event: CustomEvent) => {
+              contextLostRef.current = true
+              setWebglError('WebGL context lost - attempting recovery...')
+              console.warn('WebGL context lost, attempting recovery...')
+            }
+            
+            const handleContextRestored = (event: CustomEvent) => {
+              contextLostRef.current = false
+              setWebglError(null)
+              console.log('WebGL context restored successfully')
+              
+              // Reinitialize renderer after context restore
+              setTimeout(async () => {
+                try {
+                  const newRenderer = await advancedRenderer.initializeRenderer(canvas)
+                  rendererRef.current = newRenderer
+                } catch (error) {
+                  console.error('Failed to reinitialize renderer:', error)
+                  setWebglError('Failed to recover WebGL context')
+                }
+              }, 100)
+            }
+            
+            canvas.addEventListener('webgl-context-lost', handleContextLost as EventListener)
+            canvas.addEventListener('webgl-context-restored', handleContextRestored as EventListener)
+            
+            setIsInitializing(false)
+            console.log('WebGL initialization completed successfully')
+            
+          } catch (rendererError) {
+            console.error('Renderer initialization failed:', rendererError)
+            setWebglError(`Renderer initialization failed: ${rendererError.message}`)
+            setIsInitializing(false)
+          }
+        }
+        
+      } catch (error) {
+        console.error('GPU initialization failed:', error)
+        setWebglError(`WebGL initialization failed: ${error.message}`)
+        setIsInitializing(false)
       }
     }
     
@@ -120,6 +181,11 @@ export default function CanvasScene() {
     // Enhanced Safari compatibility
     const isSafari = typeof navigator !== 'undefined' && /^((?!chrome|android).)*safari/i.test(navigator.userAgent)
     const isWebKit = typeof navigator !== 'undefined' && /webkit/i.test(navigator.userAgent) && !/chrome/i.test(navigator.userAgent)
+    
+    // Don't render if WebGL failed
+    if (webglError && !isInitializing) {
+      return null
+    }
     
     return {
       className: "absolute inset-0",
@@ -148,14 +214,62 @@ export default function CanvasScene() {
         debounce: 200,
       },
       frameloop: contextLostRef.current ? 'never' as const : 'always' as const,
-      // Force canvas creation without waiting for async initialization
+      // Enhanced canvas creation with error handling
       onCreated: ({ gl }: { gl: any; scene: any; camera: any }) => {
         // Immediate canvas setup for test compatibility
         gl.domElement.setAttribute('data-testid', 'webgl-canvas')
-        // Canvas created and ready for testing
+        
+        // Set up additional WebGL error monitoring
+        const canvas = gl.domElement
+        const handleWebGLError = (event: Event) => {
+          console.error('WebGL error detected:', event)
+          setWebglError('WebGL rendering error detected')
+        }
+        
+        canvas.addEventListener('webglcontextlost', handleWebGLError)
+        
+        // Log successful creation
+        console.log('Canvas created and ready for rendering')
       },
     }
-  }, [perfLevel]) // Remove contextLostRef.current dependency as it's a mutable ref
+  }, [perfLevel, webglError, isInitializing]) // Add error state dependencies
+
+  // Show error state if WebGL failed
+  if (webglError && !isInitializing) {
+    return (
+      <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-b from-red-900/20 to-black">
+        <div className="text-center p-8 bg-black/50 backdrop-blur-sm rounded-xl border border-red-500/30">
+          <h3 className="text-red-400 text-xl font-bold mb-4">WebGL Error</h3>
+          <p className="text-white/80 mb-6">{webglError}</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="bg-gradient-to-r from-red-500 to-pink-500 text-white px-6 py-3 rounded-lg font-medium hover:shadow-lg transition-all duration-300"
+          >
+            Retry
+          </button>
+          <p className="text-white/60 text-sm mt-4">
+            This application requires WebGL support. Please update your browser or enable hardware acceleration.
+          </p>
+        </div>
+      </div>
+    )
+  }
+
+  // Show loading state during initialization
+  if (isInitializing) {
+    return (
+      <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-b from-black via-gray-900 to-black">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-cyan-500/30 border-t-cyan-500 rounded-full animate-spin mb-4" />
+          <p className="text-white font-medium">Initializing WebGL...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (!canvasProps) {
+    return null
+  }
 
   return (
     <Canvas {...canvasProps}>

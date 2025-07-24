@@ -4,6 +4,7 @@ import { registerServiceWorker } from '@/lib/registerServiceWorker'
 import { loadObjectsFromStorage } from '@/store/useObjects'
 import PluginLoader from "./PluginLoader"
 import ErrorBoundary from '@/components/EnhancedErrorBoundary'
+import DeploymentErrorBoundary from '@/components/DeploymentErrorBoundary'
 import { assertPrimitives } from '@/lib/assertPrimitives'
 import { safeStringify } from '@/lib/safeStringify'
 import { logger } from '@/lib/logger'
@@ -37,9 +38,23 @@ export default function ClientLayout({ children }: { readonly children: React.Re
   assertPrimitives(pageProps, 'pageProps')
   
   return (
-    <ErrorBoundary context="ClientLayout" verbose>
-      <PluginLoader />
-      {children}
-    </ErrorBoundary>
+    <DeploymentErrorBoundary 
+      context="ClientLayout"
+      onError={(error, errorInfo) => {
+        // Log deployment-specific errors
+        logger.error(`Deployment error in ClientLayout: ${JSON.stringify({
+          error: error.message,
+          stack: error.stack,
+          componentStack: errorInfo.componentStack,
+          userAgent: navigator.userAgent,
+          url: window.location.href
+        })}`)
+      }}
+    >
+      <ErrorBoundary context="ClientLayout" verbose>
+        <PluginLoader />
+        {children}
+      </ErrorBoundary>
+    </DeploymentErrorBoundary>
   )
 }

@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { Suspense } from "react";
 import dynamic from 'next/dynamic';
 import PerformanceSelector from "@/components/PerformanceSelector";
 import ExampleModal from "@/components/ExampleModal";
@@ -11,24 +11,37 @@ import PerformanceMonitor from "@/components/PerformanceMonitor";
 import { startAudio } from "@/lib/engine";
 import type { ShaderIconType } from "@/config/shaderConfigs";
 import { shaderConfigurations } from "@/config/shaderConfigs";
+import { LoadingSpinner, CanvasSkeleton, UISkeleton } from "@/components/LoadingSpinner";
 
-// New God-Tier UI System
-import GodTierUI from "@/components/ui/GodTierUI";
-
-// Dynamic imports for code splitting
+// Dynamic imports for code splitting with enhanced loading states
 const CanvasScene = dynamic(() => import('../src/components/CanvasScene'), { 
   ssr: false,
-  loading: () => <div className="absolute inset-0 flex items-center justify-center bg-black">
-    <div className="text-white">Loading 3D Scene...</div>
-  </div>
+  loading: () => <CanvasSkeleton />
 });
 
 const DevCanvas = dynamic(() => import('../src/components/DevCanvas'), { 
   ssr: false,
-  loading: () => <div className="absolute inset-0 flex items-center justify-center bg-black">
-    <div className="text-white">Loading Dev Canvas...</div>
-  </div>
+  loading: () => <CanvasSkeleton />
 });
+
+// Lazy load UI components
+const GodTierUI = dynamic(() => import("@/components/ui/GodTierUI"), {
+  ssr: false,
+  loading: () => <UISkeleton />
+});
+
+// Lazy load AI components only when needed
+const MagentaMusicGenerator = dynamic(
+  () => import('@/components/ui/MagentaMusicGenerator').then(mod => ({ default: mod.MagentaMusicGenerator })), 
+  { 
+    ssr: false,
+    loading: () => (
+      <div className="fixed bottom-4 right-4 z-40">
+        <LoadingSpinner message="Loading AI Music Generator..." variant="audio" />
+      </div>
+    )
+  }
+);
 
 const PerformanceAnalytics = dynamic(() => import("@/components/PerformanceAnalytics"), {
   ssr: false,
@@ -39,6 +52,8 @@ export default function Home() {
   const [Scene, setScene] = React.useState(() => CanvasScene)
   const [started, setStarted] = React.useState(false)
   const [showAnalytics, setShowAnalytics] = React.useState(false)
+  const [isAudioInitialized, setIsAudioInitialized] = React.useState(false)
+  const [initProgress, setInitProgress] = React.useState(0)
   // Audio reactive state
   const [bassData, setBassData] = React.useState(0)
   const [midData, setMidData] = React.useState(0)
@@ -56,11 +71,24 @@ export default function Home() {
   }, [])
 
   const handleStart = React.useCallback(async () => {
-    const ok = await startAudio()
-    if (ok) {
-      setStarted(true)
+    try {
+      setInitProgress(25)
+      const ok = await startAudio()
+      setInitProgress(75)
+      
+      if (ok) {
+        // Small delay to show progress
+        await new Promise(resolve => setTimeout(resolve, 500))
+        setInitProgress(100)
+        setIsAudioInitialized(true)
+        setStarted(true)
+      }
+      return ok
+    } catch (error) {
+      console.error('Failed to start audio:', error)
+      setInitProgress(0)
+      return false
     }
-    return ok
   }, [])
 
   return (
@@ -69,39 +97,55 @@ export default function Home() {
       <a href="#main-content" className="god-tier-skip-link">
         Skip to main content
       </a>
-      {!started && <StartOverlay onFinish={handleStart} />}
+      {!started && (
+        <StartOverlay 
+          onFinish={handleStart} 
+          progress={initProgress}
+        />
+      )}
       {started && (
         <>
           <main id="main-content" className="relative h-full w-full">
             <CanvasErrorBoundary>
               <SafariCanvasDetector>
-                <Scene />
+                <Suspense fallback={<CanvasSkeleton />}>
+                  <Scene />
+                </Suspense>
               </SafariCanvasDetector>
             </CanvasErrorBoundary>
           </main>
           
-          {/* God-Tier UI System */}
-          <GodTierUI 
-            audioData={{
-              bass: bassData,
-              mid: midData,
-              high: highData,
-              volume: volume,
-              spectrum: new Float32Array(32) // Mock spectrum data
-            }}
-            onAudioToggle={() => setIsPlaying(!isPlaying)}
-            onVolumeChange={setVolume}
-            onShaderChange={setActiveShader}
-            onParamChange={(shaderId, paramName, value) => {
-              // Handle parameter changes for specific shaders
-              if (paramName === 'glitch') {
-                setGlitchIntensity(value)
-              }
-            }}
-            isPlaying={isPlaying}
-            currentShader={activeShader}
-            shaderConfigs={shaderConfigurations}
-          />
+          {/* God-Tier UI System with Suspense */}
+          <Suspense fallback={<UISkeleton />}>
+            <GodTierUI 
+              audioData={{
+                bass: bassData,
+                mid: midData,
+                high: highData,
+                volume: volume,
+                spectrum: new Float32Array(32) // Mock spectrum data
+              }}
+              onAudioToggle={() => setIsPlaying(!isPlaying)}
+              onVolumeChange={setVolume}
+              onShaderChange={setActiveShader}
+              onParamChange={(shaderId, paramName, value) => {
+                // Handle parameter changes for specific shaders
+                if (paramName === 'glitch') {
+                  setGlitchIntensity(value)
+                }
+              }}
+              isPlaying={isPlaying}
+              currentShader={activeShader}
+              shaderConfigs={shaderConfigurations}
+            />
+          </Suspense>
+          
+          {/* Lazy load AI components only after audio is initialized */}
+          {isAudioInitialized && (
+            <Suspense fallback={null}>
+              <MagentaMusicGenerator />
+            </Suspense>
+          )}
         </>
       )}
       <ExampleModal />

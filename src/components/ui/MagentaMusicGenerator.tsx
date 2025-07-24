@@ -1,9 +1,14 @@
 'use client'
 // @ts-nocheck
 import React, { useState, useEffect, useCallback, useRef } from 'react'
-import * as mm from '@magenta/music'
 import { gsap } from 'gsap'
 import { useAudioStore } from '../../store/useAudioStore'
+
+// Dynamic import type for Magenta.js
+type MagentaModule = typeof import('@magenta/music')
+type MusicRNN = import('@magenta/music').MusicRNN
+type SoundFontPlayer = import('@magenta/music').SoundFontPlayer
+type INoteSequence = import('@magenta/music').INoteSequence
 
 interface MagentaMusicGeneratorProps {
   onNoteGenerated?: (note: mm.NoteSequence.Note) => void
@@ -19,9 +24,12 @@ export function MagentaMusicGenerator({
   isPlaying = false
 }: MagentaMusicGeneratorProps) {
   const [isLoading, setIsLoading] = useState(false)
-  const [model, setModel] = useState<mm.MusicRNN | null>(null)
-  const [player, setPlayer] = useState<mm.SoundFontPlayer | null>(null)
-  const [currentSequence, setCurrentSequence] = useState<mm.INoteSequence | null>(null)
+  const [isInitialized, setIsInitialized] = useState(false)
+  const [model, setModel] = useState<MusicRNN | null>(null)
+  const [player, setPlayer] = useState<SoundFontPlayer | null>(null)
+  const [currentSequence, setCurrentSequence] = useState<INoteSequence | null>(null)
+  const [magentaModule, setMagentaModule] = useState<MagentaModule | null>(null)
+  const [initError, setInitError] = useState<string | null>(null)
   const [isGenerating, setIsGenerating] = useState(false)
   const [temperature, setTemperature] = useState(1.0)
   const [sequenceLength, setSequenceLength] = useState(32)
@@ -29,41 +37,100 @@ export function MagentaMusicGenerator({
   const visualizerRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
-  // Initialize Magenta models
-  useEffect(() => {
-    async function initializeModels() {
-      setIsLoading(true)
-      try {
-        // Initialize Music RNN model
-        const musicRNN = new mm.MusicRNN('https://storage.googleapis.com/magentadata/js/checkpoints/music_rnn/melody_rnn')
-        await musicRNN.initialize()
-        setModel(musicRNN)
-
-        // Initialize SoundFont player
-        const soundFontPlayer = new mm.SoundFontPlayer('https://storage.googleapis.com/magentadata/js/soundfonts/gm_synth')
-        // Use a default sequence for initial loading
-        await soundFontPlayer.loadSamples({ notes: [], totalTime: 4 })
-        setPlayer(soundFontPlayer)
-
-        // Magenta models initialized successfully
-      } catch (error) {
-        console.error('Failed to initialize Magenta models:', error)
-      } finally {
-        setIsLoading(false)
-      }
+  // Lazy load Magenta.js only when user requests AI features
+  const initializeMagenta = useCallback(async () => {
+    if (magentaModule && model && player) {
+      return true // Already initialized
     }
 
-    initializeModels()
-  }, [])
+    setIsLoading(true)
+    setInitError(null)
+
+    try {
+      // Dynamic import - only loads when needed
+      console.log('Loading Magenta.js models...')
+      const mm = await import('@magenta/music')
+      setMagentaModule(mm)
+
+      // CDN fallback strategy
+      const CDN_FALLBACKS = [
+        'https://storage.googleapis.com/magentadata/js/checkpoints/music_rnn/melody_rnn',
+        'https://cdn.jsdelivr.net/npm/@magenta/music@1.3.1/es6/checkpoints/music_rnn/melody_rnn'
+      ]
+
+      let musicRNN = null
+      for (const url of CDN_FALLBACKS) {
+        try {
+          musicRNN = new mm.MusicRNN(url)
+          await musicRNN.initialize()
+          console.log(`Successfully loaded from: ${url}`)
+          break
+        } catch (error) {
+          console.warn(`Failed to load from ${url}, trying next...`)
+        }
+      }
+
+      if (!musicRNN) {
+        throw new Error('Failed to load Magenta models from all CDN sources')
+      }
+
+      setModel(musicRNN)
+
+      // Initialize SoundFont with fallback
+      const SOUNDFONT_FALLBACKS = [
+        'https://storage.googleapis.com/magentadata/js/soundfonts/gm_synth',
+        'https://cdn.jsdelivr.net/npm/@magenta/music@1.3.1/es6/soundfonts/gm_synth'
+      ]
+
+      let soundFontPlayer = null
+      for (const url of SOUNDFONT_FALLBACKS) {
+        try {
+          soundFontPlayer = new mm.SoundFontPlayer(url)
+          await soundFontPlayer.loadSamples({ notes: [], totalTime: 4 })
+          console.log(`SoundFont loaded from: ${url}`)
+          break
+        } catch (error) {
+          console.warn(`Failed to load SoundFont from ${url}`)
+        }
+      }
+
+      if (!soundFontPlayer) {
+        console.warn('SoundFont failed to load, continuing without audio playback')
+      }
+
+      setPlayer(soundFontPlayer)
+      setIsInitialized(true)
+      return true
+
+    } catch (error) {
+      console.error('Failed to initialize Magenta models:', error)
+      setInitError(error instanceof Error ? error.message : 'Unknown error')
+      return false
+    } finally {
+      setIsLoading(false)
+    }
+  }, [magentaModule, model, player])
 
   // Generate melody using Magenta
   const generateMelody = useCallback(async () => {
-    if (!model) return
+    // Initialize Magenta if not already done
+    if (!isInitialized) {
+      const success = await initializeMagenta()
+      if (!success) {
+        console.error('Cannot generate melody: Magenta initialization failed')
+        return
+      }
+    }
+
+    if (!model || !magentaModule) {
+      console.error('Model not available for generation')
+      return
+    }
 
     setIsGenerating(true)
     try {
       // Create seed sequence
-      const seed: mm.INoteSequence = {
+      const seed: INoteSequence = {
         notes: [
           { pitch: 60, startTime: 0, endTime: 0.5, velocity: 80 },
           { pitch: 64, startTime: 0.5, endTime: 1.0, velocity: 80 },
@@ -90,11 +157,11 @@ export function MagentaMusicGenerator({
       
     } catch (error) {
       console.error('Melody generation failed:', error)
+      setInitError('Generation failed. Please try again.')
     } finally {
       setIsGenerating(false)
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [model, sequenceLength, temperature, onNoteGenerated, onSequenceGenerated])
+  }, [model, magentaModule, isInitialized, sequenceLength, temperature, onNoteGenerated, onSequenceGenerated, initializeMagenta])
 
   // Play generated sequence
   const playSequence = useCallback(async () => {
@@ -124,7 +191,7 @@ export function MagentaMusicGenerator({
   }, [player])
 
   // Animate note generation
-  const animateNoteGeneration = useCallback((notes: mm.NoteSequence.Note[]) => {
+  const animateNoteGeneration = useCallback((notes: any[]) => {
     if (!visualizerRef.current) return
 
     notes.forEach((note, index) => {
@@ -160,7 +227,7 @@ export function MagentaMusicGenerator({
   }, [])
 
   // Animate note playback
-  const animateNotePlay = useCallback((note: mm.NoteSequence.Note) => {
+  const animateNotePlay = useCallback((note: any) => {
     if (!canvasRef.current) return
 
     const canvas = canvasRef.current
@@ -289,10 +356,10 @@ export function MagentaMusicGenerator({
         <div className="flex gap-2">
           <button
             onClick={generateMelody}
-            disabled={isLoading || isGenerating || !model}
+            disabled={isLoading || isGenerating}
             className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white py-2 px-4 rounded-lg font-medium transition-all duration-300 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isGenerating ? 'Generating...' : 'Generate'}
+            {isLoading ? 'Loading AI...' : isGenerating ? 'Generating...' : 'Generate'}
           </button>
 
           <button
@@ -315,8 +382,19 @@ export function MagentaMusicGenerator({
         {/* Status */}
         <div className="text-center text-white/60 text-xs">
           {isLoading && 'Loading AI models...'}
-          {!isLoading && !model && 'Failed to load models'}
-          {!isLoading && model && 'Ready to generate music'}
+          {initError && (
+            <div className="text-red-400">
+              Error: {initError}
+              <button 
+                onClick={initializeMagenta} 
+                className="ml-2 text-blue-400 hover:text-blue-300"
+              >
+                Retry
+              </button>
+            </div>
+          )}
+          {!isLoading && !initError && !isInitialized && 'Click Generate to load AI models'}
+          {!isLoading && !initError && isInitialized && model && 'AI ready to generate music'}
         </div>
       </div>
     </div>
