@@ -1,10 +1,11 @@
 {
   "compilerOptions": {
-    "target": "es5",
+    "target": "ES2022",
     "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
+      "ES2022",
+      "DOM",
+      "DOM.Iterable",
+      "WebWorker"
     ],
     "allowJs": true,
     "skipLibCheck": true,
@@ -12,35 +13,98 @@
     "forceConsistentCasingInFileNames": true,
     "noEmit": true,
     "esModuleInterop": true,
-    "module": "esnext",
-    "moduleResolution": "node",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
-    "baseUrl": ".",
-    "paths": {
-      "@/*": [
-        "src/*"
-      ],
-      "@lib/logger": [
-        "src/lib/logger.server.ts"
-      ]
-    },
-    "types": ["node"],
     "plugins": [
       {
         "name": "next"
       }
+    ],
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ],
+      "@/components/*": [
+        "./src/components/*"
+      ],
+      "@/lib/*": [
+        "./src/lib/*"
+      ],
+      "@/hooks/*": [
+        "./src/hooks/*"
+      ],
+      "@/store/*": [
+        "./src/store/*"
+      ],
+      "@/types/*": [
+        "./src/types/*"
+      ],
+      "@/shaders/*": [
+        "./src/shaders/*"
+      ],
+      "@/utils/*": [
+        "./src/utils/*"
+      ],
+      "@lib/logger": [
+        "./src/lib/logger.server.ts"
+      ]
+    },
+    "types": [
+      "@webgpu/types",
+      "@types/three",
+      "@types/web",
+      "node"
     ]
   },
   "include": [
-    "**/*.ts",
-    "**/*.tsx",
     "next-env.d.ts",
+    "app/**/*.ts",
+    "app/**/*.tsx",
+    "src/components/SimpleWorkingCanvas.tsx",
+    "src/store/*.ts",
+    "src/lib/audio.ts",
+    "src/lib/audio/**/*.ts",
+    "src/lib/analyser.ts",
+    "src/lib/ai.ts",
+    "src/types/**/*.ts",
     ".next/types/**/*.ts"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    ".next",
+    "out",
+    "dist",
+    "src/components/A*.tsx",
+    "src/components/AudioReactivePostProcess.tsx",
+    "src/components/AudioReactiveShaderBackground.tsx",
+    "src/components/LiquidButton.tsx",
+    "src/components/SingleMusicalObject.tsx",
+    "src/components/B*.tsx",
+    "src/components/C*.tsx",
+    "src/components/D*.tsx",
+    "src/components/E*.tsx",
+    "src/components/F*.tsx",
+    "src/components/I*.tsx",
+    "src/components/L*.tsx",
+    "src/components/M*.tsx",
+    "src/components/P*.tsx",
+    "src/components/S*.tsx",
+    "src/components/W*.tsx",
+    "src/components/AIMusic/**/*",
+    "src/components/visual/**/*",
+    "src/components/ui/*",
+    "src/hooks/*",
+    "src/lib/ai-*.ts",
+    "src/lib/artist*.ts",
+    "src/lib/magenta*.ts",
+    "src/lib/sound*.ts",
+    "src/lib/webgl*.ts",
+    "src/lib/webgpu*.ts",
+    "src/shaders/*.ts"
   ]
 }

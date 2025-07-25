@@ -64,7 +64,7 @@ function MetricsDisplay({ metrics }: { metrics: any }) {
           border: '1px solid rgba(239, 68, 68, 0.2)'
         }}>
           ⚠️ Issues:
-          {bottlenecks.map((issue, i) => (
+          {bottlenecks.map((issue: string, i: number) => (
             <div key={i} style={{ marginTop: '2px' }}>
               • {issue}
             </div>

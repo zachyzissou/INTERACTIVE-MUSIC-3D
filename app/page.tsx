@@ -161,23 +161,7 @@ export default function Home() {
       {!started && <StartOverlay onStart={handleStart} />}
       
       {started && (
-        <>
-          {/* Main 3D Canvas */}
-          <Suspense fallback={
-            <div style={{
-              position: 'fixed',
-              inset: 0,
-              backgroundColor: '#0f0f23',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}>
-              <div style={{ color: 'white' }}>Loading...</div>
-            </div>
-          }>
-            <WorkingMusicalCanvas />
-          </Suspense>
-        </>
+        <WorkingMusicalCanvas />
       )}
     </div>
   )

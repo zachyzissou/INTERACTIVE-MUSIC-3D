@@ -328,7 +328,6 @@ const GroundPlane = React.memo(() => (
         color="#0f0f23"
         roughness={0.1}
         metalness={0.9}
-        reflectivity={0.8}
         envMapIntensity={1.5}
         transparent={true}
         opacity={0.9}
