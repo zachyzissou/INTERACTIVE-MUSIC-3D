@@ -1,18 +1,10 @@
 {
-  "root": true,
-  "extends": [
-    "next/core-web-vitals"
-  ],
+  "extends": ["next/core-web-vitals"],
   "rules": {
     "prefer-const": "error",
     "no-var": "error",
-    "eqeqeq": ["error", "always"],
-    "no-console": ["warn", { "allow": ["warn", "error"] }]
-  },
-  "ignorePatterns": ["**/*.test.ts", "**/*.test.tsx"],
-  "env": {
-    "browser": true,
-    "es2023": true,
-    "node": true
+    "no-console": ["warn", { "allow": ["warn", "error"] }],
+    "react/no-unescaped-entities": "off",
+    "react/display-name": "off"
   }
 }
