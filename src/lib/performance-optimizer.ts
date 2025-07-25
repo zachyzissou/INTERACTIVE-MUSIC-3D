@@ -124,7 +124,7 @@ export class PerformanceOptimizer {
       }
     }
 
-    let settings = { ...baseSettings[gpu] }
+    const settings = { ...baseSettings[gpu] }
 
     // Mobile optimizations
     if (mobile) {
