@@ -6,7 +6,6 @@ import ErrorBoundary from './EnhancedErrorBoundary';
 // Lazy load heavy 3D components
 export const LazyCanvasScene = lazy(() => import('./CanvasScene'));
 export const LazyAudioVisualizer = lazy(() => import('./AudioVisualizer'));
-export const LazyEffectsPanel = lazy(() => import('./EffectsPanel').then(module => ({ default: module.EffectsPanel })));
 export const LazyShapeEditorPanel = lazy(() => import('./ShapeEditorPanel'));
 
 // Loading fallback component
@@ -47,11 +46,6 @@ export const SafeLazyAudioVisualizer = withLazyLoading(
   "AudioVisualizer"
 );
 
-export const SafeLazyEffectsPanel = withLazyLoading(
-  LazyEffectsPanel,
-  "Loading Effects...",
-  "EffectsPanel"
-);
 
 export const SafeLazyShapeEditorPanel = withLazyLoading(
   LazyShapeEditorPanel,

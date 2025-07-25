@@ -14,7 +14,17 @@ export function getAnalyser() {
     const ctx = Tone.getContext()
     analyser = ctx.rawContext.createAnalyser()
     analyser.fftSize = 512
-    ctx.destination.connect(analyser)
+    analyser.smoothingTimeConstant = 0.8
+    // Connect the analyser to capture all audio output
+    try {
+      ctx.destination.connect(analyser)
+    } catch (error) {
+      console.warn('Failed to connect destination to analyser, trying alternative method:', error)
+      // Alternative connection for WebKit browsers
+      const masterGain = ctx.rawContext.createGain()
+      ctx.destination.connect(masterGain)
+      masterGain.connect(analyser)
+    }
     dataArray = new Uint8Array(analyser.frequencyBinCount)
     texture = new THREE.DataTexture(
       dataArray,

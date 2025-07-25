@@ -1,4 +1,5 @@
 // src/lib/audio.ts
+import * as Tone from 'tone'
 import type {
   Chorus,
   FeedbackDelay,
@@ -36,105 +37,8 @@ import {
   BEAT_RELEASE,
 } from '../config/constants'
 
-let Tone: typeof import('tone') | null = null
-
 // Type aliases
 type AudioSynth = Synth | PolySynth | MembraneSynth
-
-async function ensureTone() {
-  if (Tone) return Tone
-  
-  try {
-    Tone = await import('tone')
-    return Tone
-  } catch (error) {
-    console.error('Failed to load Tone.js:', error)
-    // Create a minimal no-op fallback to prevent crashes
-    Tone = {
-      start: () => Promise.resolve(),
-      getContext: () => ({ resume: () => Promise.resolve(), state: 'running' }),
-      Gain: class { 
-        constructor() {} 
-        connect() { return this } 
-        toDestination() { return this } 
-        volume = { value: 0 } 
-      },
-      Volume: class { 
-        constructor() {} 
-        connect() { return this } 
-        toDestination() { return this } 
-        volume = { value: 0 } 
-      },
-      Synth: class { 
-        constructor() {} 
-        connect() { return this } 
-        toDestination() { return this } 
-        oscillator = { type: 'sine' } 
-        envelope = { attack: 0.1, release: 0.1 } 
-        triggerAttackRelease() {}
-      },
-      PolySynth: class { 
-        constructor() {} 
-        connect() { return this } 
-        toDestination() { return this } 
-        set() {}
-        triggerAttackRelease() {}
-      },
-      MembraneSynth: class { 
-        constructor() {} 
-        connect() { return this } 
-        toDestination() { return this } 
-        envelope = { attack: 0.1, decay: 0.1, sustain: 0.5, release: 0.1 } 
-        pitchDecay = 0.05
-        triggerAttackRelease() {}
-      },
-      Chorus: class { 
-        constructor() {} 
-        connect() { return this } 
-        toDestination() { return this } 
-        depth = 0 
-      },
-      FeedbackDelay: class { 
-        constructor() {} 
-        connect() { return this } 
-        toDestination() { return this } 
-        feedback = { value: 0.5 } 
-      },
-      Reverb: class { 
-        constructor() {} 
-        connect() { return this } 
-        toDestination() { return this } 
-        wet = { value: 0.3 } 
-      },
-      AutoFilter: class { 
-        constructor() {} 
-        connect() { return this } 
-        toDestination() { return this } 
-      },
-      Distortion: class { 
-        constructor() {} 
-        connect() { return this } 
-        toDestination() { return this } 
-      },
-      BitCrusher: class { 
-        constructor() {} 
-        connect() { return this } 
-        toDestination() { return this } 
-        wet = { value: 0.3 } 
-        set() {}
-      },
-      Filter: class { 
-        constructor() {} 
-        connect() { return this } 
-        toDestination() { return this } 
-        frequency = { value: 440 } 
-      },
-      now: () => 0,
-      Frequency: (note: string) => ({ transpose: () => ({ toNote: () => note }) })
-    } as any
-    return Tone
-  }
-}
 
 export function getTone() {
   return Tone
@@ -189,20 +93,19 @@ export function getMasterChain(): ToneAudioNode {
 
 async function initEffects() {
   if (chorus) return
-  const Tone = await ensureTone()
   
   try {
     // Ensure Tone.js context is ready before creating effects
-    await Tone!.start()
-    await Tone!.getContext().resume()
+    await Tone.start()
+    await Tone.getContext().resume()
     
     // Create effects with careful parameter checking for WebKit compatibility
-    chorus = new Tone!.Chorus()
-    delay = new Tone!.FeedbackDelay()
-    reverb = new Tone!.Reverb()
-    filter = new Tone!.AutoFilter()
-    distortion = new Tone!.Distortion()
-    bitcrusher = new Tone!.BitCrusher(4)
+    chorus = new Tone.Chorus()
+    delay = new Tone.FeedbackDelay()
+    reverb = new Tone.Reverb()
+    filter = new Tone.AutoFilter()
+    distortion = new Tone.Distortion()
+    bitcrusher = new Tone.BitCrusher(4)
     
     // Safe parameter assignment with WebKit compatibility
     try {
@@ -229,7 +132,7 @@ async function initEffects() {
     console.error('Failed to initialize audio effects:', error)
     // Fallback: create a simple passthrough chain with proper destination
     try {
-      masterChain = new Tone!.Gain(1)
+      masterChain = new Tone.Gain(1)
       masterChain.toDestination()
     } catch (fallbackError) {
       console.error('Fallback audio chain also failed:', fallbackError)
@@ -267,25 +170,29 @@ export async function initAudioEngine() {
   if (audioInitialized || !allowInit) return
   if (initPromise) return initPromise
   
-  // Detect WebKit and skip audio initialization to prevent crashes
-  const isWebKit = typeof window !== 'undefined' && 
+  // Check for Web Audio API support using feature detection (not user agent sniffing)
+  if (!window.AudioContext && !(window as any).webkitAudioContext) {
+    console.error('Web Audio API not supported on this browser')
+    audioInitialized = false
+    audioEvents.dispatchEvent(new Event('init-failed'))
+    return
+  }
+  
+  // Safari/WebKit compatibility: Use more conservative settings
+  const isWebKit = typeof navigator !== 'undefined' && 
     /WebKit/i.test(navigator.userAgent) && 
     !/Chrome/i.test(navigator.userAgent)
   
   if (isWebKit) {
-    console.warn('WebKit detected - skipping audio initialization due to compatibility issues')
-    audioInitialized = true
-    audioEvents.dispatchEvent(new Event('init'))
-    return
+    console.warn('WebKit browser detected - using compatibility mode for audio initialization')
   }
   
   initPromise = (async () => {
-    const Tone = await ensureTone()
     if (audioInitialized) { initPromise = null; return }
     
     try {
-      await Tone!.start()
-      await Tone!.getContext().resume()
+      await Tone.start()
+      await Tone.getContext().resume()
       await initEffects()
       
       // Only proceed if effects were successfully initialized
@@ -293,7 +200,7 @@ export async function initAudioEngine() {
         throw new Error('Failed to initialize audio effects chain')
       }
       
-      masterVolumeNode = new Tone!.Volume({ volume: 0 }).connect(masterChain)
+      masterVolumeNode = new Tone.Volume({ volume: 0 }).connect(masterChain)
       
       // Safe volume setting
       try {
@@ -305,18 +212,18 @@ export async function initAudioEngine() {
       }
       
       // Single-note synth
-      noteSynth = new Tone!.Synth().connect(masterVolumeNode)
+      noteSynth = new Tone.Synth().connect(masterVolumeNode)
       noteSynth.oscillator.type = 'sine'
       noteSynth.envelope.attack = NOTE_ATTACK
       noteSynth.envelope.release = NOTE_RELEASE
       
       // Polyphonic chord synth
-      chordSynth = new Tone!.PolySynth({ voice: Tone!.Synth }).connect(masterVolumeNode)
+      chordSynth = new Tone.PolySynth({ voice: Tone.Synth }).connect(masterVolumeNode)
       chordSynth.set({ oscillator: { type: 'triangle' } })
       chordSynth.set({ envelope: { attack: CHORD_ATTACK, release: CHORD_RELEASE } })
       
       // Drum synth
-      beatSynth = new Tone!.MembraneSynth().connect(masterVolumeNode)
+      beatSynth = new Tone.MembraneSynth().connect(masterVolumeNode)
       beatSynth.pitchDecay = BEAT_PITCH_DECAY
       beatSynth.envelope.attack = BEAT_ATTACK
       beatSynth.envelope.decay = BEAT_DECAY
@@ -342,12 +249,10 @@ function keyOffset(key: string): number {
 }
 
 function transpose(note: string, key: string) {
-  const Tone = getTone()
-  return Tone ? Tone.Frequency(note).transpose(keyOffset(key)).toNote() : note
+  return Tone.Frequency(note).transpose(keyOffset(key)).toNote()
 }
 
 function createChain(): EffectChain {
-  const Tone = getTone()!
   const hp = new Tone.Filter({ frequency: 0, type: 'highpass' })
   const lp = new Tone.Filter({ frequency: 20000, type: 'lowpass' })
   const delay = new Tone.FeedbackDelay({ delayTime: '8n', feedback: 0.5 })
@@ -359,23 +264,6 @@ function createChain(): EffectChain {
 }
 
 async function getObjectSynth(id: string, type: ObjectType) {
-  const Tone = getTone()
-  if (!Tone) {
-    // Return a dummy object synth for WebKit compatibility
-    return {
-      type,
-      synth: { triggerAttackRelease: () => {}, connect: () => {}, disconnect: () => {} },
-      chain: {
-        hp: { connect: () => {} },
-        lp: { connect: () => {} },
-        delay: { connect: () => {} },
-        reverb: { connect: () => {} }
-      },
-      meter: { connect: () => {} },
-      panner: {}
-    } as any
-  }
-  
   let os = objectSynths.get(id)
   if (!os) {
     const chain = createChain()
@@ -421,50 +309,74 @@ function applyParams(chain: EffectChain, params: EffectParams) {
  * Play a single note.
  * Ensures audio engine is initialized before scheduling.
  */
-export async function playNote(id: string, note: string = 'C4') {
+export async function playNote(id: string, note: string = 'C4'): Promise<boolean> {
   await initAudioEngine()
-  if (!audioInitialized || !noteSynth) return
-  const { key } = useAudioSettings.getState()
-  const finalNote = transpose(note, key)
-  const os = await getObjectSynth(id, 'note')
-  const params = useEffectSettings.getState().getParams(id)
-  applyParams(os.chain, params)
-  const Tone = getTone()
-  if (!Tone) return
-  ;(os.synth as Synth).triggerAttackRelease(finalNote, '8n', Tone.now() + 0.01)
+  if (!audioInitialized || !noteSynth) {
+    console.warn('Cannot play note: audio not initialized or noteSynth missing')
+    return false
+  }
+  
+  try {
+    const { key } = useAudioSettings.getState()
+    const finalNote = transpose(note, key)
+    const os = await getObjectSynth(id, 'note')
+    const params = useEffectSettings.getState().getParams(id)
+    applyParams(os.chain, params)
+    ;(os.synth as Synth).triggerAttackRelease(finalNote, '8n', Tone.now() + 0.01)
+    return true
+  } catch (error) {
+    console.error('Error playing note:', error)
+    return false
+  }
 }
 
 /**
  * Play a triad chord.
  */
-export async function playChord(id: string, notes: string[] = ['C4', 'E4', 'G4']) {
+export async function playChord(id: string, notes: string[] = ['C4', 'E4', 'G4']): Promise<boolean> {
   await initAudioEngine()
-  if (!audioInitialized || !chordSynth) return
-  const { key } = useAudioSettings.getState()
-  const final = notes.map((n) => transpose(n, key))
-  const os = await getObjectSynth(id, 'chord')
-  const params = useEffectSettings.getState().getParams(id)
-  applyParams(os.chain, params)
-  const Tone = getTone()
-  if (!Tone) return
-  ;(os.synth as PolySynth).triggerAttackRelease(final, '4n', Tone.now() + 0.01)
+  if (!audioInitialized || !chordSynth) {
+    console.warn('Cannot play chord: audio not initialized or chordSynth missing')
+    return false
+  }
+  
+  try {
+    const { key } = useAudioSettings.getState()
+    const final = notes.map((n) => transpose(n, key))
+    const os = await getObjectSynth(id, 'chord')
+    const params = useEffectSettings.getState().getParams(id)
+    applyParams(os.chain, params)
+    ;(os.synth as PolySynth).triggerAttackRelease(final, '4n', Tone.now() + 0.01)
+    return true
+  } catch (error) {
+    console.error('Error playing chord:', error)
+    return false
+  }
 }
 
 /**
  * Play a beat kick.
  */
-export async function playBeat(id: string) {
+export async function playBeat(id: string): Promise<boolean> {
   beatBus.dispatchEvent(new Event("beat"));
   await initAudioEngine()
-  if (!audioInitialized || !beatSynth) return
-  const { key } = useAudioSettings.getState()
-  const note = transpose('C2', key)
-  const os = await getObjectSynth(id, 'beat')
-  const params = useEffectSettings.getState().getParams(id)
-  applyParams(os.chain, params)
-  const Tone = getTone()
-  if (!Tone) return
-  ;(os.synth as MembraneSynth).triggerAttackRelease(note, '8n', Tone.now() + 0.01)
+  if (!audioInitialized || !beatSynth) {
+    console.warn('Cannot play beat: audio not initialized or beatSynth missing')
+    return false
+  }
+  
+  try {
+    const { key } = useAudioSettings.getState()
+    const note = transpose('C2', key)
+    const os = await getObjectSynth(id, 'beat')
+    const params = useEffectSettings.getState().getParams(id)
+    applyParams(os.chain, params)
+    ;(os.synth as MembraneSynth).triggerAttackRelease(note, '8n', Tone.now() + 0.01)
+    return true
+  } catch (error) {
+    console.error('Error playing beat:', error)
+    return false
+  }
 }
 
 /**
@@ -524,7 +436,6 @@ export async function startNote(note: string = 'C4') {
   if (!audioInitialized) return
   const { key } = useAudioSettings.getState()
   const finalNote = transpose(note, key)
-  const Tone = getTone()!
   noteSynth.triggerAttackRelease(finalNote, '1n', Tone.now())
 }
 
@@ -533,7 +444,6 @@ export async function startNote(note: string = 'C4') {
  */
 export function stopNote() {
   if (noteSynth) {
-    const Tone = getTone()!
     noteSynth.triggerRelease(Tone.now() + 0.01)
   }
 }
@@ -549,29 +459,39 @@ const loops = new Map<string, LoopInfo>()
 export function getLoopProgress(id: string): number {
   const info = loops.get(id)
   if (!info) return 0
-  const Tone = getTone()!
   const transport = Tone.getTransport()
   const now = transport.seconds
   const elapsed = (now - info.start) % info.duration
   return elapsed / info.duration
 }
 
-export async function startLoop(id: string, interval: string = '1m') {
+export async function startLoop(id: string, interval: string = '1m'): Promise<boolean> {
   await initAudioEngine()
-  if (!audioInitialized) return
-  if (loops.has(id)) return
-  const bpm = useAudioSettings.getState().bpm
-  const Tone = getTone()!
-  const transport = Tone.getTransport()
-  transport.bpm.value = bpm
-  const dur = Tone.Time(interval).toSeconds()
-  const start = transport.seconds
-  const loop = new Tone.Loop(() => {
-    playBeat(id)
-  }, interval).start(0)
-  loops.set(id, { loop, start, duration: dur })
-  if (transport.state !== 'started') transport.start()
-  useLoops.getState().start(id)
+  if (!audioInitialized) {
+    console.warn('Cannot start loop: audio not initialized')
+    return false
+  }
+  if (loops.has(id)) {
+    return true
+  }
+  
+  try {
+    const bpm = useAudioSettings.getState().bpm
+    const transport = Tone.getTransport()
+    transport.bpm.value = bpm
+    const dur = Tone.Time(interval).toSeconds()
+    const start = transport.seconds
+    const loop = new Tone.Loop(() => {
+      playBeat(id)
+    }, interval).start(0)
+    loops.set(id, { loop, start, duration: dur })
+    if (transport.state !== 'started') transport.start()
+    useLoops.getState().start(id)
+    return true
+  } catch (error) {
+    console.error('Error starting loop:', error)
+    return false
+  }
 }
 
 export function stopLoop(id: string) {
@@ -588,7 +508,6 @@ let spawnSynth: Synth | null = null
 export async function playSpawnSound() {
   await initAudioEngine()
   if (!audioInitialized) return
-  const Tone = getTone()!
   spawnSynth ??= new Tone.Synth({
     oscillator: { type: 'sine' },
     envelope: { attack: 0.01, decay: 0.2, sustain: 0, release: 0.3 }
@@ -598,17 +517,6 @@ export async function playSpawnSound() {
 
 // Audio node pool integration
 async function getPooledSynth(type: ObjectType, preset?: keyof typeof presetConfigs): Promise<AudioSynth> {
-  const Tone = getTone()
-  if (!Tone) {
-    // Return a dummy synth for WebKit compatibility
-    return {
-      triggerAttackRelease: () => {},
-      connect: () => {},
-      disconnect: () => {},
-      dispose: () => {}
-    } as any
-  }
-  
   return audioNodePool.acquire('synth', () => {
     if (type === 'chord') {
       const config = preset ? presetConfigs[preset] : presetConfigs.pad

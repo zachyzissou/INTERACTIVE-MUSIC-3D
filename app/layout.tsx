@@ -1,6 +1,4 @@
 import type { Metadata, Viewport } from 'next'
-import '../src/styles/globals.css'
-import ui from '../src/styles/ui.module.css'
 import ClientLayout from './ClientLayout'
 
 export const metadata: Metadata = {
@@ -22,7 +20,7 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { readonly children: React.ReactNode }) {
   return (
     <html lang="en" className="h-full w-full">
-      <body className={`${ui.root} h-full w-full relative`}>
+      <body className="h-full w-full relative">
         <ClientLayout>
           {children}
         </ClientLayout>

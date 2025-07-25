@@ -6,8 +6,8 @@ import * as THREE from 'three'
 import { useObjects } from '@/store/useObjects'
 import { useSelectedShape } from '@/store/useSelectedShape'
 import { startAudioContext } from '@/lib/audio'
-import vertex from '@/shaders/plusButton.vert'
-import fragment from '@/shaders/plusButton.frag'
+// import vertex from '@/shaders/plusButton.vert'
+// import fragment from '@/shaders/plusButton.frag'
 
 export default function PlusButton3D() {
   const { viewport } = useThree()
@@ -17,11 +17,7 @@ export default function PlusButton3D() {
   const [springs, api] = useSpring(() => ({ scale: 1, distort: 0 }))
   const [busy, setBusy] = useState(false)
 
-  const pos: [number, number, number] = [
-    -viewport.width / 2 + 0.8,
-    -viewport.height / 2 + 0.8,
-    0,
-  ]
+  const pos: [number, number, number] = [-6, -2, 2] // Fixed position, more centered
 
 
   useFrame(() => {
@@ -44,16 +40,11 @@ export default function PlusButton3D() {
         } })
       }}
     >
-      <planeGeometry args={[1,1]} />
-      <shaderMaterial
-        ref={mat}
-        transparent
-        uniforms={{
-          uDistort: { value: 0 },
-          uColor: { value: new THREE.Color('#4fa3ff') },
-        }}
-        vertexShader={vertex}
-        fragmentShader={fragment}
+      <planeGeometry args={[3,3]} />
+      <meshBasicMaterial 
+        color="#ff0000" 
+        transparent 
+        opacity={1.0}
       />
     </a.mesh>
   )

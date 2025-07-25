@@ -1,106 +1,148 @@
-const path = require('path');
-const withBundleAnalyzer = require('@next/bundle-analyzer')({
-  enabled: process.env.ANALYZE === 'true',
-});
+/** @type {import('next').NextConfig} */
+const withPWA = require('next-pwa')
+const bundleAnalyzer = require('@next/bundle-analyzer')
+const path = require('path')
 
-module.exports = withBundleAnalyzer({
-  reactStrictMode: true,
-  productionBrowserSourceMaps: false, // Disable in production for performance
-  
-  // Enable experimental features for build optimization
+const withBundleAnalyzer = bundleAnalyzer({
+  enabled: process.env.ANALYZE === 'true',
+})
+
+const nextConfig = {
+  // Enable experimental features for better performance
   experimental: {
+    turbo: {
+      rules: {
+        '*.wgsl': {
+          loaders: ['raw-loader'],
+          as: '*.js',
+        },
+        '*.glsl': {
+          loaders: ['raw-loader'], 
+          as: '*.js',
+        },
+      },
+    },
+    webpackBuildWorker: true,
+    optimizeCss: true,
     optimizePackageImports: ['three', '@react-three/fiber', '@react-three/drei'],
-    // Remove 'tone' and magenta - these will be loaded dynamically
   },
-  
-  // Turbopack configuration
-  turbopack: {
-    rules: {
-      '*.glsl': {
-        loaders: ['raw-loader'],
-        as: 'text'
-      }
-    }
+
+  // TypeScript configuration
+  typescript: {
+    ignoreBuildErrors: false,
   },
-  
+
+  // ESLint configuration
   eslint: {
+    ignoreDuringBuilds: false,
     dirs: ['app', 'src']
   },
-  
-  // Optimize image loading
+
+  // Image optimization
   images: {
     formats: ['image/webp', 'image/avif'],
     minimumCacheTTL: 31536000,
   },
-  
-  // Enhanced security headers
+
+  // Headers for SharedArrayBuffer and WebGPU
   async headers() {
     return [
       {
-        source: '/:path*',
+        source: '/(.*)',
         headers: [
+          // Security headers
           { key: 'X-Frame-Options', value: 'DENY' },
           { key: 'X-Content-Type-Options', value: 'nosniff' },
           { key: 'Referrer-Policy', value: 'origin-when-cross-origin' },
-          { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
           { key: 'X-XSS-Protection', value: '1; mode=block' },
-          { key: 'Strict-Transport-Security', value: 'max-age=31536000; includeSubDomains' }
-        ]
-      }
+          { key: 'Strict-Transport-Security', value: 'max-age=31536000; includeSubDomains' },
+          // WebGPU and SharedArrayBuffer headers
+          {
+            key: 'Cross-Origin-Embedder-Policy',
+            value: 'require-corp',
+          },
+          {
+            key: 'Cross-Origin-Opener-Policy',
+            value: 'same-origin',
+          },
+          {
+            key: 'Cross-Origin-Resource-Policy',
+            value: 'cross-origin',
+          },
+          // WebGPU security headers
+          {
+            key: 'Permissions-Policy',
+            value: 'accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()',
+          },
+        ],
+      },
     ]
   },
-  
-  webpack(config, { dev, isServer }) {
-    // Optimize for production builds
-    if (!dev) {
-      config.devtool = false; // Disable source maps in production
-      
-      // Enable aggressive optimizations
-      config.optimization = {
-        ...config.optimization,
-        minimize: true,
-        sideEffects: false,
-        usedExports: true,
-        providedExports: true,
-        // Add caching for faster rebuilds
-        moduleIds: 'deterministic',
-        chunkIds: 'deterministic'
-      };
-    }
-    
-    config.resolve = config.resolve || {};
-    config.resolve.alias = {
-      ...(config.resolve.alias || {}),
-      '@': path.resolve(__dirname, 'src'),
-      '@lib/logger': path.resolve(
-        __dirname,
-        isServer ? 'src/lib/logger.server.ts' : 'src/lib/logger.client.ts'
-      ),
-    };
-    
-    config.module = config.module || { rules: [] };
-    
-    // Add loaders for shader files
+
+  // Rewrites for API routes
+  async rewrites() {
+    return [
+      {
+        source: '/api/health',
+        destination: '/api/health',
+      },
+    ]
+  },
+
+  // Compression
+  compress: true,
+  poweredByHeader: false,
+  reactStrictMode: true,
+  swcMinify: true,
+  output: 'standalone',
+
+  // Webpack configuration for WebGPU and shader support
+  webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
+    // Handle shader files
     config.module.rules.push(
+      {
+        test: /\.(wgsl|glsl|vert|frag)$/,
+        use: 'raw-loader',
+      },
+      {
+        test: /\.(mp3|wav|ogg)$/,
+        use: {
+          loader: 'file-loader',
+          options: {
+            publicPath: '/_next/static/sounds/',
+            outputPath: 'static/sounds/',
+          },
+        },
+      },
       {
         test: /\.js\.map$/,
         use: 'null-loader'
-      },
-      {
-        test: /\.(glsl|vs|fs|vert|frag)$/,
-        exclude: /node_modules/,
-        use: ['raw-loader']
       }
-    );
-    
-    // Enhanced bundle splitting for client-side
-    if (!isServer) {
-      config.optimization = config.optimization || {};
+    )
+
+    // Resolve aliases
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@': path.resolve(process.cwd(), 'src'),
+      '@lib/logger': path.resolve(
+        process.cwd(),
+        isServer ? 'src/lib/logger.server.ts' : 'src/lib/logger.client.ts'
+      ),
+    }
+
+    // Optimization for Three.js
+    if (!dev && !isServer) {
+      config.resolve.alias = {
+        ...config.resolve.alias,
+        'three/examples/jsm': 'three/examples/jsm',
+      }
+      
+      // Enhanced bundle splitting for client-side
       config.optimization.splitChunks = {
         chunks: 'all',
         minSize: 20000,
-        maxSize: 100000, // Reduced chunk size for faster loading
-        maxAsyncSize: 200000, // Allow larger async chunks
+        maxSize: 100000,
+        maxAsyncSize: 200000,
         cacheGroups: {
           default: {
             minChunks: 2,
@@ -120,48 +162,61 @@ module.exports = withBundleAnalyzer({
             chunks: 'all',
             enforce: true
           },
-          // Remove audio group - split tone and magenta separately
           tone: {
             test: /[\\/]node_modules[\\/]tone[\\/]/,
             name: 'tone',
             priority: 20,
-            chunks: 'async', // Load only when needed
+            chunks: 'async',
             enforce: true
           },
-          ui: {
-            test: /[\\/]node_modules[\\/](gsap|framer-motion)[\\/]/,
-            name: 'ui',
-            priority: 10,
-            chunks: 'all',
-            enforce: true
-          },
-          // Split large libraries into separate chunks - Load magenta async only
           magenta: {
             test: /[\\/]node_modules[\\/]@magenta[\\/]/,
             name: 'magenta',
             priority: 25,
-            chunks: 'async', // Changed from 'all' to 'async' - only loads when imported
-            enforce: true
-          },
-          // Split Three.js more granularly for better loading
-          threeCore: {
-            test: /[\\/]node_modules[\\/]three[\\/]src[\\/]core[\\/]/,
-            name: 'three-core',
-            priority: 30,
-            chunks: 'all',
-            enforce: true
-          },
-          threeExtras: {
-            test: /[\\/]node_modules[\\/]three[\\/]src[\\/](?!core)/,
-            name: 'three-extras',
-            priority: 15,
             chunks: 'async',
+            enforce: true
+          },
+          ui: {
+            test: /[\\/]node_modules[\\/](gsap|framer-motion|@radix-ui)[\\/]/,
+            name: 'ui',
+            priority: 10,
+            chunks: 'all',
             enforce: true
           }
         }
-      };
+      }
     }
-    
-    return config;
+
+    // WebGPU polyfill configuration
+    config.resolve.fallback = {
+      ...config.resolve.fallback,
+      fs: false,
+      path: false,
+      crypto: false,
+    }
+
+    return config
   },
-});
+}
+
+// PWA configuration
+const pwaConfig = {
+  dest: 'public',
+  register: true,
+  skipWaiting: true,
+  runtimeCaching: [
+    {
+      urlPattern: /^https?.*/,
+      handler: 'NetworkFirst',
+      options: {
+        cacheName: 'offlineCache',
+        expiration: {
+          maxEntries: 200,
+        },
+      },
+    },
+  ],
+  buildExcludes: [/middleware-manifest.json$/],
+}
+
+module.exports = withBundleAnalyzer(withPWA(pwaConfig)(nextConfig))

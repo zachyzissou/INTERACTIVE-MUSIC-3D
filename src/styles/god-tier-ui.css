@@ -63,6 +63,9 @@
   user-select: none;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
+  bottom: 20px;
+  left: 20px;
+  top: auto !important;
 }
 
 /* Panel Styling */

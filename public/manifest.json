@@ -1,19 +1,100 @@
 {
-  "name": "Oscillo - Interactive Music 3D",
+  "name": "Interactive Music 3D - Oscillo",
   "short_name": "Oscillo",
+  "description": "Next-generation audio-reactive 3D music playground with AI composition",
+  "start_url": "/",
   "display": "standalone",
-  "background_color": "#000000",
-  "theme_color": "#4fa3ff",
+  "background_color": "#0f0f23",
+  "theme_color": "#4ade80",
+  "orientation": "landscape-primary",
+  "scope": "/",
+  "lang": "en-US",
+  "categories": ["music", "entertainment", "productivity"],
+  "screenshots": [
+    {
+      "src": "/screenshots/desktop-wide.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "platform": "wide",
+      "label": "Desktop experience"
+    },
+    {
+      "src": "/screenshots/mobile-narrow.png", 
+      "sizes": "393x852",
+      "type": "image/png",
+      "platform": "narrow",
+      "label": "Mobile experience"
+    }
+  ],
   "icons": [
     {
       "src": "/oscillo-logo.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/oscillo-logo.png",
+      "sizes": "96x96", 
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/oscillo-logo.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/oscillo-logo.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/oscillo-logo.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/oscillo-logo.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/oscillo-logo.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "maskable any"
     },
     {
       "src": "/oscillo-logo.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "maskable any"
     }
+  ],
+  "shortcuts": [
+    {
+      "name": "Quick Play",
+      "short_name": "Play",
+      "description": "Jump directly into music creation",
+      "url": "/?quick=true",
+      "icons": [
+        {
+          "src": "/oscillo-logo.png",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ],
+  "features": [
+    "WebGPU rendering",
+    "AI music generation", 
+    "Real-time audio processing",
+    "3D interactive interface",
+    "Offline support"
   ]
 }

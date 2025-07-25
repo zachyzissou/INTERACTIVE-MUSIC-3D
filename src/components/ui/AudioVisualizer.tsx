@@ -21,7 +21,7 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({ audioData }) => {
     // Update heights via direct DOM manipulation to avoid inline styles
     barsRef.current.forEach((bar, i) => {
       if (bar) {
-        const height = Math.max(4, (audioData.spectrum?.[i] || Math.random() * 0.3) * 40)
+        const height = Math.max(4, (audioData.spectrum?.[i] || 0) * 40)
         bar.style.height = `${height}px`
       }
     })
