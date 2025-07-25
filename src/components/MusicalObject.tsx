@@ -59,7 +59,6 @@ const MusicalObjectInstances: React.FC = () => {
                     e.stopPropagation()
                     
                     // Immediate visual feedback
-                    console.log(`🎵 CLICKED ${obj.type.toUpperCase()} ${obj.id}`)
                     
                     // Flash effect - make the shape briefly larger and brighter
                     const mesh = e.object
@@ -75,11 +74,9 @@ const MusicalObjectInstances: React.FC = () => {
                     
                     // Try to play sound
                     const success = await triggerSound(obj.type, obj.id)
-                    console.log(`🔊 Sound result: ${success ? 'SUCCESS' : 'FAILED'}`)
                     
                     // Show user feedback
                     if (success) {
-                      console.log(`✅ ${obj.type} sound played successfully!`)
                     } else {
                       console.warn(`❌ ${obj.type} sound failed - check audio initialization`)
                     }
@@ -96,24 +93,41 @@ const MusicalObjectInstances: React.FC = () => {
 }
 
 const MusicalObject: React.FC = () => {
-  const level = usePerformanceSettings((s) => s.level)
-  const instanced = level !== 'low'
   const objects = useObjects((s) => s.objects)
-  if (!instanced) {
-    return (
-      <>
-        {objects.map((o) => (
-          <SingleMusicalObject
-            key={o.id}
-            id={o.id}
-            type={o.type}
-            position={o.position}
-          />
-        ))}
-      </>
-    )
-  }
-  return <MusicalObjectInstances />
+  const select = useSelectedShape((s) => s.selectShape)
+  
+  // Temporarily use simple meshes for debugging visibility
+  return (
+    <>
+      {objects.map((obj) => {
+        const config = objectConfigs[obj.type]
+        return (
+          <mesh
+            key={obj.id}
+            position={obj.position}
+            scale={[2, 2, 2]} // Make them very large for visibility
+            onClick={async (e) => {
+              e.stopPropagation()
+              select(obj.id)
+              const success = await triggerSound(obj.type, obj.id)
+            }}
+          >
+            {config.geometry === 'sphere' && <sphereGeometry args={[1, 32, 32]} />}
+            {config.geometry === 'cube' && <boxGeometry args={[1, 1, 1]} />}
+            {config.geometry === 'torus' && <torusGeometry args={[1, 0.4, 16, 32]} />}
+            {config.geometry === 'torusKnot' && <torusKnotGeometry args={[1, 0.3, 64, 16]} />}
+            <meshStandardMaterial 
+              color={config.color} 
+              emissive={config.color}
+              emissiveIntensity={0.2}
+              roughness={0.3}
+              metalness={0.7}
+            />
+          </mesh>
+        )
+      })}
+    </>
+  )
 }
 
 export default MusicalObject

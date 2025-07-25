@@ -4,7 +4,7 @@ import { playNote, playChord, playBeat, startLoop } from './audio'
 /**
  * Trigger a sound based on object type with proper error handling and user feedback.
  */
-export async function triggerSound(type: ObjectType, id: string): Promise<void> {
+export async function triggerSound(type: ObjectType, id: string): Promise<boolean> {
   try {
     let success = false
     
@@ -24,17 +24,20 @@ export async function triggerSound(type: ObjectType, id: string): Promise<void> 
       document.dispatchEvent(new CustomEvent('sound-triggered', { 
         detail: { type, id, success: true } 
       }))
+      return true
     } else {
       console.warn(`Sound trigger failed for ${type} ${id} - audio may not be initialized`)
       // Attempt to reinitialize audio on user interaction
       const { initAudioEngine } = await import('./audio')
       await initAudioEngine()
+      return false
     }
     
   } catch (error) {
     console.error(`Error triggering sound for ${type} ${id}:`, error)
     document.dispatchEvent(new CustomEvent('sound-triggered', { 
-      detail: { type, id, success: false, error: error.message } 
+      detail: { type, id, success: false, error: String(error) } 
     }))
+    return false
   }
 }

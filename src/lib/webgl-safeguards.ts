@@ -1,6 +1,10 @@
 // WebGL Initialization Safeguards
 // Provides robust WebGL context creation with fallbacks and error recovery
 
+interface WebGLContextEvent extends Event {
+  statusMessage?: string
+}
+
 export interface WebGLCapabilities {
   webgl2: boolean
   webgl: boolean
@@ -71,10 +75,9 @@ class WebGLSafeguards {
           const adapter = await (navigator as any).gpu?.requestAdapter()
           if (adapter) {
             capabilities.webgpu = true
-            console.log('WebGPU detected and available')
+            console.warn('WebGPU detected and available')
           }
         } catch (error) {
-          console.log('WebGPU detection failed:', error)
         }
       }
 
@@ -89,7 +92,7 @@ class WebGLSafeguards {
         if (gl) {
           capabilities.webgl2 = true
           capabilities.webgl = true
-          console.log('WebGL2 context created successfully')
+          console.warn('WebGL2 context created successfully')
         }
       } catch (error) {
         console.warn('WebGL2 context creation failed:', error)
@@ -108,7 +111,7 @@ class WebGLSafeguards {
           
           if (gl) {
             capabilities.webgl = true
-            console.log('WebGL1 context created successfully')
+            console.warn('WebGL1 context created successfully')
           }
         } catch (error) {
           console.warn('WebGL1 context creation failed:', error)
@@ -198,7 +201,7 @@ class WebGLSafeguards {
           try {
             gl = canvas.getContext('webgl2', contextOptions) as WebGL2RenderingContext
             if (gl) {
-              console.log(`WebGL2 context created (attempt ${attempt + 1})`)
+              console.warn(`WebGL2 context created (attempt ${attempt + 1})`)
               break
             }
           } catch (error) {
@@ -215,7 +218,7 @@ class WebGLSafeguards {
               gl = canvas.getContext('experimental-webgl', contextOptions) as WebGLRenderingContext
             }
             if (gl) {
-              console.log(`WebGL1 context created (attempt ${attempt + 1})`)
+              console.warn(`WebGL1 context created (attempt ${attempt + 1})`)
               break
             }
           } catch (error) {
@@ -267,7 +270,7 @@ class WebGLSafeguards {
     }
 
     const handleContextRestored = () => {
-      console.log('WebGL context restored')
+      console.warn('WebGL context restored')
       
       // Emit custom event for React components to handle
       canvas.dispatchEvent(new CustomEvent('webgl-context-restored', {
@@ -275,8 +278,8 @@ class WebGLSafeguards {
       }))
     }
 
-    canvas.addEventListener('webglcontextlost', handleContextLost, false)
-    canvas.addEventListener('webglcontextrestored', handleContextRestored, false)
+    canvas.addEventListener('webglcontextlost', handleContextLost as EventListener, false)
+    canvas.addEventListener('webglcontextrestored', handleContextRestored as EventListener, false)
   }
 
   // Utility method to check if WebGL is likely to work

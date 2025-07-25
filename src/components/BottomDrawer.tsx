@@ -57,16 +57,13 @@ export default function BottomDrawer() {
       return
     }
     
-    console.log(`🎵 BottomDrawer: Playing ${target.type} with mode ${mode}`)
     
     if (playing && target.type === 'loop') {
       const { stopLoop } = require('@/lib/audio')
       stopLoop(selected)
       setPlaying(false)
-      console.log('🔇 BottomDrawer: Stopped loop')
     } else {
       const success = await triggerSound(mode as any, selected)
-      console.log(`🔊 BottomDrawer: Sound result: ${success ? 'SUCCESS' : 'FAILED'}`)
       setPlaying(success)
     }
   }, [selected, objects, playing, mode])

@@ -1,7 +1,7 @@
 'use client'
 import React, { Suspense } from 'react'
 import { Canvas, useThree } from '@react-three/fiber'
-import { Physics } from '@react-three/rapier'
+// import { Physics } from '@react-three/rapier'
 import { PerspectiveCamera, AdaptiveDpr, Stars, Float } from '@react-three/drei'
 import { getGPUTier } from 'detect-gpu'
 import { advancedRenderer } from '../lib/renderer'
@@ -16,6 +16,7 @@ import AudioReactivePostProcess from './AudioReactivePostProcess'
 import PostProcessErrorBoundary from './PostProcessErrorBoundary'
 import AudioReactiveShaderBackground from './AudioReactiveShaderBackground'
 import SceneLights from './SceneLights'
+import FloatingPanelManager from './ui/FloatingPanelManager'
 import { usePerformanceSettings } from '../store/usePerformanceSettings'
 import { useAudioSettings } from '../store/useAudioSettings'
 import { useShaderSettings } from '../store/useShaderSettings'
@@ -66,7 +67,7 @@ export default function CanvasScene() {
   const rendererRef = React.useRef<THREE.WebGLRenderer | null>(null)
   const contextLostRef = React.useRef(false)
   const [webglError, setWebglError] = React.useState<string | null>(null)
-  const [isInitializing, setIsInitializing] = React.useState(true)
+  const [isInitializing, setIsInitializing] = React.useState(true) // RESTORE INITIALIZATION
   const setPerf = usePerformanceSettings((s) => s.setLevel)
   const perfLevel = usePerformanceSettings((s) => s.level)
   const volume = useAudioSettings((s) => s.volume)
@@ -81,91 +82,17 @@ export default function CanvasScene() {
         setIsInitializing(true)
         setWebglError(null)
 
-        // Check WebGL availability first
-        const isAvailable = await WebGLSafeguards.isWebGLAvailable()
-        if (!isAvailable) {
-          throw new Error('WebGL is not supported on this device')
-        }
-
-        // Get performance tier from WebGL capabilities
-        const tier = await WebGLSafeguards.getPerformanceTier()
-        setPerf(tier)
-        console.log(`Performance tier set to: ${tier}`)
-
-        // Fallback to detect-gpu if needed
-        try {
-          const gpu = await getGPUTier()
-          if (gpu && gpu.tier < 1) {
-            setPerf('low')
-          } else if (gpu && gpu.tier < 3) {
-            setPerf('medium')
-          }
-        } catch (gpuError) {
-          console.warn('GPU tier detection failed, using WebGL tier:', gpuError)
-        }
+        // Simplified GPU detection
+        setPerf('medium') // Default to medium performance
         
         if (!cancelled) {
-          try {
-            // Use the advanced renderer with safeguards
-            const canvas = document.createElement('canvas')
-            
-            // Create safe WebGL context
-            const gl = await webglSafeguards.createSafeWebGLContext(canvas, {
-              preferWebGL2: tier !== 'low',
-              enableFallbacks: true,
-              retryAttempts: 3,
-              retryDelay: 1000,
-              requireWebGL: true
-            })
-
-            if (!gl) {
-              throw new Error('Failed to create WebGL context')
-            }
-
-            // Initialize renderer with the safe context
-            const renderer = await advancedRenderer.initializeRenderer(canvas)
-            rendererRef.current = renderer
-            
-            // Set up enhanced context loss/restore handlers
-            const handleContextLost = (event: CustomEvent) => {
-              contextLostRef.current = true
-              setWebglError('WebGL context lost - attempting recovery...')
-              console.warn('WebGL context lost, attempting recovery...')
-            }
-            
-            const handleContextRestored = (event: CustomEvent) => {
-              contextLostRef.current = false
-              setWebglError(null)
-              console.log('WebGL context restored successfully')
-              
-              // Reinitialize renderer after context restore
-              setTimeout(async () => {
-                try {
-                  const newRenderer = await advancedRenderer.initializeRenderer(canvas)
-                  rendererRef.current = newRenderer
-                } catch (error) {
-                  console.error('Failed to reinitialize renderer:', error)
-                  setWebglError('Failed to recover WebGL context')
-                }
-              }, 100)
-            }
-            
-            canvas.addEventListener('webgl-context-lost', handleContextLost as EventListener)
-            canvas.addEventListener('webgl-context-restored', handleContextRestored as EventListener)
-            
-            setIsInitializing(false)
-            console.log('WebGL initialization completed successfully')
-            
-          } catch (rendererError) {
-            console.error('Renderer initialization failed:', rendererError)
-            setWebglError(`Renderer initialization failed: ${rendererError.message}`)
-            setIsInitializing(false)
-          }
+          // Simple initialization - skip complex safeguards for now
+          setIsInitializing(false)
         }
         
       } catch (error) {
         console.error('GPU initialization failed:', error)
-        setWebglError(`WebGL initialization failed: ${error.message}`)
+        setWebglError(`WebGL initialization failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
         setIsInitializing(false)
       }
     }
@@ -204,7 +131,7 @@ export default function CanvasScene() {
           desynchronized: false,
         }),
       },
-      camera: { fov: 50, position: [0, 5, 10] as [number, number, number] },
+      camera: { fov: 75, position: [0, 0, 10] as [number, number, number] },
       style: { width: '100vw', height: '100vh' },
       resize: { scroll: false, debounce: { scroll: 0, resize: 0 } },
       dpr: Math.min(window.devicePixelRatio || 1, (perfLevel === 'high' && !isWebKit) ? 2 : 1),
@@ -228,8 +155,7 @@ export default function CanvasScene() {
         
         canvas.addEventListener('webglcontextlost', handleWebGLError)
         
-        // Log successful creation
-        console.log('Canvas created and ready for rendering')
+        // Canvas created and ready for rendering
       },
     }
   }, [perfLevel, webglError, isInitializing]) // Add error state dependencies
@@ -272,102 +198,33 @@ export default function CanvasScene() {
   }
 
   return (
-    <Canvas {...canvasProps}>
-      <AdaptiveDpr pixelated />
-      
-      {/* Audio-reactive shader backgrounds */}
-      {perfLevel !== 'low' && (
-        <>
-          <AudioReactiveShaderBackground
-            activeShader="metaball"
-            position={[0, 0, -15]}
-            scale={[25, 25, 1]}
-            bassLevel={0.5}
-            midLevel={0.3}
-            highLevel={0.2}
-            glitchIntensity={0}
-            enabled={true}
-            audioSensitivity={{ bass: bassSensitivity, mid: 1, high: 1 }}
-          />
-          {perfLevel === 'high' && (
-            <>
-              <AudioReactiveShaderBackground 
-                activeShader="voronoi" 
-                position={[-10, 5, -12]} 
-                scale={[15, 15, 1]} 
-                bassLevel={0.5}
-                midLevel={0.3}
-                highLevel={0.2}
-                glitchIntensity={0}
-                enabled={true}
-                audioSensitivity={{ bass: bassSensitivity, mid: 1, high: 1 }}
-              />
-              <AudioReactiveShaderBackground
-                activeShader="water"
-                position={[10, -5, -12]}
-                scale={[15, 15, 1]}
-                bassLevel={0.5}
-                midLevel={0.3}
-                highLevel={0.2}
-                glitchIntensity={0}
-                enabled={true}
-                audioSensitivity={{ bass: bassSensitivity, mid: 1, high: 1 }}
-              />
-            </>
-          )}
-        </>
-      )}
-      
-      <AnimatedGradient />
-      {perfLevel !== 'low' && <Stars radius={100} depth={50} count={1000} factor={4} saturation={0} fade />}
-      <ResizeHandler />
-      <Physics>
-        <PerspectiveCamera makeDefault fov={50} position={[0,5,10]} />
+    <div className="fixed inset-0 w-full h-full" style={{ zIndex: 0 }}>
+      <Canvas {...canvasProps}>
+        <color attach="background" args={['#0a0a0f']} />
+        <AdaptiveDpr pixelated />
+        
+        <AnimatedGradient />
+        {perfLevel !== 'low' && <Stars radius={100} depth={50} count={1000} factor={4} saturation={0} fade />}
+        <ResizeHandler />
+        <PerspectiveCamera makeDefault fov={75} position={[0, 0, 10]} near={0.1} far={1000} />
         <SceneLights />
-        
-        {/* Audio-reactive background elements */}
-        {perfLevel !== 'low' && volume > 0 && (
-          <Float speed={1} rotationIntensity={0.5} floatIntensity={0.5}>
-            <AudioReactiveOrb3D 
-              position={[-5, 3, -3]} 
-              color="#ff006e" 
-              frequency={0.2}
-              intensity={volume}
-            />
-          </Float>
-        )}
-        
-        {perfLevel === 'high' && volume > 0 && (
-          <>
-            <Float speed={1.5} rotationIntensity={0.3} floatIntensity={0.3}>
-              <AudioReactiveOrb3D 
-                position={[5, -2, -2]} 
-                color="#00d9ff" 
-                frequency={0.8}
-                intensity={volume * 0.7}
-              />
-            </Float>
-            <Float speed={0.8} rotationIntensity={0.4} floatIntensity={0.6}>
-              <AudioReactiveOrb3D 
-                position={[0, 8, -5]} 
-                color="#ffbe0b" 
-                frequency={0.5}
-                intensity={volume * 0.5}
-              />
-            </Float>
-          </>
-        )}
         
         <Suspense fallback={null}>
           <MusicalObject />
         </Suspense>
-      </Physics>
+        
+        {/* Floating UI Panels - Temporarily disabled */}
+        {false && (
+          <Suspense fallback={null}>
+            <FloatingPanelManager />
+          </Suspense>
+        )}
       
       <PlusButton3D />
       <XRButtons />
       
-      {/* Post-processing effects - temporarily disabled to fix 3D scene visibility */}
-      {false && perfLevel !== 'low' && (
+      {/* Post-processing effects */}
+      {perfLevel !== 'low' && (
         <PostProcessErrorBoundary>
           <AudioReactivePostProcess 
             intensity={volume}
@@ -378,6 +235,7 @@ export default function CanvasScene() {
           />
         </PostProcessErrorBoundary>
       )}
-    </Canvas>
+      </Canvas>
+    </div>
   )
 }

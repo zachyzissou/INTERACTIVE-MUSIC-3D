@@ -44,12 +44,7 @@ class DeploymentErrorBoundary extends Component<Props, State> {
     const { context = 'DeploymentErrorBoundary', onError } = this.props
     
     // Log error details
-    logger.error(`Error caught in ${context}:`, {
-      error: error.message,
-      stack: error.stack,
-      componentStack: errorInfo.componentStack,
-      retryCount: this.state.retryCount
-    })
+    logger.error(`Error caught in ${context}: ${error.message} | Stack: ${error.stack || 'No stack trace'} | Component Stack: ${errorInfo.componentStack} | Retry Count: ${this.state.retryCount}`)
 
     this.setState({
       error,

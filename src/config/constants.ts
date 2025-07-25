@@ -25,4 +25,4 @@ export const PARTICLE_COUNT_LOW = 256
 export const PARTICLE_COUNT_HIGH = 1024
 
 export const PLANE_SIZE = 1
-export const SHAPE_RADIUS = 0.5
+export const SHAPE_RADIUS = 1.5

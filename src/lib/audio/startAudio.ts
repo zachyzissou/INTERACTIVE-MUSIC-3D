@@ -8,7 +8,8 @@ export async function startAudio(): Promise<boolean> {
     await playSpawnSound()
     return true
   } catch (err) {
-    console.error('Audio failed to start', err)
+    console.error('Audio failed to start:', err)
+    useAudioEngine.getState().setError(String(err))
     return false
   }
 }
