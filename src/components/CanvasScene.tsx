@@ -1,25 +1,15 @@
 'use client'
 import React, { Suspense } from 'react'
 import { Canvas, useThree } from '@react-three/fiber'
-// import { Physics } from '@react-three/rapier'
-import { PerspectiveCamera, AdaptiveDpr, Stars, Float } from '@react-three/drei'
-import { getGPUTier } from 'detect-gpu'
-import { advancedRenderer } from '../lib/renderer'
-import { webglSafeguards, WebGLSafeguards } from '../lib/webgl-safeguards'
+import { PerspectiveCamera, AdaptiveDpr } from '@react-three/drei'
 import * as THREE from 'three'
-import AnimatedGradient from './AnimatedGradient'
 import MusicalObject from './MusicalObject'
 import PlusButton3D from './PlusButton3D'
-import XRButtons from './XRButtons'
-import AudioReactiveOrb3D from './AudioReactiveOrb3D'
-import AudioReactivePostProcess from './AudioReactivePostProcess'
-import PostProcessErrorBoundary from './PostProcessErrorBoundary'
 import AudioReactiveShaderBackground from './AudioReactiveShaderBackground'
 import SceneLights from './SceneLights'
-import FloatingPanelManager from './ui/FloatingPanelManager'
+import BottomDrawer from './BottomDrawer'
+import ModernStartOverlay from './ui/ModernStartOverlay'
 import { usePerformanceSettings } from '../store/usePerformanceSettings'
-import { useAudioSettings } from '../store/useAudioSettings'
-import { useShaderSettings } from '../store/useShaderSettings'
 
 function ResizeHandler() {
   const { camera, gl, viewport } = useThree()
@@ -70,8 +60,6 @@ export default function CanvasScene() {
   const [isInitializing, setIsInitializing] = React.useState(true) // RESTORE INITIALIZATION
   const setPerf = usePerformanceSettings((s) => s.setLevel)
   const perfLevel = usePerformanceSettings((s) => s.level)
-  const volume = useAudioSettings((s) => s.volume)
-  const bassSensitivity = useShaderSettings((s) => s.bassSensitivity)
   
   React.useEffect(() => {
     let cancelled = false
@@ -83,7 +71,10 @@ export default function CanvasScene() {
         setWebglError(null)
 
         // Simplified GPU detection
-        setPerf('medium') // Default to medium performance
+        const isMobile = /Mobi|Android/i.test(navigator.userAgent)
+        const mem = (navigator as any).deviceMemory || 4
+        const isHeadless = /HeadlessChrome/i.test(navigator.userAgent)
+        setPerf(isMobile || mem < 4 || isHeadless ? 'low' : 'medium')
         
         if (!cancelled) {
           // Simple initialization - skip complex safeguards for now
@@ -203,39 +194,24 @@ export default function CanvasScene() {
         <color attach="background" args={['#0a0a0f']} />
         <AdaptiveDpr pixelated />
         
-        <AnimatedGradient />
-        {perfLevel !== 'low' && <Stars radius={100} depth={50} count={1000} factor={4} saturation={0} fade />}
-        <ResizeHandler />
-        <PerspectiveCamera makeDefault fov={75} position={[0, 0, 10]} near={0.1} far={1000} />
-        <SceneLights />
-        
         <Suspense fallback={null}>
+          <SceneLights />
           <MusicalObject />
-        </Suspense>
-        
-        {/* Floating UI Panels - Temporarily disabled */}
-        {false && (
-          <Suspense fallback={null}>
-            <FloatingPanelManager />
-          </Suspense>
-        )}
-      
-      <PlusButton3D />
-      <XRButtons />
-      
-      {/* Post-processing effects */}
-      {perfLevel !== 'low' && (
-        <PostProcessErrorBoundary>
-          <AudioReactivePostProcess 
-            intensity={volume}
-            enableGlitch={perfLevel === 'high'}
-            enableBloom={true}
-            enableChromatic={perfLevel === 'high'}
-            performanceLevel={perfLevel}
+          <PlusButton3D />
+          <AudioReactiveShaderBackground
+            bassLevel={0}
+            midLevel={0}
+            highLevel={0}
+            activeShader="metaball"
+            glitchIntensity={0.5}
+            enabled={perfLevel !== 'low'}
+            audioSensitivity={{ bass: 1, mid: 1, high: 1 }}
           />
-        </PostProcessErrorBoundary>
-      )}
+          {/* Post-processing temporarily disabled for stability */}
+        </Suspense>
       </Canvas>
+      <BottomDrawer />
+      <ModernStartOverlay />
     </div>
   )
 }
