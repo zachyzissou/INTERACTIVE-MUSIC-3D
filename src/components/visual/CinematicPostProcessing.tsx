@@ -279,11 +279,13 @@ export default function CinematicPostProcessing({
       }
 
       // Add subtle film grain
-      <Noise
-        key="noise"
-        opacity={0.015}
-        blendFunction={BlendFunction.OVERLAY}
-      />
+      baseEffects.push(
+        <Noise
+          key="noise"
+          opacity={0.015}
+          blendFunction={BlendFunction.OVERLAY}
+        />
+      )
 
       // Theme-specific color effects
       if (theme === 'cyberpunk') {

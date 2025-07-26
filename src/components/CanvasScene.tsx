@@ -7,7 +7,6 @@ import MusicalObject from './MusicalObject'
 import PlusButton3D from './PlusButton3D'
 import AudioReactiveShaderBackground from './AudioReactiveShaderBackground'
 import SceneLights from './SceneLights'
-import CinematicPostProcessing from './visual/CinematicPostProcessing'
 import BottomDrawer from './BottomDrawer'
 import ModernStartOverlay from './ui/ModernStartOverlay'
 import { usePerformanceSettings } from '../store/usePerformanceSettings'
@@ -74,7 +73,8 @@ export default function CanvasScene() {
         // Simplified GPU detection
         const isMobile = /Mobi|Android/i.test(navigator.userAgent)
         const mem = (navigator as any).deviceMemory || 4
-        setPerf(isMobile || mem < 4 ? 'low' : 'medium')
+        const isHeadless = /HeadlessChrome/i.test(navigator.userAgent)
+        setPerf(isMobile || mem < 4 || isHeadless ? 'low' : 'medium')
         
         if (!cancelled) {
           // Simple initialization - skip complex safeguards for now
@@ -207,9 +207,7 @@ export default function CanvasScene() {
             enabled={perfLevel !== 'low'}
             audioSensitivity={{ bass: 1, mid: 1, high: 1 }}
           />
-          {perfLevel !== 'low' && (
-            <CinematicPostProcessing theme="ethereal" intensity={1.0} />
-          )}
+          {/* Post-processing temporarily disabled for stability */}
         </Suspense>
       </Canvas>
       <BottomDrawer />
