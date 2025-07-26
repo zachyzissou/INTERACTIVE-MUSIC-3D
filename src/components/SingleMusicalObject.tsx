@@ -4,7 +4,7 @@ import React, { useRef, useState, useMemo, useEffect, useCallback } from 'react'
 import { Object3D } from 'three'
 import { RigidBody, RapierRigidBody } from '@react-three/rapier'
 import { useFrame, useThree } from '@react-three/fiber'
-import { useSpring, a } from '@react-spring/three'
+import { useSpring, animated } from '@react-spring/three'
 import * as THREE from 'three'
 import { getObjectMeter, getObjectPanner } from '../lib/audio'
 import type { Meter } from 'tone'
@@ -19,10 +19,11 @@ interface MusicalObjectProps {
   readonly id: string
   readonly type: ObjectType
   readonly position: readonly [number, number, number]
+  readonly children?: React.ReactNode
 }
 
 
-export const SingleMusicalObject: React.FC<MusicalObjectProps> = ({ id, type, position }) => {
+export const SingleMusicalObject: React.FC<MusicalObjectProps> = ({ id, type, position, children }) => {
   // physics body using Rapier
   const bodyRef = useRef<RapierRigidBody | null>(null)
   const meshRef = useRef<Object3D>(null)
@@ -104,6 +105,8 @@ export const SingleMusicalObject: React.FC<MusicalObjectProps> = ({ id, type, po
 
   const onMiss = useCallback(() => setDragging(false), [])
 
+  const AnimatedGroup: any = (animated as any).group
+
   return (
     <RigidBody
       ref={bodyRef}
@@ -117,7 +120,7 @@ export const SingleMusicalObject: React.FC<MusicalObjectProps> = ({ id, type, po
         pannerRef.current = getObjectPanner(id)
       }}
     >
-      <a.group
+      <AnimatedGroup
         ref={meshRef as React.MutableRefObject<Object3D>}
         scale={springs.scale.to((s) => s * objectConfigs[type].baseScale)}
         onPointerDown={onPointerDown}
@@ -126,7 +129,8 @@ export const SingleMusicalObject: React.FC<MusicalObjectProps> = ({ id, type, po
         onPointerMissed={onMiss}
       >
         <ProceduralShape type={type} />
-      </a.group>
+        {children}
+      </AnimatedGroup>
     </RigidBody>
   )
 }

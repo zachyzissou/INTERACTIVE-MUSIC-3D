@@ -9,6 +9,7 @@ import { useSelectedShape } from '../store/useSelectedShape'
 import { usePhysicsStore } from '../lib/physics'
 import * as THREE from 'three'
 import SingleMusicalObject from './SingleMusicalObject'
+import BlobbyNote from './BlobbyNote'
 import { usePerformanceSettings } from '../store/usePerformanceSettings'
 import { triggerSound } from '../lib/soundTriggers'
 import { logger } from '../lib/logger'
@@ -55,7 +56,7 @@ const MusicalObjectInstances: React.FC = () => {
                   position={pos}
                   rotation={rot}
                   scale={objectConfigs[t].baseScale}
-                  onClick={async (e) => {
+                  onClick={async (e: any) => {
                     e.stopPropagation()
                     
                     // Immediate visual feedback
@@ -105,24 +106,28 @@ const MusicalObject: React.FC = () => {
           <mesh
             key={obj.id}
             position={obj.position}
-            scale={[2, 2, 2]} // Make them very large for visibility
+            scale={[2, 2, 2]}
             onClick={async (e) => {
               e.stopPropagation()
               select(obj.id)
               const success = await triggerSound(obj.type, obj.id)
             }}
           >
-            {config.geometry === 'sphere' && <sphereGeometry args={[1, 32, 32]} />}
+            {config.geometry === 'sphere' && (
+              <BlobbyNote intensity={config.pulseIntensity ?? 0.5} color={config.color ?? '#00bfff'} />
+            )}
             {config.geometry === 'cube' && <boxGeometry args={[1, 1, 1]} />}
             {config.geometry === 'torus' && <torusGeometry args={[1, 0.4, 16, 32]} />}
             {config.geometry === 'torusKnot' && <torusKnotGeometry args={[1, 0.3, 64, 16]} />}
-            <meshStandardMaterial 
-              color={config.color} 
-              emissive={config.color}
-              emissiveIntensity={0.2}
-              roughness={0.3}
-              metalness={0.7}
-            />
+            {config.geometry !== 'sphere' && (
+              <meshStandardMaterial
+                color={config.color}
+                emissive={config.color}
+                emissiveIntensity={0.2}
+                roughness={0.3}
+                metalness={0.7}
+              />
+            )}
           </mesh>
         )
       })}
