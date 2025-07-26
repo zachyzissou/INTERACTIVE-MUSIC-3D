@@ -13,7 +13,7 @@ test.describe('Essential Functionality Verification - Smoke Tests', () => {
     await expect(startOverlay).toBeVisible({ timeout: 8000 });
     
     // Verify start overlay content
-    await expect(page.locator('text=Let\'s begin your sonic voyage')).toBeVisible({ timeout: 5000 });
+    await expect(page.locator('text=Interactive 3D Music Experience')).toBeVisible({ timeout: 5000 });
     await expect(page.locator('[data-testid="start-button"]')).toBeVisible();
     
     // Click start to begin the experience
