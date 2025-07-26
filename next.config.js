@@ -1,5 +1,5 @@
 /** @type {import('next').NextConfig} */
-const withPWA = require('next-pwa')
+const withPWA = require('@ducanh2912/next-pwa').default
 const bundleAnalyzer = require('@next/bundle-analyzer')
 const path = require('path')
 
@@ -8,20 +8,22 @@ const withBundleAnalyzer = bundleAnalyzer({
 })
 
 const nextConfig = {
-  // Enable experimental features for better performance
-  experimental: {
-    turbo: {
-      rules: {
-        '*.wgsl': {
-          loaders: ['raw-loader'],
-          as: '*.js',
-        },
-        '*.glsl': {
-          loaders: ['raw-loader'], 
-          as: '*.js',
-        },
+  // Turbopack configuration (now stable in Next.js 15)
+  turbopack: {
+    rules: {
+      '*.wgsl': {
+        loaders: ['raw-loader'],
+        as: '*.js',
+      },
+      '*.glsl': {
+        loaders: ['raw-loader'], 
+        as: '*.js',
       },
     },
+  },
+  
+  // Enable experimental features for better performance
+  experimental: {
     webpackBuildWorker: true,
     optimizeCss: true,
     optimizePackageImports: ['three', '@react-three/fiber', '@react-three/drei'],
@@ -93,7 +95,7 @@ const nextConfig = {
   compress: true,
   poweredByHeader: false,
   reactStrictMode: true,
-  swcMinify: true,
+  // swcMinify is now default in Next.js 15
   output: 'standalone',
 
   // Webpack configuration for WebGPU and shader support

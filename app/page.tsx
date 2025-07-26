@@ -40,16 +40,18 @@ function StartOverlay({ onStart }: { onStart: () => Promise<void> }) {
   }
   
   return (
-    <div style={{
-      position: 'fixed',
-      inset: 0,
-      backgroundColor: 'rgba(0, 0, 0, 0.95)',
-      backdropFilter: 'blur(10px)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      zIndex: 50
-    }}>
+    <div 
+      data-testid="start-overlay"
+      style={{
+        position: 'fixed',
+        inset: 0,
+        backgroundColor: 'rgba(0, 0, 0, 0.95)',
+        backdropFilter: 'blur(10px)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 50
+      }}>
       <div style={{ textAlign: 'center' }}>
         <div style={{ textAlign: 'center', marginBottom: '40px' }}>
           <div style={{
@@ -79,6 +81,7 @@ function StartOverlay({ onStart }: { onStart: () => Promise<void> }) {
         </div>
         
         <button
+          data-testid="start-button"
           onClick={handleStart}
           disabled={loading}
           style={{
@@ -161,7 +164,33 @@ export default function Home() {
       {!started && <StartOverlay onStart={handleStart} />}
       
       {started && (
-        <WorkingMusicalCanvas />
+        <div 
+          id="main-content" 
+          data-testid="main-content"
+          style={{
+            position: 'fixed',
+            inset: 0,
+            width: '100%',
+            height: '100%',
+            zIndex: 10
+          }}
+        >
+          <Suspense fallback={
+            <div style={{
+              position: 'absolute',
+              inset: 0,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: 'white',
+              fontSize: '18px'
+            }}>
+              Loading 3D Experience...
+            </div>
+          }>
+            <WorkingMusicalCanvas />
+          </Suspense>
+        </div>
       )}
     </div>
   )

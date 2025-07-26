@@ -11,7 +11,7 @@ test.describe('Oscillo Application', () => {
 
   test('start overlay appears and functions', async ({ page }) => {
     // Check if start overlay is visible
-    await expect(page.locator('[data-testid="start-overlay"], .start-overlay, [class*="start"]')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('[data-testid="start-overlay"]')).toBeVisible({ timeout: 10000 });
   });
 
   test('canvas renders after start', async ({ page, browserName }) => {
