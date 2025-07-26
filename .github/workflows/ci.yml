@@ -15,7 +15,7 @@ jobs:
         with:
           node-version: 20
           cache: 'npm'
-      - run: npm ci --legacy-peer-deps
+      - run: npm ci
       - run: npx tsc --noEmit
       - run: npm run lint
       - run: npm run build
@@ -48,7 +48,7 @@ jobs:
         with:
           node-version: 20
           cache: 'npm'
-      - run: npm ci --legacy-peer-deps
+      - run: npm ci
       - name: Download build artifacts
         uses: actions/download-artifact@v4
         with:
@@ -86,7 +86,7 @@ jobs:
         with:
           node-version: 20
           cache: 'npm'
-      - run: npm ci --legacy-peer-deps
+      - run: npm ci
       - name: Download build artifacts
         uses: actions/download-artifact@v4
         with:

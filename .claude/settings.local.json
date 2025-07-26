@@ -42,7 +42,11 @@
       "Bash(npm start)",
       "Bash(npx next:*)",
       "Bash(git push:*)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(npm ls:*)",
+      "Bash(npm view:*)",
+      "Bash(npm search:*)",
+      "Bash(npx playwright:*)"
     ],
     "deny": []
   }
