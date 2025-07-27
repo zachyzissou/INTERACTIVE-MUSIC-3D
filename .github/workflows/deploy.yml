@@ -12,6 +12,7 @@ on:
 jobs:
   build-and-deploy:
     runs-on: [self-hosted, interactive-music-3d]
+    timeout-minutes: 30
 
     env:
       NEXT_TELEMETRY_DISABLED: 1
@@ -69,42 +70,74 @@ jobs:
         with:
           driver: docker-container
 
-      - name: Rebuild & restart web container
+      - name: 🧹 Clean up existing containers and processes
+        if: steps.changes.outputs.src == 'true'
+        run: |
+          echo "=== Cleanup Phase ==="
+          # Stop and remove containers aggressively
+          docker stop interactive-music-web || true
+          docker rm -f interactive-music-web || true
+          
+          # Remove all containers using the image
+          docker ps -a --filter "ancestor=interactive-music-web" --format "{{.ID}}" | xargs -r docker rm -f || true
+          
+          # Find and kill processes on port 31415
+          echo "Checking for processes on port 31415..."
+          netstat -tlnp 2>/dev/null | grep ':31415 ' || echo "No processes found on port 31415"
+          
+          # Kill any processes using port 31415
+          netstat -tlnp 2>/dev/null | grep ':31415 ' | awk '{print $7}' | cut -d'/' -f1 | xargs -r kill -9 || true
+          
+          # Wait and verify port is free
+          sleep 3
+          if netstat -tln 2>/dev/null | grep -q ':31415 '; then
+            echo "⚠️  Port 31415 still in use, attempting to force free it..."
+            # More aggressive cleanup if needed
+            docker ps -q | xargs -r docker stop || true
+            sleep 2
+          else
+            echo "✅ Port 31415 is free"
+          fi
+
+      - name: 🔨 Build Docker image
         if: steps.changes.outputs.src == 'true'
         env:
           DOCKER_BUILDKIT: 1
         run: |
-          echo "Building Docker image from workspace"
+          echo "=== Build Phase ==="
+          echo "Building Docker image with buildx..."
           docker buildx build \
             --load \
             --cache-from=type=local,src=./.buildcache \
             --cache-to=type=local,dest=./.buildcache,mode=max \
-            -t interactive-music-web .
-          echo "Stopping and removing old container if exists"
-          docker stop interactive-music-web || true
-          docker rm -f interactive-music-web || true
-          
-          # More aggressive cleanup - remove any containers using the image
-          docker ps -a --filter "ancestor=interactive-music-web" --format "{{.ID}}" | xargs -r docker rm -f || true
-          
-          # Kill any processes using port 31415 using netstat (more compatible than lsof)
-          netstat -tlnp 2>/dev/null | grep ':31415 ' | awk '{print $7}' | cut -d'/' -f1 | xargs -r kill -9 || true
-          
-          # Wait longer for port to be fully released
-          sleep 5
-          
-          # Final check - if port is still in use, find and kill the process
-          for i in {1..10}; do
-            if ! netstat -tln 2>/dev/null | grep -q ':31415 '; then
-              echo "Port 31415 is now free"
-              break
-            fi
-            echo "Port 31415 still in use, waiting... (attempt $i/10)"
-            sleep 2
-          done
-          
-          echo "Starting new container from built image"
+            -t interactive-music-web . || {
+              echo "❌ Docker build failed"
+              exit 1
+            }
+          echo "✅ Docker build completed successfully"
+
+      - name: 🚀 Start new container
+        if: steps.changes.outputs.src == 'true'
+        run: |
+          echo "=== Deploy Phase ==="
+          echo "Starting new container from built image..."
           docker run -d --name interactive-music-web \
             --restart unless-stopped \
             -p 31415:3000 \
-            interactive-music-web
+            interactive-music-web || {
+              echo "❌ Container start failed"
+              docker logs interactive-music-web || true
+              exit 1
+            }
+          echo "✅ Container started successfully"
+          
+          # Verify container is running
+          sleep 2
+          if docker ps | grep -q interactive-music-web; then
+            echo "✅ Container is running and healthy"
+            docker ps | grep interactive-music-web
+          else
+            echo "❌ Container failed to start properly"
+            docker logs interactive-music-web || true
+            exit 1
+          fi
