@@ -74,29 +74,46 @@ jobs:
         if: steps.changes.outputs.src == 'true'
         run: |
           echo "=== Cleanup Phase ==="
-          # Stop and remove containers aggressively
-          docker stop interactive-music-web || true
-          docker rm -f interactive-music-web || true
           
-          # Remove all containers using the image
+          # Nuclear cleanup - stop ALL containers first
+          echo "Stopping all running containers..."
+          docker ps -q | xargs -r docker stop || true
+          
+          # Remove all containers with our name
+          docker ps -a --filter "name=interactive-music-web" --format "{{.ID}}" | xargs -r docker rm -f || true
+          
+          # Remove containers by image name too
           docker ps -a --filter "ancestor=interactive-music-web" --format "{{.ID}}" | xargs -r docker rm -f || true
           
-          # Find and kill processes on port 31415
-          echo "Checking for processes on port 31415..."
-          netstat -tlnp 2>/dev/null | grep ':31415 ' || echo "No processes found on port 31415"
+          # Remove orphaned containers
+          docker container prune -f || true
           
-          # Kill any processes using port 31415
-          netstat -tlnp 2>/dev/null | grep ':31415 ' | awk '{print $7}' | cut -d'/' -f1 | xargs -r kill -9 || true
+          # Check multiple ports (31415 and 3000) for conflicts
+          echo "Checking for port conflicts..."
+          for port in 31415 3000; do
+            if netstat -tln 2>/dev/null | grep -q ":$port "; then
+              echo "⚠️  Port $port is in use"
+              # Try to find and kill the process
+              pid=$(netstat -tlnp 2>/dev/null | grep ":$port " | awk '{print $7}' | cut -d'/' -f1 | head -1)
+              if [ ! -z "$pid" ] && [ "$pid" != "-" ]; then
+                echo "Killing process $pid on port $port"
+                kill -9 "$pid" || true
+              fi
+            else
+              echo "✅ Port $port is free"
+            fi
+          done
           
-          # Wait and verify port is free
-          sleep 3
+          # Wait for ports to be released
+          sleep 5
+          
+          # Final verification
           if netstat -tln 2>/dev/null | grep -q ':31415 '; then
-            echo "⚠️  Port 31415 still in use, attempting to force free it..."
-            # More aggressive cleanup if needed
-            docker ps -q | xargs -r docker stop || true
-            sleep 2
+            echo "❌ Port 31415 still occupied, using alternative port 31416"
+            echo "ALTERNATIVE_PORT=31416" >> $GITHUB_ENV
           else
-            echo "✅ Port 31415 is free"
+            echo "✅ Port 31415 is available"
+            echo "ALTERNATIVE_PORT=31415" >> $GITHUB_ENV
           fi
 
       - name: 🔨 Build Docker image
@@ -120,24 +137,33 @@ jobs:
         if: steps.changes.outputs.src == 'true'
         run: |
           echo "=== Deploy Phase ==="
-          echo "Starting new container from built image..."
+          echo "Starting new container on port ${ALTERNATIVE_PORT}..."
           docker run -d --name interactive-music-web \
             --restart unless-stopped \
-            -p 31415:3000 \
+            -p ${ALTERNATIVE_PORT}:3000 \
             interactive-music-web || {
               echo "❌ Container start failed"
               docker logs interactive-music-web || true
               exit 1
             }
-          echo "✅ Container started successfully"
+          echo "✅ Container started successfully on port ${ALTERNATIVE_PORT}"
           
           # Verify container is running
-          sleep 2
+          sleep 3
           if docker ps | grep -q interactive-music-web; then
             echo "✅ Container is running and healthy"
             docker ps | grep interactive-music-web
+            echo "🌐 Application should be accessible at: http://localhost:${ALTERNATIVE_PORT}"
           else
             echo "❌ Container failed to start properly"
             docker logs interactive-music-web || true
             exit 1
+          fi
+          
+          # Test if the application is responding
+          sleep 5
+          if curl -f http://localhost:${ALTERNATIVE_PORT} >/dev/null 2>&1; then
+            echo "✅ Application is responding on port ${ALTERNATIVE_PORT}"
+          else
+            echo "⚠️  Application may still be starting up on port ${ALTERNATIVE_PORT}"
           fi
