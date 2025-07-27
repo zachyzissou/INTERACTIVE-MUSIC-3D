@@ -2,7 +2,7 @@
 import React from "react"
 import dynamic from 'next/dynamic'
 
-const CanvasScene = dynamic(() => import('../src/components/CanvasScene'), { ssr: false })
+const SimpleWorkingCanvas = dynamic(() => import('../src/components/SimpleWorkingCanvas'), { ssr: false })
 
 
 export default function Home() {
@@ -19,7 +19,7 @@ export default function Home() {
         backgroundColor: '#0f0f23'
       }}
     >
-      <CanvasScene />
+      <SimpleWorkingCanvas />
     </div>
   )
 }
