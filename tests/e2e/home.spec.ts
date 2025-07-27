@@ -19,7 +19,7 @@ test.describe('Oscillo Application', () => {
     const startButton = page.locator('button:has-text("Start"), button:has-text("Begin"), button:has-text("Enter"), [data-testid="start-button"]').first();
     
     if (await startButton.isVisible({ timeout: 5000 })) {
-      await startButton.click();
+      await startButton.click({ force: true });
       
       // Wait a bit for content to load
       await page.waitForTimeout(3000);

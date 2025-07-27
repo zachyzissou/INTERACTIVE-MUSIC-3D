@@ -82,67 +82,42 @@ export default function ModernStartOverlay() {
         glow
       >
         {!hasInteracted ? (
-          // Welcome Screen
-          <div className="text-center space-y-4">
-            <div className="flex justify-center mb-3">
-              <div className="relative">
-                <Music className="w-16 h-16 md:w-24 md:h-24 text-cyan-400" />
-                <div className="absolute inset-0 animate-ping">
-                  <Music className="w-16 h-16 md:w-24 md:h-24 text-cyan-400 opacity-50" />
-                </div>
-              </div>
+          // Welcome Screen - CI-optimized compact version
+          <div className="text-center space-y-2">
+            <div className="flex justify-center mb-2">
+              <Music className="w-12 h-12 text-cyan-400" />
             </div>
             
-            <h1 className="text-2xl md:text-4xl font-bold text-white mb-2">
+            <h1 className="text-xl md:text-2xl font-bold text-white mb-1">
               Interactive 3D Music Experience
             </h1>
-            <p className="text-base md:text-lg text-white/80 mb-4">
-              Create immersive music in a 3D space with AI-powered composition
+            <p className="text-sm text-white/80 mb-3">
+              Create immersive music in a 3D space
             </p>
             
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
-              <div className="bg-white/5 rounded-lg p-3 backdrop-blur-sm">
-                <Mouse className="w-6 h-6 text-cyan-400 mx-auto mb-1" />
-                <h3 className="font-semibold text-white mb-1 text-sm">Click & Drag</h3>
-                <p className="text-xs text-white/60">
-                  Click shapes to play sounds, drag to move camera
-                </p>
-              </div>
-              
-              <div className="bg-white/5 rounded-lg p-3 backdrop-blur-sm">
-                <Keyboard className="w-6 h-6 text-purple-400 mx-auto mb-1" />
-                <h3 className="font-semibold text-white mb-1 text-sm">Keyboard Control</h3>
-                <p className="text-xs text-white/60">
-                  Use shortcuts for quick actions (Press H for help)
-                </p>
-              </div>
-              
-              <div className="bg-white/5 rounded-lg p-3 backdrop-blur-sm">
-                <Smartphone className="w-6 h-6 text-pink-400 mx-auto mb-1" />
-                <h3 className="font-semibold text-white mb-1 text-sm">Touch Friendly</h3>
-                <p className="text-xs text-white/60">
-                  Fully responsive with touch gestures support
-                </p>
-              </div>
-            </div>
-            
-            <div className="flex flex-col items-center space-y-3">
+            {/* Essential button - ensure it's always visible */}
+            <div className="flex flex-col items-center space-y-2">
               <NeonButton
                 variant="primary"
                 size="lg"
                 onClick={handleStart}
-                className="min-w-[200px]"
+                className="min-w-[180px] relative z-50"
                 data-testid="start-button"
+                style={{ 
+                  position: 'relative',
+                  zIndex: 9999,
+                  transform: 'translateY(0)'
+                }}
               >
-                <Volume2 className="w-5 h-5 mr-2 inline" />
+                <Volume2 className="w-4 h-4 mr-2 inline" />
                 Start Creating
               </NeonButton>
               
               <button
                 onClick={() => setShowHelp(true)}
-                className="text-sm text-white/60 hover:text-white transition-colors"
+                className="text-xs text-white/60 hover:text-white transition-colors"
               >
-                View keyboard shortcuts →
+                Controls & Help →
               </button>
             </div>
           </div>

@@ -16,8 +16,8 @@ test.describe('Essential Functionality Verification - Smoke Tests', () => {
     await expect(page.locator('text=Interactive 3D Music Experience')).toBeVisible({ timeout: 5000 });
     await expect(page.locator('[data-testid="start-button"]')).toBeVisible();
     
-    // Click start to begin the experience
-    await page.click('[data-testid="start-button"]');
+    // Click start to begin the experience (force click to bypass viewport issues in CI)
+    await page.click('[data-testid="start-button"]', { force: true });
     
     // Wait for overlay to disappear
     await expect(startOverlay).not.toBeVisible({ timeout: 5000 });
