@@ -150,6 +150,8 @@
 - Desktop: Look for "Install" button in address bar
 - Mobile: Use "Add to Home Screen" from browser menu
 - Offline mode: Basic caching via service worker
+  Service worker files (`public/sw.js`, `public/workbox-*.js`) are generated
+  during `next build` and are ignored in version control.
 
 ### **Environment Configuration**
 
