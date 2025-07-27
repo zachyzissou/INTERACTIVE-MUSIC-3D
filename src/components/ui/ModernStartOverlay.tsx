@@ -78,55 +78,55 @@ export default function ModernStartOverlay() {
     >
       <GlassPanel
         variant="neon"
-        className="max-w-2xl w-full mx-4 p-8 animate-in fade-in zoom-in duration-500"
+        className="max-w-2xl w-full max-h-[90vh] mx-4 p-4 md:p-8 animate-in fade-in zoom-in duration-500 overflow-y-auto"
         glow
       >
         {!hasInteracted ? (
           // Welcome Screen
-          <div className="text-center space-y-6">
-            <div className="flex justify-center mb-4">
+          <div className="text-center space-y-4">
+            <div className="flex justify-center mb-3">
               <div className="relative">
-                <Music className="w-24 h-24 text-cyan-400" />
+                <Music className="w-16 h-16 md:w-24 md:h-24 text-cyan-400" />
                 <div className="absolute inset-0 animate-ping">
-                  <Music className="w-24 h-24 text-cyan-400 opacity-50" />
+                  <Music className="w-16 h-16 md:w-24 md:h-24 text-cyan-400 opacity-50" />
                 </div>
               </div>
             </div>
             
-            <h1 className="text-4xl font-bold text-white mb-2">
+            <h1 className="text-2xl md:text-4xl font-bold text-white mb-2">
               Interactive 3D Music Experience
             </h1>
-            <p className="text-lg text-white/80 mb-8">
+            <p className="text-base md:text-lg text-white/80 mb-4">
               Create immersive music in a 3D space with AI-powered composition
             </p>
             
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-              <div className="bg-white/5 rounded-lg p-4 backdrop-blur-sm">
-                <Mouse className="w-8 h-8 text-cyan-400 mx-auto mb-2" />
-                <h3 className="font-semibold text-white mb-1">Click & Drag</h3>
-                <p className="text-sm text-white/60">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+              <div className="bg-white/5 rounded-lg p-3 backdrop-blur-sm">
+                <Mouse className="w-6 h-6 text-cyan-400 mx-auto mb-1" />
+                <h3 className="font-semibold text-white mb-1 text-sm">Click & Drag</h3>
+                <p className="text-xs text-white/60">
                   Click shapes to play sounds, drag to move camera
                 </p>
               </div>
               
-              <div className="bg-white/5 rounded-lg p-4 backdrop-blur-sm">
-                <Keyboard className="w-8 h-8 text-purple-400 mx-auto mb-2" />
-                <h3 className="font-semibold text-white mb-1">Keyboard Control</h3>
-                <p className="text-sm text-white/60">
+              <div className="bg-white/5 rounded-lg p-3 backdrop-blur-sm">
+                <Keyboard className="w-6 h-6 text-purple-400 mx-auto mb-1" />
+                <h3 className="font-semibold text-white mb-1 text-sm">Keyboard Control</h3>
+                <p className="text-xs text-white/60">
                   Use shortcuts for quick actions (Press H for help)
                 </p>
               </div>
               
-              <div className="bg-white/5 rounded-lg p-4 backdrop-blur-sm">
-                <Smartphone className="w-8 h-8 text-pink-400 mx-auto mb-2" />
-                <h3 className="font-semibold text-white mb-1">Touch Friendly</h3>
-                <p className="text-sm text-white/60">
+              <div className="bg-white/5 rounded-lg p-3 backdrop-blur-sm">
+                <Smartphone className="w-6 h-6 text-pink-400 mx-auto mb-1" />
+                <h3 className="font-semibold text-white mb-1 text-sm">Touch Friendly</h3>
+                <p className="text-xs text-white/60">
                   Fully responsive with touch gestures support
                 </p>
               </div>
             </div>
             
-            <div className="flex flex-col items-center space-y-4">
+            <div className="flex flex-col items-center space-y-3">
               <NeonButton
                 variant="primary"
                 size="lg"
