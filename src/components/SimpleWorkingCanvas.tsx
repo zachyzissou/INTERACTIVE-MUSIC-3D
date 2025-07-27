@@ -5,6 +5,7 @@ import { OrbitControls } from '@react-three/drei'
 import * as THREE from 'three'
 import * as Tone from 'tone'
 import { useMusicalPalette } from '../store/useMusicalPalette'
+import ModernStartOverlay from './ui/ModernStartOverlay'
 
 // Simple musical object component
 const MusicalObject = React.memo(({ 
@@ -306,6 +307,8 @@ export default function SimpleWorkingCanvas() {
           dampingFactor={0.05}
         />
       </Canvas>
+      
+      <ModernStartOverlay />
       
       {/* Simple controls */}
       <div style={{
