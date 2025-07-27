@@ -68,6 +68,7 @@ export default function ModernStartOverlay() {
   return (
     <div
       id="start-overlay"
+      data-testid="start-overlay"
       className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm"
       onClick={(e) => {
         if (e.target === e.currentTarget && hasInteracted) {
@@ -93,7 +94,7 @@ export default function ModernStartOverlay() {
             </div>
             
             <h1 className="text-4xl font-bold text-white mb-2">
-              Interactive Music 3D
+              Interactive 3D Music Experience
             </h1>
             <p className="text-lg text-white/80 mb-8">
               Create immersive music in a 3D space with AI-powered composition
@@ -131,6 +132,7 @@ export default function ModernStartOverlay() {
                 size="lg"
                 onClick={handleStart}
                 className="min-w-[200px]"
+                data-testid="start-button"
               >
                 <Volume2 className="w-5 h-5 mr-2 inline" />
                 Start Creating

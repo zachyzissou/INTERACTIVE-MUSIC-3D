@@ -1,38 +1,25 @@
 'use client'
-import React, { useRef, useEffect } from 'react'
+import React, { useEffect } from 'react'
 import * as THREE from 'three'
 import { useThree } from '@react-three/fiber'
 
 export default function SceneLights() {
   const { scene } = useThree()
-  const lightsRef = useRef<THREE.Light[]>([])
 
   useEffect(() => {
-    // Create lights
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.4)
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8)
-    const pointLight = new THREE.PointLight(0xffffff, 0.5)
-
-    // Set positions
-    directionalLight.position.set(5, 10, 5)
-    directionalLight.castShadow = true
-    pointLight.position.set(0, 5, -5)
-
-    // Configure shadow properties
-    directionalLight.shadow.mapSize.width = 2048
-    directionalLight.shadow.mapSize.height = 2048
-    directionalLight.shadow.camera.near = 0.5
-    directionalLight.shadow.camera.far = 50
-
-    // Add to scene
-    const lights = [ambientLight, directionalLight, pointLight]
+    const ambient = new THREE.AmbientLight(0x404050, 0.3)
+    const rim = new THREE.SpotLight(0x88caff, 1.0, 50, Math.PI / 4, 0.5, 1)
+    rim.position.set(-10, 15, 10)
+    const warm = new THREE.PointLight(0xffa15d, 0.6, 60)
+    warm.position.set(0, -5, 0)
+    const accent1 = new THREE.PointLight(0x7c3aed, 0.8, 40)
+    accent1.position.set(5, 8, -5)
+    const accent2 = new THREE.PointLight(0x14b8a6, 0.8, 40)
+    accent2.position.set(-5, 8, 5)
+    rim.castShadow = true
+    const lights = [ambient, rim, warm, accent1, accent2]
     lights.forEach(light => scene.add(light))
-    lightsRef.current = lights
-
-    return () => {
-      // Cleanup
-      lights.forEach(light => scene.remove(light))
-    }
+    return () => lights.forEach(light => scene.remove(light))
   }, [scene])
 
   return null

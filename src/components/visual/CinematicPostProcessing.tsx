@@ -22,7 +22,7 @@ import {
 } from '@react-three/postprocessing'
 import { BlendFunction, GlitchMode, ToneMappingMode, KernelSize } from 'postprocessing'
 import * as THREE from 'three'
-import { useAudioStore } from '@/store/useAudioEngine'
+import { useAudioStore } from '@/store/useAudioStore'
 import { usePerformanceSettings } from '@/store/usePerformanceSettings'
 
 interface CinematicPostProcessingProps {
@@ -30,13 +30,15 @@ interface CinematicPostProcessingProps {
   intensity?: number
 }
 
-export default function CinematicPostProcessing({ 
-  theme = 'ethereal', 
-  intensity = 1.0 
+export default function CinematicPostProcessing({
+  theme = 'ethereal',
+  intensity = 1.0
 }: CinematicPostProcessingProps) {
-  const { fftData, volume } = useAudioStore()
+  const { analysisData } = useAudioStore()
+  const fftData = analysisData.frequencyData
+  const volume = analysisData.volume
   const { level: perfLevel } = usePerformanceSettings()
-  const { size } = useThree()
+  const { size, gl } = useThree()
   
   // Effect refs for dynamic control
   const bloomRef = useRef<any>(null)
@@ -56,13 +58,13 @@ export default function CinematicPostProcessing({
     const bassEnd = Math.floor(fftData.length * 0.1)
     const midEnd = Math.floor(fftData.length * 0.5)
     
-    const bass = fftData.slice(0, bassEnd).reduce((a, b) => a + b, 0) / bassEnd / 255
-    const mid = fftData.slice(bassEnd, midEnd).reduce((a, b) => a + b, 0) / (midEnd - bassEnd) / 255
-    const treble = fftData.slice(midEnd).reduce((a, b) => a + b, 0) / (fftData.length - midEnd) / 255
+    const bass = fftData.slice(0, bassEnd).reduce((a: number, b: number) => a + b, 0) / bassEnd / 255
+    const mid = fftData.slice(bassEnd, midEnd).reduce((a: number, b: number) => a + b, 0) / (midEnd - bassEnd) / 255
+    const treble = fftData.slice(midEnd).reduce((a: number, b: number) => a + b, 0) / (fftData.length - midEnd) / 255
     const average = (bass + mid + treble) / 3
 
     // Detect audio peaks for dynamic effects
-    const peaks = []
+    const peaks: { frequency: number; intensity: number }[] = []
     for (let i = 1; i < fftData.length - 1; i++) {
       if (fftData[i] > fftData[i - 1] && fftData[i] > fftData[i + 1] && fftData[i] > 200) {
         peaks.push({ frequency: i, intensity: fftData[i] / 255 })
@@ -311,8 +313,14 @@ export default function CinematicPostProcessing({
     return baseEffects
   }, [perfLevel, theme, themeConfig, intensity, size])
 
+  const isWebGL2 = (gl?.getContext?.().constructor?.name || '').includes('WebGL2') || (gl as any)?.capabilities?.isWebGL2
+
+  if (!isWebGL2) {
+    return null
+  }
+
   return (
-    <EffectComposer 
+    <EffectComposer
       multisampling={perfLevel === 'high' ? 8 : perfLevel === 'medium' ? 4 : 0}
       stencilBuffer={false}
       depthBuffer={true}

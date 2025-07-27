@@ -1,11 +1,10 @@
 'use client'
 import { useThree, useFrame } from '@react-three/fiber'
-import { a, useSpring } from '@react-spring/three'
+import { animated, useSpring } from '@react-spring/three'
 import { useRef, useState } from 'react'
 import * as THREE from 'three'
 import { useObjects } from '@/store/useObjects'
 import { useSelectedShape } from '@/store/useSelectedShape'
-import { startAudioContext } from '@/lib/audio'
 // import vertex from '@/shaders/plusButton.vert'
 // import fragment from '@/shaders/plusButton.frag'
 
@@ -24,14 +23,15 @@ export default function PlusButton3D() {
     if (mat.current) mat.current.uniforms.uDistort.value = springs.distort.get()
   })
 
+  const AnimatedMesh: any = (animated as any).mesh
+
   return (
-    <a.mesh
+    <AnimatedMesh
       position={pos}
       scale={springs.scale}
       onClick={async () => {
         if (busy) return
         setBusy(true)
-        await startAudioContext()
         api.start({ distort: 1, scale: 0, config: { duration: 400 }, onRest: () => {
           const id = spawn('note')
           select(id)
@@ -46,6 +46,6 @@ export default function PlusButton3D() {
         transparent 
         opacity={1.0}
       />
-    </a.mesh>
+      </AnimatedMesh>
   )
 }
