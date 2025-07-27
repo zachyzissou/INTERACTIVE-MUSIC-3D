@@ -23,3 +23,7 @@ coverage/
 .nyc_output/
 dist/
 out/
+
+# PWA build artifacts
+public/sw.js
+public/workbox-*.js
