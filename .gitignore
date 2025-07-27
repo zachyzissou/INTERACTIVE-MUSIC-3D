@@ -27,3 +27,15 @@ out/
 # PWA build artifacts
 public/sw.js
 public/workbox-*.js
+
+# Documentation and task tracking files
+ACTIONABLE_TASKS*.md
+DEPLOYMENT_*.md
+FINAL_*.md
+PR_DESCRIPTION*.md
+TRANSFORMATION*.md
+MODERN_UI*.md
+PRODUCTION_READY*.md
+
+# Local IDE settings
+.claude/settings.local.json
