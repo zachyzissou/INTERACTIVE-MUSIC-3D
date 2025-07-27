@@ -11,7 +11,7 @@ on:
 
 jobs:
   build-and-deploy:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, interactive-music-3d]
 
     env:
       NEXT_TELEMETRY_DISABLED: 1
