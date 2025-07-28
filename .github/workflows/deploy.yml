@@ -46,8 +46,12 @@ jobs:
           # Clean up any orphaned containers with our name
           docker ps -a --filter "name=interactive-music-web" --format "{{.ID}}" | xargs -r docker rm -f 2>/dev/null || echo "No orphaned containers"
           
-          # Wait for ports to be released
-          sleep 2
+          # Clean up Docker system to release port bindings
+          echo "Cleaning up Docker system..."
+          docker system prune -f 2>/dev/null || true
+          
+          # Wait longer for Docker internal cleanup
+          sleep 5
           echo "✅ Early cleanup completed"
 
       - name: 🔄 Restore Next.js cache
@@ -92,22 +96,32 @@ jobs:
         run: |
           echo "=== Port Check Phase ==="
           
-          # Simple port check (container already removed in early cleanup)
+          # Comprehensive port check including Docker state
           echo "Checking port availability..."
-          if ss -tln 2>/dev/null | grep -q ':31415 '; then
-            if ss -tln 2>/dev/null | grep -q ':31416 '; then
-              echo "❌ Both 31415 and 31416 occupied, using port 31417"
-              echo "ALTERNATIVE_PORT=31417" >> $GITHUB_ENV
+          
+          # Try to find a free port dynamically
+          for port in 31415 31416 31417 31418; do
+            if ! ss -tln 2>/dev/null | grep -q ":$port "; then
+              # Double-check with Docker by attempting a quick test bind
+              if docker run --rm -p $port:80 --name test-port-$port alpine:latest echo "Port test" >/dev/null 2>&1; then
+                echo "✅ Port $port is available and Docker can bind to it"
+                echo "ALTERNATIVE_PORT=$port" >> $GITHUB_ENV
+                break
+              else
+                echo "⚠️  Port $port appears free but Docker cannot bind to it"
+              fi
             else
-              echo "⚠️  Port 31415 occupied, using port 31416"
-              echo "ALTERNATIVE_PORT=31416" >> $GITHUB_ENV
+              echo "❌ Port $port is occupied by system process"
             fi
-          else
-            echo "✅ Port 31415 is available"
-            echo "ALTERNATIVE_PORT=31415" >> $GITHUB_ENV
+          done
+          
+          # Fallback to high port if all low ports fail
+          if [ -z "$ALTERNATIVE_PORT" ]; then
+            echo "Using fallback high port 32415"
+            echo "ALTERNATIVE_PORT=32415" >> $GITHUB_ENV
           fi
           
-          echo "Will use port: ${ALTERNATIVE_PORT:-31415}"
+          echo "Will use port: ${ALTERNATIVE_PORT:-32415}"
 
       - name: 🔨 Build Docker image
         if: steps.changes.outputs.src == 'true'
