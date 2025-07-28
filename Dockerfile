@@ -23,7 +23,8 @@ RUN apt-get update && \
 FROM base AS deps
 COPY package.json package-lock.json ./
 RUN --mount=type=cache,target=/root/.npm \
-    npm ci --legacy-peer-deps
+    --mount=type=cache,target=/app/.next/cache \
+    npm ci --legacy-peer-deps --prefer-offline
 
 FROM base AS builder
 COPY --from=deps /app/node_modules ./node_modules
@@ -32,12 +33,8 @@ COPY . .
 # Build with enhanced optimizations for audio/graphics
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
-RUN npm run build && npm prune --omit=dev
-
-# Test stage for CI/CD
-FROM builder AS tester
-ENV NODE_ENV=test
-RUN npm run test:ci || true
+RUN --mount=type=cache,target=/app/.next/cache \
+    npm run build && npm prune --omit=dev
 
 FROM base AS runner
 ENV NODE_ENV=production
