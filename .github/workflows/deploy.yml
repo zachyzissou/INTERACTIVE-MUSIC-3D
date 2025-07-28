@@ -173,7 +173,7 @@ jobs:
           if docker ps | grep -q interactive-music-web; then
             echo "✅ Container is running and healthy"
             docker ps | grep interactive-music-web
-            echo "🌐 Application should be accessible at: http://localhost:${ALTERNATIVE_PORT}"
+            echo "🌐 Application should be accessible at: http://192.168.4.225:${ALTERNATIVE_PORT}"
           else
             echo "❌ Container failed to start properly"
             docker logs interactive-music-web || true
@@ -183,7 +183,7 @@ jobs:
           # Quick application response test
           echo "Testing application responsiveness..."
           for i in {1..4}; do
-            if curl -f --max-time 3 http://localhost:${ALTERNATIVE_PORT} >/dev/null 2>&1; then
+            if curl -f --max-time 3 http://192.168.4.225:${ALTERNATIVE_PORT} >/dev/null 2>&1; then
               echo "✅ Application is responding on port ${ALTERNATIVE_PORT}"
               break
             fi
