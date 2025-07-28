@@ -113,11 +113,11 @@ jobs:
           
           # Fallback to high port if all low ports fail
           if [ -z "$ALTERNATIVE_PORT" ]; then
-            echo "Using fallback high port 32415"
-            echo "ALTERNATIVE_PORT=32415" >> $GITHUB_ENV
+            echo "Using fallback high port 31415"
+            echo "ALTERNATIVE_PORT=31415" >> $GITHUB_ENV
           fi
-          
-          echo "Will use port: ${ALTERNATIVE_PORT:-32415}"
+
+          echo "Will use port: ${ALTERNATIVE_PORT:-31415}"
 
       - name: 🔨 Build Docker image
         if: steps.changes.outputs.src == 'true'
