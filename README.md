@@ -312,7 +312,7 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
-    restart: unless-stopped
+  restart: unless-stopped
 ```
 
 Set the `HOST_PORT` environment variable when running `docker compose up` to
