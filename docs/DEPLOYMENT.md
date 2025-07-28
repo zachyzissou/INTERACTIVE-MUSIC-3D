@@ -130,7 +130,7 @@ services:
   interactive-music-3d:
     build: .
     ports:
-      * "3000:3000"
+      * "${HOST_PORT:-31415}:3000" # Set HOST_PORT to expose a different port on the host
     environment:
       * NODE_ENV=production
       * LOG_DIR=/app/logs
@@ -138,6 +138,12 @@ services:
       * ./logs:/app/logs
       * ./uploads:/app/uploads
     restart: unless-stopped
+``` 
+
+You can override `HOST_PORT` when running `docker compose up` to bind a
+different external port, e.g. `HOST_PORT=31415 docker compose up -d`.
+
+```yaml
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
       interval: 30s
