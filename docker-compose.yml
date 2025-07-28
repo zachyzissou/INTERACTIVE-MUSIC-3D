@@ -4,10 +4,11 @@ services:
     build: .
     image: your-dockerhub-username/interactive-music-3d:latest
     ports:
-      - "3000:3000"
+      - "${WEB_PORT:-3000}:3000"
     environment:
       - NODE_ENV=production
       - LOG_DIR=/app/logs
+      - PORT=${WEB_PORT:-3000}
     volumes:
       - /mnt/user/appdata/interactive-music-3d/logs:/app/logs
       - /mnt/user/appdata/interactive-music-3d/uploads:/app/uploads

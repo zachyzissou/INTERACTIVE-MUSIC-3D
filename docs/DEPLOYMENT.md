@@ -49,7 +49,7 @@ npm run start  # Now correctly uses NODE_ENV=production
 
 ## Test security headers locally
 
-curl -I http://localhost:3000
+curl -I http://localhost:${WEB_PORT:-3000}
 
 
 ## Should see headers
@@ -112,7 +112,7 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
 USER nextjs
 EXPOSE 3000
-ENV PORT 3000
+ENV PORT ${WEB_PORT:-3000}
 ENV HOSTNAME "0.0.0.0"
 
 CMD ["node", "server.js"]
@@ -130,7 +130,7 @@ services:
   interactive-music-3d:
     build: .
     ports:
-      * "3000:3000"
+      * "${WEB_PORT:-3000}:3000" # Override with WEB_PORT if needed
     environment:
       * NODE_ENV=production
       * LOG_DIR=/app/logs
@@ -362,7 +362,7 @@ docker rm interactive-music-3d || true
 docker run -d \
   --name interactive-music-3d \
   --restart unless-stopped \
-  -p 3000:3000 \
+  -p ${WEB_PORT:-3000}:3000 \
   -e NODE_ENV=production \
   -e LOG_DIR=/app/logs \
   -v $(pwd)/logs:/app/logs \
@@ -391,7 +391,7 @@ docker rm interactive-music-3d
 
 docker run -d --name interactive-music-3d \
   --restart unless-stopped \
-  -p 3000:3000 \
+  -p ${WEB_PORT:-3000}:3000 \
   interactive-music-3d:previous-tag
 
 
