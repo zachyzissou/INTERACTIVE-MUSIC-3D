@@ -46,12 +46,8 @@ jobs:
           # Clean up any orphaned containers with our name
           docker ps -a --filter "name=interactive-music-web" --format "{{.ID}}" | xargs -r docker rm -f 2>/dev/null || echo "No orphaned containers"
           
-          # Clean up Docker system to release port bindings
-          echo "Cleaning up Docker system..."
-          docker system prune -f 2>/dev/null || true
-          
-          # Wait longer for Docker internal cleanup
-          sleep 5
+          # Short wait to ensure port is released
+          sleep 2
           echo "✅ Early cleanup completed"
 
       - name: 🔄 Restore Next.js cache
