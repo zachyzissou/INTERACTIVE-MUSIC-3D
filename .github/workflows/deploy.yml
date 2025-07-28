@@ -73,32 +73,50 @@ jobs:
       - name: 🧹 Clean up existing containers and processes
         if: steps.changes.outputs.src == 'true'
         run: |
-          echo "=== Conservative Cleanup Phase ==="
+          echo "=== Robust Cleanup Phase ==="
           
-          # Stop and remove our specific container with force
-          echo "Stopping and removing interactive-music-web container..."
-          docker stop interactive-music-web 2>/dev/null || echo "Container not running"
-          docker rm -f interactive-music-web 2>/dev/null || echo "Container not found"
+          # Find and kill any processes using our target ports first
+          echo "Checking for processes using ports 31415, 31416, and 3000..."
+          for port in 31415 31416 3000; do
+            pid=$(ss -tlnp 2>/dev/null | grep ":$port " | awk '{print $6}' | grep -o 'pid=[0-9]*' | cut -d= -f2 | head -1)
+            if [ ! -z "$pid" ]; then
+              echo "Killing process $pid using port $port"
+              kill -9 "$pid" 2>/dev/null || true
+            fi
+          done
+          
+          # Stop and remove ALL containers with our name pattern
+          echo "Stopping and removing all interactive-music-web containers..."
+          docker ps -a --filter "name=interactive-music-web" --format "{{.ID}}" | xargs -r docker stop 2>/dev/null || echo "No containers to stop"
+          docker ps -a --filter "name=interactive-music-web" --format "{{.ID}}" | xargs -r docker rm -f 2>/dev/null || echo "No containers to remove"
           
           # Also clean up any containers created from our image
           echo "Cleaning up containers from our image..."
-          docker ps -a --filter "ancestor=interactive-music-web" --format "{{.ID}}" | xargs -r docker rm -f 2>/dev/null || echo "No containers from our image"
+          docker ps -a --filter "ancestor=interactive-music-web" --format "{{.ID}}" | xargs -r docker rm -f 2>/dev/null || echo "No image containers found"
           
-          # Wait for port to be released
-          echo "Waiting for port to be released..."
-          sleep 3
+          # Remove any orphaned containers
+          docker container prune -f 2>/dev/null || true
           
-          # Check if port 31415 is available after cleanup
-          echo "Checking port availability..."
-          if netstat -tln 2>/dev/null | grep -q ':31415 '; then
-            echo "⚠️  Port 31415 still occupied, using port 31416"
-            echo "ALTERNATIVE_PORT=31416" >> $GITHUB_ENV
+          # Wait longer for ports to be fully released
+          echo "Waiting for ports to be released..."
+          sleep 5
+          
+          # Aggressive port checking and assignment
+          echo "Final port availability check..."
+          if ss -tln 2>/dev/null | grep -q ':31415 '; then
+            if ss -tln 2>/dev/null | grep -q ':31416 '; then
+              echo "❌ Both 31415 and 31416 occupied, using port 31417"
+              echo "ALTERNATIVE_PORT=31417" >> $GITHUB_ENV
+            else
+              echo "⚠️  Port 31415 occupied, using port 31416"
+              echo "ALTERNATIVE_PORT=31416" >> $GITHUB_ENV
+            fi
           else
             echo "✅ Port 31415 is available"
             echo "ALTERNATIVE_PORT=31415" >> $GITHUB_ENV
           fi
           
-          echo "Cleanup completed successfully"
+          echo "Cleanup completed - using port ${ALTERNATIVE_PORT:-31415}"
 
       - name: 🔨 Build Docker image
         if: steps.changes.outputs.src == 'true'
@@ -124,12 +142,23 @@ jobs:
         run: |
           echo "=== Deploy Phase ==="
           echo "Starting new container on port ${ALTERNATIVE_PORT}..."
+          
+          # Final check before starting container
+          if ss -tln 2>/dev/null | grep -q ":${ALTERNATIVE_PORT} "; then
+            echo "❌ Port ${ALTERNATIVE_PORT} is still occupied, cannot start container"
+            echo "Available ports:"
+            ss -tln 2>/dev/null | grep ":314" || echo "No similar ports found"
+            exit 1
+          fi
+          
           docker run -d --name interactive-music-web \
             --restart unless-stopped \
             -p ${ALTERNATIVE_PORT}:3000 \
             interactive-music-web || {
               echo "❌ Container start failed"
-              docker logs interactive-music-web || true
+              echo "Port status:"
+              ss -tln 2>/dev/null | grep ":${ALTERNATIVE_PORT}" || echo "Port not bound"
+              docker logs interactive-music-web 2>/dev/null || true
               exit 1
             }
           echo "✅ Container started successfully on port ${ALTERNATIVE_PORT}"

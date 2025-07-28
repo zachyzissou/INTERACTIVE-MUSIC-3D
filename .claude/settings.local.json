@@ -46,7 +46,17 @@
       "Bash(npm ls:*)",
       "Bash(npm view:*)",
       "Bash(npm search:*)",
-      "Bash(npx playwright:*)"
+      "Bash(npx playwright:*)",
+      "Bash(git fetch:*)",
+      "Bash(git merge:*)",
+      "Bash(git stash push:*)",
+      "Bash(git checkout:*)",
+      "Bash(git pull:*)",
+      "Bash(git cherry-pick:*)",
+      "Bash(ss:*)",
+      "Bash(tasklist:*)",
+      "Bash(npm update:*)",
+      "Bash(npx eslint:*)"
     ],
     "deny": []
   }
