@@ -33,6 +33,23 @@ jobs:
               - '!docs/**'
               - '!README.md'
 
+      - name: 🧹 Early cleanup - Remove old container first
+        if: steps.changes.outputs.src == 'true'
+        run: |
+          echo "=== Early Container Removal ==="
+          echo "Removing old container before any other operations..."
+          
+          # Stop and remove old container immediately
+          docker stop interactive-music-web 2>/dev/null || echo "No container to stop"
+          docker rm -f interactive-music-web 2>/dev/null || echo "No container to remove"
+          
+          # Clean up any orphaned containers with our name
+          docker ps -a --filter "name=interactive-music-web" --format "{{.ID}}" | xargs -r docker rm -f 2>/dev/null || echo "No orphaned containers"
+          
+          # Wait for ports to be released
+          sleep 2
+          echo "✅ Early cleanup completed"
+
       - name: 🔄 Restore Next.js cache
         uses: actions/cache@v3
         with:
@@ -70,39 +87,13 @@ jobs:
         with:
           driver: docker-container
 
-      - name: 🧹 Clean up existing containers and processes
+      - name: 🔍 Check port availability
         if: steps.changes.outputs.src == 'true'
         run: |
-          echo "=== Robust Cleanup Phase ==="
+          echo "=== Port Check Phase ==="
           
-          # Find and kill any processes using our target ports first
-          echo "Checking for processes using ports 31415, 31416, and 3000..."
-          for port in 31415 31416 3000; do
-            pid=$(ss -tlnp 2>/dev/null | grep ":$port " | awk '{print $6}' | grep -o 'pid=[0-9]*' | cut -d= -f2 | head -1)
-            if [ ! -z "$pid" ]; then
-              echo "Killing process $pid using port $port"
-              kill -9 "$pid" 2>/dev/null || true
-            fi
-          done
-          
-          # Stop and remove ALL containers with our name pattern
-          echo "Stopping and removing all interactive-music-web containers..."
-          docker ps -a --filter "name=interactive-music-web" --format "{{.ID}}" | xargs -r docker stop 2>/dev/null || echo "No containers to stop"
-          docker ps -a --filter "name=interactive-music-web" --format "{{.ID}}" | xargs -r docker rm -f 2>/dev/null || echo "No containers to remove"
-          
-          # Also clean up any containers created from our image
-          echo "Cleaning up containers from our image..."
-          docker ps -a --filter "ancestor=interactive-music-web" --format "{{.ID}}" | xargs -r docker rm -f 2>/dev/null || echo "No image containers found"
-          
-          # Remove any orphaned containers
-          docker container prune -f 2>/dev/null || true
-          
-          # Wait longer for ports to be fully released
-          echo "Waiting for ports to be released..."
-          sleep 5
-          
-          # Aggressive port checking and assignment
-          echo "Final port availability check..."
+          # Simple port check (container already removed in early cleanup)
+          echo "Checking port availability..."
           if ss -tln 2>/dev/null | grep -q ':31415 '; then
             if ss -tln 2>/dev/null | grep -q ':31416 '; then
               echo "❌ Both 31415 and 31416 occupied, using port 31417"
@@ -116,7 +107,7 @@ jobs:
             echo "ALTERNATIVE_PORT=31415" >> $GITHUB_ENV
           fi
           
-          echo "Cleanup completed - using port ${ALTERNATIVE_PORT:-31415}"
+          echo "Will use port: ${ALTERNATIVE_PORT:-31415}"
 
       - name: 🔨 Build Docker image
         if: steps.changes.outputs.src == 'true'
