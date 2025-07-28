@@ -11,6 +11,7 @@ export default defineConfig({
     ['junit', { outputFile: 'test-results/junit.xml' }],
     ['json', { outputFile: 'test-results/results.json' }]
   ],
+  timeout: 60 * 1000, // 60 seconds per test
   
   // Optimized web server configuration for faster startup
   webServer: {
@@ -27,9 +28,8 @@ export default defineConfig({
     trace: 'off', // Disable tracing for CI to avoid FFmpeg issues
     video: 'off', // Disable video recording for CI
     screenshot: 'only-on-failure',
-    // Reduce navigation timeout for faster test execution
-    navigationTimeout: 30000,
-    actionTimeout: 15000,
+    navigationTimeout: 30 * 1000, // 30 seconds for navigation
+    actionTimeout: 15 * 1000, // 15 seconds for actions
   },
   
   projects: [
@@ -64,8 +64,7 @@ export default defineConfig({
     ] : []),
   ],
   
-  // Optimized timeouts for faster execution
-  timeout: process.env.CI ? 30000 : 60000, // Reduced from 60s to 30s for CI
+  // Note: timeout already set above for consistency
   
   // Faster assertion timeout
   expect: {

@@ -56,7 +56,9 @@
       "Bash(ss:*)",
       "Bash(tasklist:*)",
       "Bash(npm update:*)",
-      "Bash(npx eslint:*)"
+      "Bash(npx eslint:*)",
+      "Bash(git rm:*)",
+      "Bash(git rebase:*)"
     ],
     "deny": []
   }

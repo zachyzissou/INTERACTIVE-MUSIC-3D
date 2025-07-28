@@ -19,59 +19,10 @@ jobs:
       - run: npx tsc --noEmit
       - run: npm run lint
       - run: npm run build
-      - name: Verify .next output
-        run: |
-          if [ ! -d ".next" ]; then
-            echo "No build output found" && exit 1
-          fi
-          du -sh .next
-          ls -al .next | head
-      - name: Remove build cache
-        run: rm -rf .next/cache
-      - name: Upload build artifacts
-        if: success()
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-files
-          path: .next/**
-          include-hidden-files: true
-          if-no-files-found: error
-          retention-days: 1
-
-  # Lightweight smoke tests - basic functionality only
-  smoke-tests:
-    runs-on: ubuntu-latest
-    needs: quick-checks
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'npm'
-      - run: npm ci
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: build-files
-          path: .next
-          if-no-files-found: error
-      - name: List downloaded build
-        run: ls -al .next | head
-      - name: Cache Playwright browsers
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-${{ hashFiles('package-lock.json') }}
-      - name: Install system Chrome
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y google-chrome-stable
-        continue-on-error: true
-      - name: Install Playwright dependencies
-        run: npx playwright install-deps
-        continue-on-error: true
-      - name: Run smoke tests only
-        run: npm run test:smoke
+      - name: Install Playwright browsers and system dependencies
+        run: npx playwright install --with-deps
+      - name: Run Playwright tests
+        run: npm test
         env:
           CI: true
 
