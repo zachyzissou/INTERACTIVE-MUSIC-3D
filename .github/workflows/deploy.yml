@@ -119,51 +119,43 @@ jobs:
             }
           echo "✅ Docker build completed successfully"
 
-      - name: 🚀 Rolling deployment
+      - name: 🚀 Start new container
         if: steps.changes.outputs.src == 'true'
         run: |
-          echo "=== Rolling Deploy Phase ==="
-          
-          # Start new container with temporary name first
-          echo "Starting new container (temporary)..."
-          docker run -d --name interactive-music-web-new \
+          echo "=== Deploy Phase ==="
+          echo "Starting new container on port ${ALTERNATIVE_PORT}..."
+          docker run -d --name interactive-music-web \
             --restart unless-stopped \
             -p ${ALTERNATIVE_PORT}:3000 \
             interactive-music-web || {
-              echo "❌ New container start failed"
-              docker logs interactive-music-web-new 2>/dev/null || true
+              echo "❌ Container start failed"
+              docker logs interactive-music-web || true
               exit 1
             }
+          echo "✅ Container started successfully on port ${ALTERNATIVE_PORT}"
           
-          # Quick health check (reduced wait time)
-          echo "Performing quick health check..."
+          # Verify container is running (reduced wait time)
           sleep 2
-          if ! docker ps | grep -q interactive-music-web-new; then
-            echo "❌ New container failed to start"
-            docker logs interactive-music-web-new 2>/dev/null || true
-            docker rm -f interactive-music-web-new 2>/dev/null || true
+          if docker ps | grep -q interactive-music-web; then
+            echo "✅ Container is running and healthy"
+            docker ps | grep interactive-music-web
+            echo "🌐 Application should be accessible at: http://localhost:${ALTERNATIVE_PORT}"
+          else
+            echo "❌ Container failed to start properly"
+            docker logs interactive-music-web || true
             exit 1
           fi
           
-          # Test if new container is responding (reduced timeout)
-          echo "Testing new container responsiveness..."
-          for i in {1..6}; do
+          # Quick application response test
+          echo "Testing application responsiveness..."
+          for i in {1..4}; do
             if curl -f --max-time 3 http://localhost:${ALTERNATIVE_PORT} >/dev/null 2>&1; then
-              echo "✅ New container is responding"
+              echo "✅ Application is responding on port ${ALTERNATIVE_PORT}"
               break
             fi
-            if [ $i -eq 6 ]; then
-              echo "⚠️  New container not responding after 18s, but proceeding with deployment"
+            if [ $i -eq 4 ]; then
+              echo "⚠️  Application may still be starting up on port ${ALTERNATIVE_PORT}"
             else
               sleep 3
             fi
           done
-          
-          # Rolling switch: stop old, rename new
-          echo "Performing rolling switch..."
-          docker stop interactive-music-web 2>/dev/null || echo "No old container to stop"
-          docker rm interactive-music-web 2>/dev/null || echo "No old container to remove"
-          docker rename interactive-music-web-new interactive-music-web
-          
-          echo "✅ Rolling deployment completed successfully"
-          echo "🌐 Application accessible at: http://localhost:${ALTERNATIVE_PORT}"
