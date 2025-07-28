@@ -58,7 +58,8 @@
       "Bash(npm update:*)",
       "Bash(npx eslint:*)",
       "Bash(git rm:*)",
-      "Bash(git rebase:*)"
+      "Bash(git rebase:*)",
+      "Bash(git push:*)"
     ],
     "deny": []
   }

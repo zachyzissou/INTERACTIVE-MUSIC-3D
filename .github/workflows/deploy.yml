@@ -144,6 +144,9 @@ jobs:
           echo "=== Deploy Phase ==="
           echo "Starting new container on port ${ALTERNATIVE_PORT}..."
           
+          # Ensure Docker network exists
+          docker network create interactive-music-3d_default 2>/dev/null || echo "Network already exists"
+          
           # Final check before starting container
           if ss -tln 2>/dev/null | grep -q ":${ALTERNATIVE_PORT} "; then
             echo "❌ Port ${ALTERNATIVE_PORT} is still occupied, cannot start container"
@@ -153,7 +156,7 @@ jobs:
           fi
           
           docker run -d --name interactive-music-web \
-            --network bridge \
+            --network interactive-music-3d_default \
             --restart unless-stopped \
             -p ${ALTERNATIVE_PORT}:3000 \
             interactive-music-web || {
