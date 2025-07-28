@@ -73,48 +73,27 @@ jobs:
       - name: 🧹 Clean up existing containers and processes
         if: steps.changes.outputs.src == 'true'
         run: |
-          echo "=== Cleanup Phase ==="
+          echo "=== Conservative Cleanup Phase ==="
           
-          # Nuclear cleanup - stop ALL containers first
-          echo "Stopping all running containers..."
-          docker ps -q | xargs -r docker stop || true
+          # Only target our specific container
+          echo "Stopping interactive-music-web container if running..."
+          docker stop interactive-music-web 2>/dev/null || echo "Container not running"
           
-          # Remove all containers with our name
-          docker ps -a --filter "name=interactive-music-web" --format "{{.ID}}" | xargs -r docker rm -f || true
+          # Remove our specific container
+          echo "Removing interactive-music-web container..."
+          docker rm -f interactive-music-web 2>/dev/null || echo "Container not found"
           
-          # Remove containers by image name too
-          docker ps -a --filter "ancestor=interactive-music-web" --format "{{.ID}}" | xargs -r docker rm -f || true
-          
-          # Remove orphaned containers
-          docker container prune -f || true
-          
-          # Check multiple ports (31415 and 3000) for conflicts
-          echo "Checking for port conflicts..."
-          for port in 31415 3000; do
-            if netstat -tln 2>/dev/null | grep -q ":$port "; then
-              echo "⚠️  Port $port is in use"
-              # Try to find and kill the process
-              pid=$(netstat -tlnp 2>/dev/null | grep ":$port " | awk '{print $7}' | cut -d'/' -f1 | head -1)
-              if [ ! -z "$pid" ] && [ "$pid" != "-" ]; then
-                echo "Killing process $pid on port $port"
-                kill -9 "$pid" || true
-              fi
-            else
-              echo "✅ Port $port is free"
-            fi
-          done
-          
-          # Wait for ports to be released
-          sleep 5
-          
-          # Final verification
+          # Check if port 31415 is available
+          echo "Checking port availability..."
           if netstat -tln 2>/dev/null | grep -q ':31415 '; then
-            echo "❌ Port 31415 still occupied, using alternative port 31416"
+            echo "⚠️  Port 31415 is occupied, using port 31416"
             echo "ALTERNATIVE_PORT=31416" >> $GITHUB_ENV
           else
             echo "✅ Port 31415 is available"
             echo "ALTERNATIVE_PORT=31415" >> $GITHUB_ENV
           fi
+          
+          echo "Cleanup completed successfully"
 
       - name: 🔨 Build Docker image
         if: steps.changes.outputs.src == 'true'
