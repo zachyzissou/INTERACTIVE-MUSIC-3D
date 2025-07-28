@@ -103,7 +103,7 @@ jobs:
           for port in 31415 31416 31417 31418; do
             if ! ss -tln 2>/dev/null | grep -q ":$port "; then
               # Double-check with Docker by attempting a quick test bind
-              if docker run --rm -p $port:80 --name test-port-$port alpine:latest echo "Port test" >/dev/null 2>&1; then
+              if docker run --rm --network bridge -p $port:80 --name test-port-$port alpine:latest echo "Port test" >/dev/null 2>&1; then
                 echo "✅ Port $port is available and Docker can bind to it"
                 echo "ALTERNATIVE_PORT=$port" >> $GITHUB_ENV
                 break
@@ -157,6 +157,7 @@ jobs:
           fi
           
           docker run -d --name interactive-music-web \
+            --network bridge \
             --restart unless-stopped \
             -p ${ALTERNATIVE_PORT}:3000 \
             interactive-music-web || {
