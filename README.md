@@ -125,7 +125,7 @@
 
    ```bash
    npm run dev
-   # → http://localhost:3000
+   # → http://localhost:$WEB_PORT (default 3000)
    # Hot reload enabled with TypeScript checking
    ```
 
@@ -134,7 +134,7 @@
    ```bash
    npm run build
    npm run start
-   # → http://localhost:3000 (production mode)
+   # → http://localhost:$WEB_PORT (default 3000)
    ```
 
 3. **Testing & validation**
@@ -299,8 +299,10 @@ CMD ["node", "server.js"]
 services:
   oscillo:
     build: .
+    # Map desired host port to container's internal port 3000
+    # Set WEB_PORT to override (e.g. WEB_PORT=32415 docker-compose up)
     ports:
-      - "3000:3000"
+      - "${WEB_PORT:-3000}:3000"
     environment:
       - NODE_ENV=production
       - LOG_DIR=/app/logs
@@ -567,16 +569,16 @@ npm run profile
 
 ```bash
 # Health check endpoint
-curl http://localhost:3000/api/health
+curl http://localhost:$WEB_PORT/api/health
 
 # WebGL capabilities
-curl http://localhost:3000/api/webgl-info
+curl http://localhost:$WEB_PORT/api/webgl-info
 
 # Audio system status
-curl http://localhost:3000/api/audio-status
+curl http://localhost:$WEB_PORT/api/audio-status
 
 # Performance metrics
-curl http://localhost:3000/api/metrics
+curl http://localhost:$WEB_PORT/api/metrics
 ```
 
 ---
