@@ -96,7 +96,7 @@ jobs:
           echo "Checking port availability..."
           
           # Try to find a free port dynamically
-          for port in 31415 31416 31417 31418; do
+          for port in 32415 32416 32417 32418; do
             if ! ss -tln 2>/dev/null | grep -q ":$port "; then
               # Double-check with Docker by attempting a quick test bind
               if docker run --rm --network bridge -p $port:80 --name test-port-$port alpine:latest echo "Port test" >/dev/null 2>&1; then
@@ -113,11 +113,11 @@ jobs:
           
           # Fallback to high port if all low ports fail
           if [ -z "$ALTERNATIVE_PORT" ]; then
-            echo "Using fallback high port 31415"
-            echo "ALTERNATIVE_PORT=31415" >> $GITHUB_ENV
+            echo "Using fallback high port 32415"
+            echo "ALTERNATIVE_PORT=32415" >> $GITHUB_ENV
           fi
 
-          echo "Will use port: ${ALTERNATIVE_PORT:-31415}"
+          echo "Will use port: ${ALTERNATIVE_PORT:-32415}"
 
       - name: 🔨 Build Docker image
         if: steps.changes.outputs.src == 'true'
@@ -151,7 +151,7 @@ jobs:
           if ss -tln 2>/dev/null | grep -q ":${ALTERNATIVE_PORT} "; then
             echo "❌ Port ${ALTERNATIVE_PORT} is still occupied, cannot start container"
             echo "Available ports:"
-            ss -tln 2>/dev/null | grep ":314" || echo "No similar ports found"
+            ss -tln 2>/dev/null | grep ":324" || echo "No similar ports found"
             exit 1
           fi
           
