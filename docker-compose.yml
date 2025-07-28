@@ -3,8 +3,9 @@ services:
   interactive-music-3d:
     build: .
     image: your-dockerhub-username/interactive-music-3d:latest
+    # Allow custom host port via HOST_PORT env variable
     ports:
-      - "3000:3000"
+      - "${HOST_PORT:-31415}:3000"
     environment:
       - NODE_ENV=production
       - LOG_DIR=/app/logs

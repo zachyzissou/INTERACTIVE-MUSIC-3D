@@ -300,7 +300,7 @@ services:
   oscillo:
     build: .
     ports:
-      - "3000:3000"
+      - "${HOST_PORT:-31415}:3000"  # Change HOST_PORT to expose a different host port
     environment:
       - NODE_ENV=production
       - LOG_DIR=/app/logs
@@ -312,8 +312,12 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
-    restart: unless-stopped
+  restart: unless-stopped
 ```
+
+Set the `HOST_PORT` environment variable when running `docker compose up` to
+expose a different host port (for example `HOST_PORT=31415`). The application
+inside the container still listens on port 3000.
 
 ### **GitHub Actions CI/CD**
 
