@@ -19,6 +19,14 @@ jobs:
       - run: npx tsc --noEmit
       - run: npm run lint
       - run: npm run build
+      - name: Upload build artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-files
+          path: .next
+          if-no-files-found: error
+          retention-days: 1
       - name: Install Playwright browsers and system dependencies
         run: npx playwright install --with-deps
       - name: Run Playwright tests
