@@ -75,18 +75,23 @@ jobs:
         run: |
           echo "=== Conservative Cleanup Phase ==="
           
-          # Only target our specific container
-          echo "Stopping interactive-music-web container if running..."
+          # Stop and remove our specific container with force
+          echo "Stopping and removing interactive-music-web container..."
           docker stop interactive-music-web 2>/dev/null || echo "Container not running"
-          
-          # Remove our specific container
-          echo "Removing interactive-music-web container..."
           docker rm -f interactive-music-web 2>/dev/null || echo "Container not found"
           
-          # Check if port 31415 is available
+          # Also clean up any containers created from our image
+          echo "Cleaning up containers from our image..."
+          docker ps -a --filter "ancestor=interactive-music-web" --format "{{.ID}}" | xargs -r docker rm -f 2>/dev/null || echo "No containers from our image"
+          
+          # Wait for port to be released
+          echo "Waiting for port to be released..."
+          sleep 3
+          
+          # Check if port 31415 is available after cleanup
           echo "Checking port availability..."
           if netstat -tln 2>/dev/null | grep -q ':31415 '; then
-            echo "⚠️  Port 31415 is occupied, using port 31416"
+            echo "⚠️  Port 31415 still occupied, using port 31416"
             echo "ALTERNATIVE_PORT=31416" >> $GITHUB_ENV
           else
             echo "✅ Port 31415 is available"
