@@ -24,7 +24,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6.0.2
 
       - name: Toolchain
         run: |
@@ -44,6 +44,14 @@ jobs:
         working-directory: native
         run: codesign --verify --deep --strict dist/Oscillo.app
 
+      - name: Verify bundled framework rpath
+        working-directory: native
+        run: |
+          if ! otool -l dist/Oscillo.app/Contents/MacOS/OscilloMac | grep -q '@executable_path/../Frameworks'; then
+            echo "OscilloMac is missing @executable_path/../Frameworks rpath for bundled frameworks" >&2
+            exit 66
+          fi
+
       - name: Zip app artifact
         working-directory: native
         run: |
@@ -52,7 +60,7 @@ jobs:
           shasum -a 256 dist/Oscillo-macOS-ci.zip | tee dist/Oscillo-macOS-ci.zip.sha256
 
       - name: Upload native app artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7.0.1
         with:
           name: Oscillo-macOS-ci
           path: |

@@ -14,7 +14,9 @@ package-lock.json
 .buildcache/*
 !.buildcache/.gitkeep
 native/.build/
+native/.swiftpm/
 native/dist/
+native/secrets/
 tsconfig.tsbuildinfo
 
 # Test artifacts and build results

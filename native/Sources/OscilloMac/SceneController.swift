@@ -4,6 +4,7 @@ import SwiftUI
 @MainActor
 final class SceneController: ObservableObject {
     @Published private(set) var settings: SceneSettings
+    @Published private(set) var selectedPreset: PerformancePreset?
 
     let settingsStore: SceneSettingsStore
 
@@ -17,7 +18,8 @@ final class SceneController: ObservableObject {
             visualGain: value,
             particleDensity: settings.particleDensity,
             previewTempo: settings.previewTempo,
-            palette: settings.palette
+            palette: settings.palette,
+            sceneMode: settings.sceneMode
         )
     }
 
@@ -26,7 +28,8 @@ final class SceneController: ObservableObject {
             visualGain: settings.visualGain,
             particleDensity: value,
             previewTempo: settings.previewTempo,
-            palette: settings.palette
+            palette: settings.palette,
+            sceneMode: settings.sceneMode
         )
     }
 
@@ -35,7 +38,8 @@ final class SceneController: ObservableObject {
             visualGain: settings.visualGain,
             particleDensity: settings.particleDensity,
             previewTempo: value,
-            palette: settings.palette
+            palette: settings.palette,
+            sceneMode: settings.sceneMode
         )
     }
 
@@ -44,23 +48,44 @@ final class SceneController: ObservableObject {
             visualGain: settings.visualGain,
             particleDensity: settings.particleDensity,
             previewTempo: settings.previewTempo,
-            palette: palette
+            palette: palette,
+            sceneMode: settings.sceneMode
         )
+    }
+
+    func setSceneMode(_ sceneMode: SceneMode) {
+        update(
+            visualGain: settings.visualGain,
+            particleDensity: settings.particleDensity,
+            previewTempo: settings.previewTempo,
+            palette: settings.palette,
+            sceneMode: sceneMode
+        )
+    }
+
+    func applyPreset(_ preset: PerformancePreset) {
+        let next = preset.settings
+        settings = next
+        selectedPreset = preset
+        settingsStore.update(next)
     }
 
     private func update(
         visualGain: Float,
         particleDensity: Float,
         previewTempo: Float,
-        palette: ScenePalette
+        palette: ScenePalette,
+        sceneMode: SceneMode
     ) {
         let next = SceneSettings(
             visualGain: visualGain,
             particleDensity: particleDensity,
             previewTempo: previewTempo,
-            palette: palette
+            palette: palette,
+            sceneMode: sceneMode
         )
         settings = next
+        selectedPreset = nil
         settingsStore.update(next)
     }
 }
